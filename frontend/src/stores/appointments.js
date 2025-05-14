@@ -11,31 +11,74 @@ export const useAppointmentsStore = defineStore('appointments', () => {
   // State
   const appointmentsList = ref([]);
   const selectedDate = ref(getTodayDateString());
+  const selectedStatus = ref(''); // Nuevo: filtro por estado
+  const selectedDoctorId = ref(''); // Nuevo: filtro por doctor ID
+  const searchPatientName = ref(''); // Nuevo: filtro por nombre de paciente
   const isLoading = ref(false);
   const error = ref(null);
 
   // Getters
   const appointments = computed(() => appointmentsList.value);
   const date = computed(() => selectedDate.value);
+  const status = computed(() => selectedStatus.value); // Nuevo: getter estado
+  const doctorId = computed(() => selectedDoctorId.value); // Nuevo: getter doctor_id
+  const patientName = computed(() => searchPatientName.value); // Nuevo: getter patient_name
   const loading = computed(() => isLoading.value);
   const currentError = computed(() => error.value);
+  
+  // Nuevo: getter para los filtros actuales
+  const currentFilters = computed(() => {
+    const filters = {};
+    if (selectedDate.value) filters.date = selectedDate.value;
+    if (selectedStatus.value) filters.status = selectedStatus.value;
+    if (selectedDoctorId.value) filters.doctor_id = selectedDoctorId.value;
+    if (searchPatientName.value) filters.patient_name = searchPatientName.value;
+    return filters;
+  });
 
   // Actions
   function setSelectedDate(newDate) {
     if (newDate && typeof newDate === 'string') {
         selectedDate.value = newDate;
-        fetchAppointments(newDate);
+        fetchAppointments();
     } else {
         console.error("Formato de fecha inválido:", newDate);
     }
   }
+  
+  // Nuevo: función para establecer el filtro de estado
+  function setSelectedStatus(status) {
+    selectedStatus.value = status;
+    fetchAppointments();
+  }
+  
+  // Nuevo: función para establecer el filtro de doctor
+  function setSelectedDoctorId(doctorId) {
+    selectedDoctorId.value = doctorId;
+    fetchAppointments();
+  }
+  
+  // Nuevo: función para establecer el filtro por nombre de paciente
+  function setSearchPatientName(name) {
+    searchPatientName.value = name;
+    fetchAppointments();
+  }
+  
+  // Nuevo: función para limpiar todos los filtros
+  function clearFilters() {
+    selectedStatus.value = '';
+    selectedDoctorId.value = '';
+    searchPatientName.value = '';
+    // No limpiamos la fecha, solo los otros filtros
+    fetchAppointments();
+  }
 
-  async function fetchAppointments(date = selectedDate.value) {
+  async function fetchAppointments() {
     isLoading.value = true;
     error.value = null;
     appointmentsList.value = [];
     try {
-      const data = await apiAppointmentsService.getAppointments(date);
+      const data = await apiAppointmentsService.getAppointments(currentFilters.value);
       appointmentsList.value = data || [];
     } catch (err) {
       console.error("Error fetching appointments:", err);
@@ -72,15 +115,8 @@ export const useAppointmentsStore = defineStore('appointments', () => {
     error.value = null;
     try {
         const newAppointment = await apiAppointmentsService.createAppointment(appointmentData);
-        // Comprobar si la nueva cita es para la fecha actualmente seleccionada
-        const newApptDate = new Date(newAppointment.appointment_time).toISOString().split('T')[0];
-        if (newApptDate === selectedDate.value) {
-            // Añadir a la lista actual y ordenar
-            appointmentsList.value.push(newAppointment);
-            appointmentsList.value.sort((a, b) => new Date(a.appointment_time) - new Date(b.appointment_time));
-        }
-        // Podríamos simplemente recargar la lista actual:
-        // await fetchAppointments(selectedDate.value);
+        // Refrescar la lista con los filtros actuales
+        await fetchAppointments();
         return true; // Indicar éxito
     } catch (err) {
         console.error("Error creating appointment:", err);
@@ -124,13 +160,8 @@ export const useAppointmentsStore = defineStore('appointments', () => {
     error.value = null;
     try {
       const updatedAppointment = await apiAppointmentsService.updateAppointment(id, appointmentData);
-      // Actualizar la cita en la lista local
-      const idx = appointmentsList.value.findIndex(appt => appt.id === id);
-      if (idx !== -1) {
-        appointmentsList.value[idx] = updatedAppointment;
-      } else {
-        await fetchAppointments(selectedDate.value);
-      }
+      // Refrescar la lista con los filtros actuales
+      await fetchAppointments();
       return true; // Indicar éxito
     } catch (err) {
       console.error(`Error updating appointment ${id}:`, err);
@@ -142,18 +173,21 @@ export const useAppointmentsStore = defineStore('appointments', () => {
   }
 
   // Realtime (placeholder)
-  function handleRealtimeUpdate(payload) { console.log("Realtime Update:", payload); fetchAppointments(selectedDate.value); }
+  function handleRealtimeUpdate(payload) { console.log("Realtime Update:", payload); fetchAppointments(); }
   function subscribeToRealtimeUpdates() { console.log("Subscribing..."); }
   function unsubscribeFromRealtimeUpdates() { console.log("Unsubscribing..."); }
 
   return {
     // State
-    appointmentsList, selectedDate, isLoading, error,
+    appointmentsList, selectedDate, isLoading, error, 
+    selectedStatus, selectedDoctorId, searchPatientName, // Nuevos estados
     // Getters
-    appointments, date, loading, currentError,
+    appointments, date, loading, currentError, 
+    status, doctorId, patientName, currentFilters, // Nuevos getters
     // Actions
     setSelectedDate, fetchAppointments, updateAppointmentStatus,
     createAppointment, deleteAppointment, updateAppointmentData,
-    subscribeToRealtimeUpdates, unsubscribeFromRealtimeUpdates
+    subscribeToRealtimeUpdates, unsubscribeFromRealtimeUpdates,
+    setSelectedStatus, setSelectedDoctorId, setSearchPatientName, clearFilters // Nuevas acciones
   };
 });

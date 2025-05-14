@@ -1,15 +1,15 @@
 import apiClient from './apiClient'; // Importar la instancia configurada de Axios
 
 /**
- * Obtiene las citas para una fecha específica.
- * @param {string} dateString - Fecha en formato 'YYYY-MM-DD'.
+ * Obtiene las citas con filtros opcionales.
+ * @param {object} filters - Objeto con filtros { date, status, doctor_id, patient_name }.
  * @returns {Promise<Array>} - Promesa que resuelve con el array de citas.
  */
-export const getAppointments = async (dateString) => {
+export const getAppointments = async (filters = {}) => {
   try {
     // El interceptor de apiClient añadirá el token automáticamente
     const response = await apiClient.get('/appointments', {
-      params: { date: dateString } // Añadir fecha como query parameter
+      params: filters // Pasar todos los filtros como query parameters
     });
     return response.data; // Devuelve el array de citas
   } catch (error) {

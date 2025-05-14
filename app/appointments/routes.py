@@ -66,7 +66,7 @@ def create_appointment(current_user):
 @appointments_bp.route("", methods=["GET"])
 @token_required
 def get_appointments(current_user):
-    """Endpoint para obtener la lista de citas, con filtro opcional por fecha."""
+    """Endpoint para obtener la lista de citas, con filtros opcionales."""
     current_app.logger.info(f"Solicitud GET /appointments por user ID: {current_user.id}")
     try:
         query = supabase.table('appointments').select('''
@@ -76,18 +76,23 @@ def get_appointments(current_user):
             doctor:doctors (id, name)
         ''').order('appointment_time')
 
+        # Aplicar filtros desde los query parameters
         filter_date = request.args.get('date')
+        filter_status = request.args.get('status')
+        filter_doctor_id = request.args.get('doctor_id')
+        filter_patient_name = request.args.get('patient_name')
+
+        # Filtro por fecha
         if filter_date:
             try:
                 valid_date = datetime.strptime(filter_date, '%Y-%m-%d').date()
 
-                # --- NUEVA LÓGICA DE FILTRO (Rango UTC Explícito) ---
                 # Crear objetos datetime conscientes de UTC para inicio y fin del día
                 start_dt = datetime(valid_date.year, valid_date.month, valid_date.day, 0, 0, 0, tzinfo=timezone.utc)
                 # El fin es el inicio del día siguiente (exclusivo)
                 end_dt = start_dt + timedelta(days=1)
 
-                # Convertir a strings ISO 8601 (aunque la librería podría aceptar objetos datetime)
+                # Convertir a strings ISO 8601
                 start_dt_iso = start_dt.isoformat()
                 end_dt_iso = end_dt.isoformat()
 
@@ -95,12 +100,32 @@ def get_appointments(current_user):
                 # Aplicar filtros gte (>=) y lt (<)
                 query = query.gte('appointment_time', start_dt_iso)
                 query = query.lt('appointment_time', end_dt_iso)
-                # --- FIN NUEVA LÓGICA ---
             except ValueError:
                 return jsonify({"message": "Formato de fecha inválido, usar YYYY-MM-DD"}), 400
             except Exception as filter_error:
                 current_app.logger.error(f"Error aplicando filtro de fecha: {filter_error}")
                 return jsonify({"message": "Error interno al aplicar filtro de fecha"}), 500
+        
+        # Filtro por estado
+        if filter_status:
+            query = query.eq('status', filter_status)
+            current_app.logger.info(f"Filtrando citas por estado: {filter_status}")
+        
+        # Filtro por doctor_id
+        if filter_doctor_id:
+            try:
+                doctor_id = int(filter_doctor_id)
+                query = query.eq('doctor_id', doctor_id)
+                current_app.logger.info(f"Filtrando citas por doctor_id: {doctor_id}")
+            except ValueError:
+                return jsonify({"message": "doctor_id debe ser un número entero"}), 400
+        
+        # Filtro por nombre de paciente (texto parcial)
+        if filter_patient_name:
+            # Usamos Postgres ilike para búsqueda case-insensitive
+            # Necesitamos usar la sintaxis especial para filtrar en relaciones anidadas
+            query = query.filter('patient.name', 'ilike', f'%{filter_patient_name}%')
+            current_app.logger.info(f"Filtrando citas por nombre de paciente: {filter_patient_name}")
 
         response = query.execute()
         current_app.logger.debug(f"Respuesta de Supabase (get appointments): {response}")

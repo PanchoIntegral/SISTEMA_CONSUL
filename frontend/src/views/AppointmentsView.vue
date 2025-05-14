@@ -27,6 +27,94 @@
       </div>
     </div>
 
+    <!-- Nuevos controles de filtro -->
+    <div class="bg-white p-4 rounded-lg shadow mb-6">
+      <details class="w-full">
+        <summary class="font-medium text-gray-700 cursor-pointer">Filtros avanzados</summary>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <!-- Filtro por estado -->
+          <div>
+            <label for="status-filter" class="block text-sm font-medium text-gray-700">Por estado:</label>
+            <select
+              id="status-filter"
+              v-model="localSelectedStatus"
+              @change="updateStatus"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+            >
+              <option value="">Todos los estados</option>
+              <option value="Programada">Programada</option>
+              <option value="En Espera">En Espera</option>
+              <option value="En Consulta">En Consulta</option>
+              <option value="Completada">Completada</option>
+              <option value="Cancelada">Cancelada</option>
+              <option value="No Asistió">No Asistió</option>
+            </select>
+          </div>
+
+          <!-- Filtro por doctor -->
+          <div>
+            <label for="doctor-filter" class="block text-sm font-medium text-gray-700">Por doctor:</label>
+            <select
+              id="doctor-filter"
+              v-model="localSelectedDoctorId"
+              @change="updateDoctorId"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+            >
+              <option value="">Todos los doctores</option>
+              <option v-for="doctor in doctorsStore.doctors" :key="doctor.id" :value="doctor.id">
+                {{ doctor.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Filtro por nombre del paciente -->
+          <div>
+            <label for="patient-filter" class="block text-sm font-medium text-gray-700">Por nombre del paciente:</label>
+            <div class="mt-1 relative rounded-md shadow-sm">
+              <input
+                type="text"
+                id="patient-filter"
+                v-model="localSearchPatientName"
+                @input="updatePatientName"
+                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+                placeholder="Nombre del paciente..."
+              />
+              <div v-if="localSearchPatientName" @click="clearPatientSearch" class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer">
+                <span class="text-gray-400 hover:text-gray-500">&times;</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex justify-end mt-4">
+          <button
+            @click="clearAllFilters"
+            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
+          >
+            Limpiar filtros
+          </button>
+        </div>
+        
+        <!-- Etiquetas de filtros activos -->
+        <div v-if="hasActiveFilters" class="mt-4 flex flex-wrap gap-2">
+          <span v-if="localSelectedStatus" class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+            Estado: {{ localSelectedStatus }}
+            <button type="button" @click="clearStatusFilter" class="ml-1">&times;</button>
+          </span>
+          
+          <span v-if="localSelectedDoctorId" class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-700/10">
+            Doctor: {{ getDoctorName(localSelectedDoctorId) }}
+            <button type="button" @click="clearDoctorFilter" class="ml-1">&times;</button>
+          </span>
+          
+          <span v-if="localSearchPatientName" class="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
+            Paciente: {{ localSearchPatientName }}
+            <button type="button" @click="clearPatientSearch" class="ml-1">&times;</button>
+          </span>
+        </div>
+      </details>
+    </div>
+
     <div v-if="appointmentsStore.loading && !isAppointmentModalOpen && !isPatientModalOpen" class="text-center py-10">
       <p class="text-gray-500">Cargando citas...</p>
     </div>
@@ -38,7 +126,7 @@
     <div v-else>
       <div v-if="appointmentsStore.appointments.length > 0">
         <h2 class="text-lg font-medium text-gray-900 mb-4">
-          Citas para el {{ formattedDate }}
+          Citas para el {{ formattedDate }} {{ filterSuffix }}
         </h2>
         <div class="space-y-4">
            <AppointmentCard
@@ -52,7 +140,7 @@
         </div>
       </div>
       <div v-else class="text-center py-10">
-        <p class="text-gray-500">No hay citas programadas para esta fecha.</p>
+        <p class="text-gray-500">No hay citas que coincidan con los filtros seleccionados.</p>
       </div>
     </div>
 
@@ -126,6 +214,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useAppointmentsStore } from '@/stores/appointments';
 import { usePatientsStore } from '@/stores/patients'; // Importar store de pacientes
+import { useDoctorsStore } from '@/stores/doctors'; // Importar store de doctores
 import AppointmentCard from '@/components/AppointmentCard.vue';
 import BaseModal from '@/components/BaseModal.vue';
 import AppointmentForm from '@/components/AppointmentForm.vue';
@@ -134,8 +223,13 @@ import PatientForm from '@/components/PatientForm.vue'; // Importar form de paci
 
 const appointmentsStore = useAppointmentsStore();
 const patientsStore = usePatientsStore(); // Usar store de pacientes
+const doctorsStore = useDoctorsStore(); // Usar store de doctores
 
 const localSelectedDate = ref(appointmentsStore.date);
+const localSelectedStatus = ref(appointmentsStore.status);
+const localSelectedDoctorId = ref(appointmentsStore.doctorId);
+const localSearchPatientName = ref(appointmentsStore.patientName);
+
 const isAppointmentModalOpen = ref(false); // Estado para modal de citas
 const isPatientModalOpen = ref(false); // Estado para modal de pacientes
 const isEditModalOpen = ref(false); // Estado para modal de edición
@@ -144,14 +238,78 @@ const patientFormRef = ref(null); // Referencia al form de paciente
 const editFormRef = ref(null); // Referencia al form de edición
 const selectedAppointment = ref(null); // Cita seleccionada para editar
 
+// Verificar si hay filtros activos
+const hasActiveFilters = computed(() => {
+  return localSelectedStatus.value || localSelectedDoctorId.value || localSearchPatientName.value;
+});
+
+// Texto adicional para el título cuando hay filtros
+const filterSuffix = computed(() => {
+  const parts = [];
+  if (localSelectedStatus.value) {
+    parts.push(`con estado "${localSelectedStatus.value}"`);
+  }
+  if (localSelectedDoctorId.value) {
+    parts.push(`del Dr. ${getDoctorName(localSelectedDoctorId.value)}`);
+  }
+  if (localSearchPatientName.value) {
+    parts.push(`que coinciden con "${localSearchPatientName.value}"`);
+  }
+  
+  return parts.length > 0 ? `(${parts.join(' ')})` : '';
+});
+
 const formattedDate = computed(() => {
   if (!localSelectedDate.value) return '';
   const date = new Date(localSelectedDate.value + 'T00:00:00');
   return date.toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
 });
 
+// Función para obtener el nombre del doctor a partir de su ID
+const getDoctorName = (doctorId) => {
+  const doctor = doctorsStore.doctors.find(d => d.id === parseInt(doctorId));
+  return doctor ? doctor.name : 'Desconocido';
+};
+
 const updateDate = () => {
   appointmentsStore.setSelectedDate(localSelectedDate.value);
+};
+
+const updateStatus = () => {
+  appointmentsStore.setSelectedStatus(localSelectedStatus.value);
+};
+
+const updateDoctorId = () => {
+  appointmentsStore.setSelectedDoctorId(localSelectedDoctorId.value);
+};
+
+const updatePatientName = () => {
+  // Aplicar un pequeño debounce para evitar muchas llamadas a la API
+  clearTimeout(window._patientSearchTimeout);
+  window._patientSearchTimeout = setTimeout(() => {
+    appointmentsStore.setSearchPatientName(localSearchPatientName.value);
+  }, 300);
+};
+
+const clearStatusFilter = () => {
+  localSelectedStatus.value = '';
+  appointmentsStore.setSelectedStatus('');
+};
+
+const clearDoctorFilter = () => {
+  localSelectedDoctorId.value = '';
+  appointmentsStore.setSelectedDoctorId('');
+};
+
+const clearPatientSearch = () => {
+  localSearchPatientName.value = '';
+  appointmentsStore.setSearchPatientName('');
+};
+
+const clearAllFilters = () => {
+  clearStatusFilter();
+  clearDoctorFilter();
+  clearPatientSearch();
 };
 
 const changeAppointmentStatus = (appointmentId, newStatus) => {
@@ -194,9 +352,15 @@ const handlePatientSubmitted = (newPatient) => {
 };
 
 onMounted(() => {
-  appointmentsStore.fetchAppointments(localSelectedDate.value);
-  // Cargar pacientes al inicio para el selector del form de citas
+  // Cargar doctores para el selector de filtros
+  doctorsStore.fetchDoctors();
+  
+  // Cargar pacientes para el selector del form de citas
   patientsStore.fetchPatients();
+  
+  // Cargar citas con los filtros actuales
+  appointmentsStore.fetchAppointments();
+  
   // appointmentsStore.subscribeToRealtimeUpdates();
 });
 
