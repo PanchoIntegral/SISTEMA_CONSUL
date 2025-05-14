@@ -365,9 +365,3 @@ def get_appointments_by_day(current_user):
     except Exception as e:
         current_app.logger.exception(f"Error obteniendo citas por día: {e}")
         return jsonify({"message": "Error interno del servidor"}), 500
-
-
-@dashboard_bp.route("/health", methods=["GET"])
-def health_check():
-    """Endpoint de salud para verificar que el backend está corriendo."""
-    return {"status": "ok"}, 200
