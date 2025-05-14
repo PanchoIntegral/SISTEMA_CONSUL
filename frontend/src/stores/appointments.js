@@ -141,7 +141,11 @@ export const useAppointmentsStore = defineStore('appointments', () => {
     } catch (err) {
         console.error("Error creating appointment:", err);
         error.value = err.message || 'Error al crear la cita.';
-        return false; // Indicar fallo
+        // Si es el error específico de doctor no disponible, propagarlo
+        if (err.error_type === 'doctor_unavailable') {
+            throw err; // Propagar el error con su tipo específico
+        }
+        return false; // Indicar fallo para otros errores
     } finally {
         isLoading.value = false;
     }
@@ -186,7 +190,11 @@ export const useAppointmentsStore = defineStore('appointments', () => {
     } catch (err) {
       console.error(`Error updating appointment ${id}:`, err);
       error.value = err.message || 'Error al actualizar la cita.';
-      return false; // Indicar fallo
+      // Si es el error específico de doctor no disponible, propagarlo
+      if (err.error_type === 'doctor_unavailable') {
+        throw err; // Propagar el error con su tipo específico
+      }
+      return false; // Indicar fallo para otros errores
     } finally {
       isLoading.value = false;
     }

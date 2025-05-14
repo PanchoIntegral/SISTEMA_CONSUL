@@ -24,9 +24,33 @@ def create_appointment(current_user):
     try:
         # Validar formato de fecha/hora
         try:
-            datetime.fromisoformat(data["appointment_time"].replace('Z', '+00:00'))
+            appointment_dt = datetime.fromisoformat(data["appointment_time"].replace('Z', '+00:00'))
         except ValueError:
             return jsonify({"message": "Formato inválido para appointment_time. Usar formato ISO 8601 (ej: geliştirmeler-MM-DDTHH:mm:ssZ)"}), 400
+
+        # Verificar si el doctor ya tiene una cita en la misma hora
+        doctor_id = data.get("doctor_id")
+        if doctor_id is not None and doctor_id != "":
+            # Definir ventana de tiempo para verificar (±30 minutos)
+            time_window = timedelta(minutes=30)
+            start_time = (appointment_dt - time_window).isoformat()
+            end_time = (appointment_dt + time_window).isoformat()
+            
+            # Buscar citas del doctor en la ventana de tiempo
+            existing_appointments = supabase.table('appointments')\
+                .select('id, appointment_time')\
+                .eq('doctor_id', doctor_id)\
+                .gte('appointment_time', start_time)\
+                .lte('appointment_time', end_time)\
+                .execute()
+                
+            if hasattr(existing_appointments, 'data') and existing_appointments.data:
+                current_app.logger.info(f"Doctor ID {doctor_id} ya tiene cita(s) en horario similar: {existing_appointments.data}")
+                return jsonify({
+                    "message": "El doctor seleccionado ya tiene una cita programada en este horario.",
+                    "error_type": "doctor_unavailable",
+                    "conflict_time": data["appointment_time"]
+                }), 409  # Conflict status code
 
         appointment_data = {
             "patient_id": data.get("patient_id"),
@@ -285,12 +309,48 @@ def update_appointment(current_user, appointment_id):
                          return jsonify({"message": "doctor_id debe ser un número entero o null"}), 400
                 elif field == "appointment_time" and data[field] is not None:
                      try:
-                          datetime.fromisoformat(data[field].replace('Z', '+00:00'))
+                          appointment_dt = datetime.fromisoformat(data[field].replace('Z', '+00:00'))
                           update_data[field] = data[field]
                      except ValueError:
                           return jsonify({"message": "Formato inválido para appointment_time. Usar formato ISO 8601"}), 400
                 else: # Para 'notes'
                     update_data[field] = data[field]
+
+        # Verificar disponibilidad del doctor si se está actualizando doctor_id o appointment_time
+        if ("doctor_id" in update_data or "appointment_time" in update_data) and "doctor_id" in update_data and update_data["doctor_id"] is not None:
+            doctor_id = update_data["doctor_id"]
+            
+            # Si solo se actualiza doctor_id, necesitamos obtener el appointment_time actual
+            if "appointment_time" not in update_data:
+                appt_time_query = supabase.table('appointments').select('appointment_time').eq('id', appointment_id).maybe_single().execute()
+                if appt_time_query.data and "appointment_time" in appt_time_query.data:
+                    appointment_dt = datetime.fromisoformat(appt_time_query.data["appointment_time"].replace('Z', '+00:00'))
+                else:
+                    return jsonify({"message": "Error al obtener la hora de la cita"}), 500
+            else:
+                appointment_dt = datetime.fromisoformat(update_data["appointment_time"].replace('Z', '+00:00'))
+            
+            # Definir ventana de tiempo para verificar (±30 minutos)
+            time_window = timedelta(minutes=30)
+            start_time = (appointment_dt - time_window).isoformat()
+            end_time = (appointment_dt + time_window).isoformat()
+            
+            # Buscar citas del doctor en la ventana de tiempo (excluyendo la cita actual)
+            existing_appointments = supabase.table('appointments')\
+                .select('id, appointment_time')\
+                .eq('doctor_id', doctor_id)\
+                .neq('id', appointment_id)\
+                .gte('appointment_time', start_time)\
+                .lte('appointment_time', end_time)\
+                .execute()
+                
+            if hasattr(existing_appointments, 'data') and existing_appointments.data:
+                current_app.logger.info(f"Doctor ID {doctor_id} ya tiene cita(s) en horario similar: {existing_appointments.data}")
+                return jsonify({
+                    "message": "El doctor seleccionado ya tiene una cita programada en este horario.",
+                    "error_type": "doctor_unavailable",
+                    "conflict_time": update_data.get("appointment_time") or appt_time_query.data.get("appointment_time")
+                }), 409  # Conflict status code
 
 
         # --- VALIDACIÓN Y MANEJO DE ESTADO (CORREGIDO Y APLICADO) ---

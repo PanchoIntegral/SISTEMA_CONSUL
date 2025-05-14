@@ -31,6 +31,14 @@ export const updateAppointment = async (id, updateData) => {
         return response.data;
     } catch (error) {
         console.error(`Error en servicio updateAppointment (ID: ${id}):`, error.response || error.message);
+        // Verificar si es un error de doctor no disponible
+        if (error.response?.status === 409 && error.response?.data?.error_type === 'doctor_unavailable') {
+            throw {
+                message: error.response.data.message || 'El doctor seleccionado ya tiene una cita programada en este horario.',
+                error_type: 'doctor_unavailable',
+                conflict_time: error.response.data.conflict_time
+            };
+        }
         throw error.response?.data || { message: 'Error al actualizar la cita.' };
     }
 };
@@ -46,6 +54,14 @@ export const createAppointment = async (appointmentData) => {
       return response.data;
   } catch (error) {
       console.error("Error en servicio createAppointment:", error.response || error.message);
+      // Verificar si es un error de doctor no disponible
+      if (error.response?.status === 409 && error.response?.data?.error_type === 'doctor_unavailable') {
+          throw {
+              message: error.response.data.message || 'El doctor seleccionado ya tiene una cita programada en este horario.',
+              error_type: 'doctor_unavailable',
+              conflict_time: error.response.data.conflict_time
+          };
+      }
       throw error.response?.data || { message: 'Error al crear la cita.' };
   }
 };

@@ -181,10 +181,10 @@
       </div>
     </div>
 
-    <BaseModal :show="isAppointmentModalOpen" @close="isAppointmentModalOpen = false">
+    <BaseModal :show="isAppointmentModalOpen" @close="closeAppointmentModal">
       <template #title>Agendar Nueva Cita</template>
       <template #default>
-        <AppointmentForm ref="appointmentFormRef" @close="isAppointmentModalOpen = false" @submitted="isAppointmentModalOpen = false"/>
+        <AppointmentForm ref="appointmentFormRef" @close="closeAppointmentModal" @submitted="handleAppointmentSubmitted"/>
       </template>
       <template #footer>
         <button
@@ -196,20 +196,20 @@
           <span v-if="appointmentFormRef?.isLoading">Guardando...</span>
           <span v-else>Agendar Cita</span>
         </button>
-        <button type="button" @click="isAppointmentModalOpen = false" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancelar</button>
+        <button type="button" @click="closeAppointmentModal" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancelar</button>
       </template>
     </BaseModal>
 
     <!-- Modal para editar cita -->
-    <BaseModal :show="isEditModalOpen" @close="isEditModalOpen = false">
+    <BaseModal :show="isEditModalOpen" @close="closeEditModal">
       <template #title>Editar Cita</template>
       <template #default>
         <AppointmentEditForm 
           v-if="selectedAppointment" 
           ref="editFormRef" 
           :appointment="selectedAppointment" 
-          @close="isEditModalOpen = false" 
-          @submitted="isEditModalOpen = false"/>
+          @close="closeEditModal" 
+          @submitted="handleEditSubmitted"/>
       </template>
       <template #footer>
         <button
@@ -221,14 +221,14 @@
           <span v-if="editFormRef?.isLoading">Guardando...</span>
           <span v-else>Actualizar Cita</span>
         </button>
-        <button type="button" @click="isEditModalOpen = false" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancelar</button>
+        <button type="button" @click="closeEditModal" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancelar</button>
       </template>
     </BaseModal>
 
-    <BaseModal :show="isPatientModalOpen" @close="isPatientModalOpen = false">
+    <BaseModal :show="isPatientModalOpen" @close="closePatientModal">
        <template #title>Registrar Nuevo Paciente</template>
        <template #default>
-         <PatientForm ref="patientFormRef" @close="isPatientModalOpen = false" @submitted="handlePatientSubmitted"/>
+         <PatientForm ref="patientFormRef" @close="closePatientModal" @submitted="handlePatientSubmitted"/>
        </template>
        <template #footer>
          <button
@@ -240,7 +240,7 @@
            <span v-if="patientFormRef?.isLoading">Guardando...</span>
            <span v-else>Registrar Paciente</span>
          </button>
-         <button type="button" @click="isPatientModalOpen = false" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancelar</button>
+         <button type="button" @click="closePatientModal" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancelar</button>
        </template>
      </BaseModal>
 
@@ -371,8 +371,10 @@ const clearAllFilters = () => {
   clearPatientSearch();
 };
 
-const changeAppointmentStatus = (appointmentId, newStatus) => {
-    appointmentsStore.updateAppointmentStatus(appointmentId, newStatus);
+const changeAppointmentStatus = async (appointmentId, newStatus) => {
+    await appointmentsStore.updateAppointmentStatus(appointmentId, newStatus);
+    // Refrescar los datos después de cambiar el estado
+    refreshDataOnModalClose();
 };
 
 // Llamar al submit del formulario de citas
@@ -392,7 +394,11 @@ const submitEditForm = () => {
 
 // Abrir modal de edición con la cita seleccionada
 const openEditModal = (appointment) => {
+    // Recargar los datos antes de abrir el modal
+    refreshDataOnModalClose();
+    // Asignar la cita seleccionada
     selectedAppointment.value = appointment;
+    // Abrir el modal
     isEditModalOpen.value = true;
 };
 
@@ -400,14 +406,51 @@ const openEditModal = (appointment) => {
 const deleteAppointment = async (appointmentId) => {
     const success = await appointmentsStore.deleteAppointment(appointmentId);
     if (success) {
-        // La cita ya se eliminó del store en la acción deleteAppointment
+        // Refrescar los datos después de eliminar la cita
+        refreshDataOnModalClose();
     }
+};
+
+// Función para refrescar todos los datos al cerrar un modal
+const refreshDataOnModalClose = () => {
+  // Recargar las citas
+  appointmentsStore.fetchAppointments();
+  // Recargar los doctores
+  doctorsStore.fetchDoctors();
+  // Recargar los pacientes
+  patientsStore.fetchPatients();
+};
+
+// Funciones para cerrar modales con refresco de datos
+const closeAppointmentModal = () => {
+  isAppointmentModalOpen.value = false;
+  refreshDataOnModalClose();
+};
+
+const closePatientModal = () => {
+  isPatientModalOpen.value = false;
+  refreshDataOnModalClose();
+};
+
+const closeEditModal = () => {
+  isEditModalOpen.value = false;
+  refreshDataOnModalClose();
+};
+
+const handleAppointmentSubmitted = () => {
+  isAppointmentModalOpen.value = false;
+  refreshDataOnModalClose();
+};
+
+const handleEditSubmitted = () => {
+  isEditModalOpen.value = false;
+  refreshDataOnModalClose();
 };
 
 // Opcional: Recargar lista de pacientes en el form de citas después de crear uno nuevo
 const handlePatientSubmitted = (newPatient) => {
-    console.log('Nuevo paciente creado:', newPatient);
-   
+  console.log('Nuevo paciente creado:', newPatient);
+  closePatientModal();
 };
 
 onMounted(() => {

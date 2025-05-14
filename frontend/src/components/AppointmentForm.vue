@@ -59,6 +59,31 @@
        </div>
   
       </form>
+
+      <!-- Alerta de doctor no disponible -->
+      <div v-if="showDoctorUnavailableAlert" 
+           class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-medium text-red-600">Doctor No Disponible</h3>
+            <button @click="showDoctorUnavailableAlert = false" class="text-gray-400 hover:text-gray-500">
+              <span class="sr-only">Cerrar</span>
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <p class="mb-4">El doctor seleccionado ya tiene una cita programada en este horario. Por favor, elija otro horario o un doctor diferente.</p>
+          <div class="flex justify-end">
+            <button 
+              @click="showDoctorUnavailableAlert = false"
+              class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      </div>
   </template>
   
   <script setup>
@@ -84,6 +109,7 @@
   });
   const isLoading = ref(false);
   const errorMessage = ref('');
+  const showDoctorUnavailableAlert = ref(false);
   
   // Cargar pacientes y doctores al montar
   onMounted(() => {
@@ -95,6 +121,7 @@
   const handleSubmit = async () => {
     isLoading.value = true;
     errorMessage.value = '';
+    showDoctorUnavailableAlert.value = false;
   
     // Convertir fecha/hora local a ISO string UTC (formato Z)
     let appointmentTimeISO = '';
@@ -119,16 +146,24 @@
       notes: formData.notes || null, // Enviar null si está vacío
     };
   
-    // Llamar a la acción del store para crear la cita
-    const success = await appointmentsStore.createAppointment(dataToSend);
-  
-    isLoading.value = false;
-    if (success) {
-      emit('submitted'); // Indicar éxito al padre (modal)
-      emit('close'); // Cerrar el modal
-    } else {
-      // Mostrar error del store
-      errorMessage.value = appointmentsStore.currentError || 'Error desconocido al crear la cita.';
+    try {
+      // Llamar a la acción del store para crear la cita
+      const success = await appointmentsStore.createAppointment(dataToSend);
+      
+      isLoading.value = false;
+      if (success) {
+        emit('submitted'); // Indicar éxito al padre (modal)
+        emit('close'); // Cerrar el modal
+      }
+    } catch (err) {
+      isLoading.value = false;
+      // Verificar si es el error específico de doctor no disponible
+      if (err.error_type === 'doctor_unavailable') {
+        showDoctorUnavailableAlert.value = true;
+      } else {
+        // Mostrar error general
+        errorMessage.value = err.message || appointmentsStore.currentError || 'Error desconocido al crear la cita.';
+      }
     }
   };
   
