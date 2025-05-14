@@ -1,14 +1,18 @@
 # Fábrica de la aplicación Flask (Application Factory)
 
 import logging
-from flask import Flask
+from flask import Flask, request, make_response, jsonify
 from .config import Config # Importar la configuración
 from .extensions import cors, init_supabase # Importar instancias/funciones de extensiones
+from flask_cors import CORS
 
 def create_app(config_class=Config):
     """Crea y configura una instancia de la aplicación Flask."""
     app = Flask(__name__)
     app.config.from_object(config_class) # Cargar configuración desde el objeto Config
+    
+    # Configuración adicional para CORS
+    app.config['CORS_HEADERS'] = 'Content-Type,Authorization'
 
     # Configurar el logger
     app.logger.setLevel(logging.INFO)
@@ -23,8 +27,24 @@ def create_app(config_class=Config):
 
     app.logger.info("Flask App Logger Initialized")
 
-    # Inicializar extensiones
-    cors.init_app(app) # Inicializar CORS con la app
+    # Configurar CORS a nivel global
+    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+    # No usar la instancia previa de cors para evitar duplicación
+    
+    # Definir un manejador global para preflight OPTIONS
+    @app.before_request
+    def handle_preflight():
+        if request.method == "OPTIONS":
+            response = make_response()
+            return response
+    
+    # Agregar un endpoint de health check con CORS habilitado
+    @app.route("/api/v1/health", methods=["GET", "OPTIONS"])
+    def health_check():
+        if request.method == "OPTIONS":
+            return make_response()
+        return jsonify({"status": "ok", "message": "API funcionando correctamente"})
+    
     try:
         init_supabase(app.config['SUPABASE_URL'], app.config['SUPABASE_KEY'])
         app.logger.info("Supabase client initialized successfully via Factory.")

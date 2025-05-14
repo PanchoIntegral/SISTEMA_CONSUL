@@ -4,6 +4,7 @@ from supabase import create_client, Client
 from flask_cors import CORS
 
 # Crear instancias globales (se inicializarán en la fábrica de la app)
+# CORS ahora se inicializa directamente en create_app(), no aquí
 cors = CORS()
 supabase: Client = None # Se inicializará en create_app
 
