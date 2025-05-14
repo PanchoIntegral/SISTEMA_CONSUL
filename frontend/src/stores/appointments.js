@@ -11,28 +11,35 @@ export const useAppointmentsStore = defineStore('appointments', () => {
   // State
   const appointmentsList = ref([]);
   const selectedDate = ref(getTodayDateString());
-  const selectedStatus = ref(''); // Nuevo: filtro por estado
-  const selectedDoctorId = ref(''); // Nuevo: filtro por doctor ID
-  const searchPatientName = ref(''); // Nuevo: filtro por nombre de paciente
+  const selectedStatus = ref(''); // Filtro por estado
+  const selectedDoctorId = ref(''); // Filtro por doctor ID
+  const searchPatientName = ref(''); // Filtro por nombre de paciente
+  const sortBy = ref('appointment_time'); // Nuevo: campo de ordenamiento
+  const sortDirection = ref('asc'); // Nuevo: dirección de ordenamiento
   const isLoading = ref(false);
   const error = ref(null);
 
   // Getters
   const appointments = computed(() => appointmentsList.value);
   const date = computed(() => selectedDate.value);
-  const status = computed(() => selectedStatus.value); // Nuevo: getter estado
-  const doctorId = computed(() => selectedDoctorId.value); // Nuevo: getter doctor_id
-  const patientName = computed(() => searchPatientName.value); // Nuevo: getter patient_name
+  const status = computed(() => selectedStatus.value);
+  const doctorId = computed(() => selectedDoctorId.value);
+  const patientName = computed(() => searchPatientName.value);
+  const currentSortBy = computed(() => sortBy.value); // Nuevo: getter para campo de orden
+  const currentSortDirection = computed(() => sortDirection.value); // Nuevo: getter para dirección de orden
   const loading = computed(() => isLoading.value);
   const currentError = computed(() => error.value);
   
-  // Nuevo: getter para los filtros actuales
+  // Getter para los filtros y ordenamiento actuales
   const currentFilters = computed(() => {
     const filters = {};
     if (selectedDate.value) filters.date = selectedDate.value;
     if (selectedStatus.value) filters.status = selectedStatus.value;
     if (selectedDoctorId.value) filters.doctor_id = selectedDoctorId.value;
     if (searchPatientName.value) filters.patient_name = searchPatientName.value;
+    // Añadir parámetros de ordenamiento
+    filters.sort_by = sortBy.value;
+    filters.sort_dir = sortDirection.value;
     return filters;
   });
 
@@ -46,30 +53,43 @@ export const useAppointmentsStore = defineStore('appointments', () => {
     }
   }
   
-  // Nuevo: función para establecer el filtro de estado
+  // Función para establecer el filtro de estado
   function setSelectedStatus(status) {
     selectedStatus.value = status;
     fetchAppointments();
   }
   
-  // Nuevo: función para establecer el filtro de doctor
+  // Función para establecer el filtro de doctor
   function setSelectedDoctorId(doctorId) {
     selectedDoctorId.value = doctorId;
     fetchAppointments();
   }
   
-  // Nuevo: función para establecer el filtro por nombre de paciente
+  // Función para establecer el filtro por nombre de paciente
   function setSearchPatientName(name) {
     searchPatientName.value = name;
     fetchAppointments();
   }
   
-  // Nuevo: función para limpiar todos los filtros
+  // Nueva: función para establecer el ordenamiento
+  function setSorting(field, direction) {
+    sortBy.value = field;
+    sortDirection.value = direction;
+    fetchAppointments();
+  }
+  
+  // Nueva: función para cambiar la dirección de ordenamiento del campo actual
+  function toggleSortDirection() {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+    fetchAppointments();
+  }
+  
+  // Función para limpiar todos los filtros
   function clearFilters() {
     selectedStatus.value = '';
     selectedDoctorId.value = '';
     searchPatientName.value = '';
-    // No limpiamos la fecha, solo los otros filtros
+    // No limpiamos la fecha ni el ordenamiento, solo los filtros
     fetchAppointments();
   }
 
@@ -180,14 +200,17 @@ export const useAppointmentsStore = defineStore('appointments', () => {
   return {
     // State
     appointmentsList, selectedDate, isLoading, error, 
-    selectedStatus, selectedDoctorId, searchPatientName, // Nuevos estados
+    selectedStatus, selectedDoctorId, searchPatientName,
+    sortBy, sortDirection, // Nuevos estados
     // Getters
     appointments, date, loading, currentError, 
-    status, doctorId, patientName, currentFilters, // Nuevos getters
+    status, doctorId, patientName, currentFilters,
+    currentSortBy, currentSortDirection, // Nuevos getters
     // Actions
     setSelectedDate, fetchAppointments, updateAppointmentStatus,
     createAppointment, deleteAppointment, updateAppointmentData,
     subscribeToRealtimeUpdates, unsubscribeFromRealtimeUpdates,
-    setSelectedStatus, setSelectedDoctorId, setSearchPatientName, clearFilters // Nuevas acciones
+    setSelectedStatus, setSelectedDoctorId, setSearchPatientName, clearFilters,
+    setSorting, toggleSortDirection // Nuevas acciones
   };
 });

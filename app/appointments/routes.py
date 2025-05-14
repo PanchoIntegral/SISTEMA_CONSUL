@@ -69,12 +69,38 @@ def get_appointments(current_user):
     """Endpoint para obtener la lista de citas, con filtros opcionales."""
     current_app.logger.info(f"Solicitud GET /appointments por user ID: {current_user.id}")
     try:
-        query = supabase.table('appointments').select('''
-            id, appointment_time, status, notes, created_at,
-            arrival_time, consultation_start_time, consultation_end_time,
-            patient:patients (id, name),
-            doctor:doctors (id, name)
-        ''').order('appointment_time')
+        # Determinar campo y dirección de ordenamiento
+        sort_by = request.args.get('sort_by', 'appointment_time')  # Por defecto ordenar por fecha
+        sort_dir = request.args.get('sort_dir', 'asc')  # Por defecto ascendente
+        
+        # Validar campos permitidos para ordenamiento
+        allowed_sort_fields = {'appointment_time', 'status', 'patient.name'}
+        if sort_by not in allowed_sort_fields:
+            sort_by = 'appointment_time'  # Valor seguro por defecto
+        
+        # Validar dirección de ordenamiento
+        if sort_dir.lower() not in ['asc', 'desc']:
+            sort_dir = 'asc'  # Valor seguro por defecto
+            
+        # Para ordenar por nombre de paciente, vamos a realizar un ordenamiento manual
+        # después de obtener los datos, así que para ese caso no incluimos ordenamiento en la consulta
+        if sort_by == 'patient.name':
+            query = supabase.table('appointments').select('''
+                id, appointment_time, status, notes, created_at,
+                arrival_time, consultation_start_time, consultation_end_time,
+                patient:patients (id, name),
+                doctor:doctors (id, name)
+            ''')
+        else:
+            # Para otros campos, aplicamos el ordenamiento directamente en la consulta
+            query = supabase.table('appointments').select('''
+                id, appointment_time, status, notes, created_at,
+                arrival_time, consultation_start_time, consultation_end_time,
+                patient:patients (id, name),
+                doctor:doctors (id, name)
+            ''').order(sort_by, desc=(sort_dir.lower() == 'desc'))
+            
+        current_app.logger.info(f"Ordenando por {sort_by} ({sort_dir})")
 
         # Aplicar filtros desde los query parameters
         filter_date = request.args.get('date')
@@ -151,6 +177,26 @@ def get_appointments(current_user):
                         appt_with_times['is_recurring_patient'] = False
                 
                 appointments_with_times.append(appt_with_times)
+
+            # Ordenar manualmente por nombre de paciente si es necesario
+            if sort_by == 'patient.name':
+                try:
+                    # Ordenar por nombre de paciente, manejando casos donde patient o name sean None
+                    def get_patient_name(appt):
+                        if appt.get('patient') and appt['patient'].get('name'):
+                            return appt['patient']['name'].lower()  # Convertir a minúsculas para ordenar de forma insensible a mayúsculas
+                        return ""  # Si no hay paciente o nombre, usar cadena vacía
+                    
+                    # Ordenar la lista según la dirección solicitada
+                    appointments_with_times = sorted(
+                        appointments_with_times, 
+                        key=get_patient_name,
+                        reverse=(sort_dir.lower() == 'desc')
+                    )
+                    current_app.logger.debug("Ordenamiento manual aplicado por nombre de paciente")
+                except Exception as sort_error:
+                    current_app.logger.error(f"Error al ordenar por nombre de paciente: {sort_error}")
+                    # Continuamos sin ordenar si hay un error
 
         return jsonify(appointments_with_times), 200
 

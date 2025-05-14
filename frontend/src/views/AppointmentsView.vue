@@ -86,6 +86,43 @@
           </div>
         </div>
         
+        <!-- Controles de ordenamiento -->
+        <div class="mt-4 border-t pt-4">
+          <h4 class="text-sm font-medium text-gray-700 mb-2">Ordenar por:</h4>
+          <div class="flex flex-wrap gap-2">
+            <button 
+              @click="setSort('appointment_time')" 
+              class="px-3 py-1 text-sm rounded-md border"
+              :class="sortClasses('appointment_time')"
+            >
+              Hora de cita 
+              <span v-if="localSortBy === 'appointment_time'">
+                {{ localSortDir === 'asc' ? '↑' : '↓' }}
+              </span>
+            </button>
+            <button 
+              @click="setSort('status')" 
+              class="px-3 py-1 text-sm rounded-md border"
+              :class="sortClasses('status')"
+            >
+              Estado 
+              <span v-if="localSortBy === 'status'">
+                {{ localSortDir === 'asc' ? '↑' : '↓' }}
+              </span>
+            </button>
+            <button 
+              @click="setSort('patient.name')" 
+              class="px-3 py-1 text-sm rounded-md border"
+              :class="sortClasses('patient.name')"
+            >
+              Nombre del paciente 
+              <span v-if="localSortBy === 'patient.name'">
+                {{ localSortDir === 'asc' ? '↑' : '↓' }}
+              </span>
+            </button>
+          </div>
+        </div>
+        
         <div class="flex justify-end mt-4">
           <button
             @click="clearAllFilters"
@@ -229,6 +266,8 @@ const localSelectedDate = ref(appointmentsStore.date);
 const localSelectedStatus = ref(appointmentsStore.status);
 const localSelectedDoctorId = ref(appointmentsStore.doctorId);
 const localSearchPatientName = ref(appointmentsStore.patientName);
+const localSortBy = ref(appointmentsStore.currentSortBy);
+const localSortDir = ref(appointmentsStore.currentSortDirection);
 
 const isAppointmentModalOpen = ref(false); // Estado para modal de citas
 const isPatientModalOpen = ref(false); // Estado para modal de pacientes
@@ -269,6 +308,26 @@ const formattedDate = computed(() => {
 const getDoctorName = (doctorId) => {
   const doctor = doctorsStore.doctors.find(d => d.id === parseInt(doctorId));
   return doctor ? doctor.name : 'Desconocido';
+};
+
+// Función para determinar las clases de los botones de ordenamiento
+const sortClasses = (field) => {
+  return {
+    'bg-indigo-50 text-indigo-700 border-indigo-300': localSortBy.value === field,
+    'bg-white text-gray-700 border-gray-300 hover:bg-gray-50': localSortBy.value !== field
+  };
+};
+
+// Función para cambiar el ordenamiento
+const setSort = (field) => {
+  // Si ya está ordenando por este campo, cambiar dirección
+  if (localSortBy.value === field) {
+    localSortDir.value = localSortDir.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    localSortBy.value = field;
+    localSortDir.value = 'asc'; // Por defecto ascendente al cambiar campo
+  }
+  appointmentsStore.setSorting(localSortBy.value, localSortDir.value);
 };
 
 const updateDate = () => {
