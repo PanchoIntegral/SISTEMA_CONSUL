@@ -44,37 +44,6 @@
         </div>
       </div>
 
-      <!-- Género -->
-      <div>
-        <label for="patient_gender" class="block text-sm font-medium text-navy dark:text-dark-primary">Género</label>
-        <div class="mt-1">
-          <select
-            id="patient_gender"
-            v-model="formData.gender"
-            class="block w-full rounded-md border-gray-300 dark:border-dark-border shadow-sm focus:border-secondary focus:ring-secondary dark:focus:border-secondary-dark dark:focus:ring-secondary-dark sm:text-sm text-navy dark:text-dark-primary dark:bg-dark-surface"
-          >
-            <option value="">No especificado</option>
-            <option value="male">Masculino</option>
-            <option value="female">Femenino</option>
-            <option value="other">Otro</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Información médica -->
-      <div>
-        <label for="patient_medical_info" class="block text-sm font-medium text-navy dark:text-dark-primary">Información médica (opcional)</label>
-        <div class="mt-1">
-          <textarea
-            id="patient_medical_info"
-            v-model="formData.medical_info"
-            rows="3"
-            placeholder="Alergias, condiciones médicas, medicamentos, etc."
-            class="block w-full rounded-md border-gray-300 dark:border-dark-border shadow-sm focus:border-secondary focus:ring-secondary dark:focus:border-secondary-dark dark:focus:ring-secondary-dark sm:text-sm text-navy dark:text-dark-primary dark:bg-dark-surface"
-          ></textarea>
-        </div>
-      </div>
-
       <!-- Error general -->
       <div v-if="errorMessage" class="rounded-md bg-red-50 dark:bg-dark-danger/30 p-4">
         <div class="flex">

@@ -1,6 +1,6 @@
 <template>
   <div id="app-container" class="flex flex-col min-h-screen bg-white dark:bg-dark text-navy dark:text-dark-primary transition-colors duration-300">
-    <nav v-if="authStore.isAuthenticated" class="bg-primary dark:bg-dark-surface text-white shadow-sm dark:shadow-dark-sm border-b-0 dark:border-b dark:border-dark-border sticky top-0 z-50 rounded-b-md">
+    <nav v-if="authStore.isAuthenticated" class="bg-navy dark:bg-dark-elevated text-white shadow-sm dark:shadow-dark-sm border-b-0 dark:border-b dark:border-dark-border sticky top-0 z-50 rounded-b-md">
       <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center px-5 py-3">
         <div class="flex items-center mb-4 sm:mb-0">
           <div class="flex items-center">
