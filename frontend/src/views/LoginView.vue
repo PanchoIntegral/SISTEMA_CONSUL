@@ -9,15 +9,12 @@
         <span class="font-bold text-3xl text-secondary">Flow</span>
       </div>
       <p class="mt-1 text-center text-sm text-gray-500">INNOVACIÓN EN GESTIÓN CLÍNICA</p>
-      <h2 class="mt-8 text-center text-2xl font-bold leading-9 tracking-tight text-navy">
-        Iniciar sesión
-      </h2>
     </div>
 
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-sm">
       <form class="space-y-6" @submit.prevent="handleLogin">
         <div>
-          <label for="email" class="block text-sm font-medium leading-6 text-navy">Email</label>
+          <label for="email" class="block text-sm font-medium text-navy">Email</label>
           <div class="mt-2">
             <input
               id="email"
@@ -27,14 +24,14 @@
               autocomplete="email"
               required
               placeholder="tu@email.com"
-              class="block w-full rounded-md border-0 py-1.5 text-navy shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-secondary sm:text-sm sm:leading-6 px-2"
+              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary sm:text-sm"
             />
           </div>
         </div>
 
         <div>
           <div class="flex items-center justify-between">
-            <label for="password" class="block text-sm font-medium leading-6 text-navy">Contraseña</label>
+            <label for="password" class="block text-sm font-medium text-navy">Contraseña</label>
             </div>
           <div class="mt-2">
             <input
@@ -45,7 +42,7 @@
               autocomplete="current-password"
               required
               placeholder="Tu contraseña"
-              class="block w-full rounded-md border-0 py-1.5 text-navy shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-secondary sm:text-sm sm:leading-6 px-2"
+              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary sm:text-sm"
             />
           </div>
         </div>

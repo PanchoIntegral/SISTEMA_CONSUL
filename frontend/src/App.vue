@@ -1,41 +1,57 @@
 <template>
   <div id="app-container" class="flex flex-col min-h-screen bg-white dark:bg-dark text-navy dark:text-dark-primary transition-colors duration-300">
-    <nav v-if="authStore.isAuthenticated" class="bg-primary dark:bg-dark-surface text-white shadow-md dark:shadow-dark-sm border-b-0 dark:border-b dark:border-dark-border">
-      <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center px-5 py-4">
+    <nav v-if="authStore.isAuthenticated" class="bg-primary dark:bg-dark-surface text-white shadow-sm dark:shadow-dark-sm border-b-0 dark:border-b dark:border-dark-border sticky top-0 z-50 rounded-b-md">
+      <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center px-5 py-3">
         <div class="flex items-center mb-4 sm:mb-0">
           <div class="flex items-center">
-            <span class="font-bold text-xl mr-1 text-white dark:text-white">Health</span>
-            <span class="font-bold text-xl text-accent dark:text-secondary">Flow</span>
+            <span class="font-bold text-2xl mr-1 text-white dark:text-white">Health</span>
+            <span class="font-bold text-2xl text-accent dark:text-secondary">Flow</span>
           </div>
-          <span class="ml-2 text-xs texto-secundario dark:texto-secundario">INNOVACIÓN EN GESTIÓN CLÍNICA</span>
+          <span class="ml-3 text-xs font-medium tracking-wider text-gray-200 dark:text-gray-300 uppercase">INNOVACIÓN EN GESTIÓN CLÍNICA</span>
         </div>
-        <div class="flex flex-wrap justify-center gap-3 sm:gap-2 sm:space-x-3 items-center">
-          <RouterLink
-            to="/"
-            class="px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-light dark:hover:bg-dark-elevated transition-all duration-200"
-            active-class="bg-secondary dark:bg-secondary-dark text-white dark:border-secondary-dark dark:border-b-2"
-          >
-            Citas
-          </RouterLink>
-          <RouterLink
-            to="/patients"
-            class="px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-light dark:hover:bg-dark-elevated transition-all duration-200"
-            active-class="bg-secondary dark:bg-secondary-dark text-white dark:border-secondary-dark dark:border-b-2"
-          >
-            Pacientes
-          </RouterLink>
-          <RouterLink
-            to="/dashboard"
-            class="px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-light dark:hover:bg-dark-elevated transition-all duration-200"
-            active-class="bg-secondary dark:bg-secondary-dark text-white dark:border-secondary-dark dark:border-b-2"
-          >
-            Dashboard
-          </RouterLink>
-          <div class="h-6 w-px bg-gray-600 dark:bg-dark-border-light mx-1 hidden sm:block"></div>
-          <DarkModeSwitch class="mx-2" />
-          <button @click="handleLogout" class="px-4 py-2 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700 transition-all duration-200 dark:bg-dark-danger dark:hover:bg-red-700 shadow-sm dark:shadow-dark-sm">
-            Salir
-          </button>
+        <div class="flex flex-wrap justify-center gap-4 sm:gap-2 items-center">
+          <div class="flex space-x-4">
+            <RouterLink
+              to="/"
+              class="px-4 py-2 text-sm font-medium hover:bg-white hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 transition-all duration-200 relative flex items-center rounded-lg"
+              :class="{ 'nav-active': $route.path === '/' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Citas
+            </RouterLink>
+            <RouterLink
+              to="/patients"
+              class="px-4 py-2 text-sm font-medium hover:bg-white hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 transition-all duration-200 relative flex items-center rounded-lg"
+              :class="{ 'nav-active': $route.path === '/patients' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              Pacientes
+            </RouterLink>
+            <RouterLink
+              to="/dashboard"
+              class="px-4 py-2 text-sm font-medium hover:bg-white hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 transition-all duration-200 relative flex items-center rounded-lg"
+              :class="{ 'nav-active': $route.path === '/dashboard' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              Dashboard
+            </RouterLink>
+          </div>
+          <div class="h-6 w-px bg-white bg-opacity-20 dark:bg-dark-border-light mx-3 hidden sm:block"></div>
+          <div class="flex items-center space-x-3">
+            <DarkModeSwitch class="rounded-full" />
+            <button @click="handleLogout" class="px-4 py-2 text-sm font-medium bg-red-600 hover:bg-red-700 transition-all duration-200 dark:bg-dark-danger dark:hover:bg-red-700 flex items-center rounded-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Salir
+            </button>
+          </div>
         </div>
       </div>
     </nav>
@@ -50,7 +66,7 @@
           <span class="font-bold text-xl mr-1 text-white dark:text-white">Health</span>
           <span class="font-bold text-xl text-accent dark:text-secondary">Flow</span>
         </div>
-        <p class="text-sm texto-muted dark:texto-muted">© 2023 HealthFlow - Innovación en Gestión Clínica</p>
+        <p class="text-sm texto-muted dark:texto-muted">© 2025 HealthFlow - Innovación en Gestión Clínica</p>
       </div>
     </footer>
   </div>
@@ -103,6 +119,21 @@ html, body {
 
 .dark p, .dark div, .dark span {
   color: #FFFFFF;
+}
+
+/* Navegación activa con estilo minimalista */
+.nav-active {
+  background-color: rgba(255, 255, 255, 0.1);
+  font-weight: 500;
+  color: white !important;
+  border-radius: 0.5rem;
+}
+
+.dark .nav-active {
+  background-color: rgba(255, 255, 255, 0.08);
+  font-weight: 500;
+  color: white !important;
+  border-radius: 0.5rem;
 }
 
 /* Clases de texto personalizadas */
@@ -182,16 +213,6 @@ html, body {
 /* Mejoras para enlaces activos en modo oscuro */
 .dark .router-link-active {
   position: relative;
-}
-
-.dark .router-link-active::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: theme('colors.secondary.dark');
 }
 
 /* Mejorar la visibilidad de elementos recurrentes */

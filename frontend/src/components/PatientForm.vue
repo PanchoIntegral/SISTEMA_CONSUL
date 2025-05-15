@@ -114,8 +114,6 @@ const formData = reactive({
   name: '',
   contact_info: '',
   date_of_birth: '',
-  gender: '',
-  medical_info: '',
 });
 const isLoading = ref(false);
 const errorMessage = ref('');
@@ -129,8 +127,6 @@ watch(() => props.initialData, (newData) => {
     formData.name = newData.name || '';
     formData.contact_info = newData.contact_info || '';
     formData.date_of_birth = newData.date_of_birth || '';
-    formData.gender = newData.gender || '';
-    formData.medical_info = newData.medical_info || '';
   } else {
     // Resetear si no hay datos iniciales (modo creación)
     isEditing.value = false;
@@ -138,8 +134,6 @@ watch(() => props.initialData, (newData) => {
     formData.name = '';
     formData.contact_info = '';
     formData.date_of_birth = '';
-    formData.gender = '';
-    formData.medical_info = '';
   }
 }, { immediate: true }); // Ejecutar al inicio también
 
@@ -154,8 +148,6 @@ const handleSubmit = async () => {
     name: formData.name,
     contact_info: formData.contact_info || null,
     date_of_birth: formData.date_of_birth || null,
-    gender: formData.gender || null,
-    medical_info: formData.medical_info || null,
   };
 
   let success = false;
