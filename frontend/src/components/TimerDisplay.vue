@@ -84,8 +84,9 @@
   </script>
   
   <style scoped>
-  /* Añadir estilos si se desea, ej. font-mono */
+  /* Removing monospace font in favor of system font */
   .timer-display {
-    font-family: monospace;
+    /* Using system font family instead of monospace */
+    font-family: inherit;
   }
   </style>

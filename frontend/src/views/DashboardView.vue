@@ -1,14 +1,14 @@
 <template>
-  <div class="p-4 md:p-8">
-    <h1 class="text-2xl font-semibold mb-6 text-gray-800">Dashboard de Estadísticas</h1>
+  <div class="p-2 sm:p-4 md:p-8">
+    <h1 class="text-2xl font-semibold mb-4 sm:mb-6 text-gray-800">Dashboard de Estadísticas</h1>
 
-    <div class="mb-6">
-      <label for="month-selector" class="block text-sm font-medium text-gray-700 mb-2">Seleccionar Mes:</label>
+    <div class="mb-4 sm:mb-6">
+      <label for="month-selector" class="block text-sm font-medium text-navy mb-2">Seleccionar Mes:</label>
       <select
         id="month-selector"
         v-model="selectedMonth"
         @change="fetchDashboardData"
-        class="block w-full max-w-xs rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+        class="block w-full max-w-xs rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary sm:text-sm p-2"
       >
         <option v-for="(month, index) in months" :key="index" :value="index + 1">
           {{ month }}
@@ -16,11 +16,11 @@
       </select>
     </div>
 
-    <div v-if="isLoading" class="text-center py-10">
+    <div v-if="isLoading" class="text-center py-6 sm:py-10">
       <p class="text-gray-500">Cargando estadísticas...</p>
     </div>
 
-    <div v-else-if="error" class="rounded-md bg-red-50 p-4 mb-6">
+    <div v-else-if="error" class="rounded-md bg-red-50 p-4 mb-4 sm:mb-6">
       <div class="flex">
         <div class="flex-shrink-0">
           <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -45,34 +45,40 @@
       </div>
     </div>
 
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-lg font-medium text-gray-900 mb-2">Total de Citas</h2>
-        <p class="text-3xl font-bold text-indigo-600">{{ stats.totalAppointments }}</p>
-        <div class="mt-4 h-64">
-          <canvas ref="appointmentsChart"></canvas>
+    <div v-else>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
+        <!-- Tarjeta 1: Total de Citas -->
+        <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+          <h2 class="text-lg font-medium text-primary mb-2">Total de Citas</h2>
+          <p class="text-3xl font-bold text-secondary">{{ stats.totalAppointments }}</p>
+          <div class="mt-4 h-48 sm:h-64">
+            <canvas ref="appointmentsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Tarjeta 2: Tiempo Promedio de Espera -->
+        <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+          <h2 class="text-lg font-medium text-primary mb-2">Tiempo Promedio de Espera</h2>
+          <p class="text-3xl font-bold text-wave-blue">{{ stats.avgWaitTime }} min</p>
+          <div class="mt-4 h-48 sm:h-64">
+            <canvas ref="waitTimeChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Tarjeta 3: Tiempo Promedio de Consulta -->
+        <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+          <h2 class="text-lg font-medium text-primary mb-2">Tiempo Promedio de Consulta</h2>
+          <p class="text-3xl font-bold text-wave-teal">{{ stats.avgConsultTime }} min</p>
+          <div class="mt-4 h-48 sm:h-64">
+            <canvas ref="consultTimeChart"></canvas>
+          </div>
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-lg font-medium text-gray-900 mb-2">Tiempo Promedio de Espera</h2>
-        <p class="text-3xl font-bold text-green-600">{{ stats.avgWaitTime }} min</p>
-         <div class="mt-4 h-64">
-          <canvas ref="waitTimeChart"></canvas>
-        </div>
-      </div>
-
-      <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-lg font-medium text-gray-900 mb-2">Tiempo Promedio de Consulta</h2>
-        <p class="text-3xl font-bold text-blue-600">{{ stats.avgConsultTime }} min</p>
-         <div class="mt-4 h-64">
-          <canvas ref="consultTimeChart"></canvas>
-        </div>
-      </div>
-
-      <div class="bg-white p-6 rounded-lg shadow-md col-span-1 md:col-span-2 lg:col-span-3">
-        <h2 class="text-lg font-medium text-gray-900 mb-2">Citas por Doctor</h2>
-        <div class="mt-4 h-80">
+      <!-- Gráfico principal -->
+      <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+        <h2 class="text-lg font-medium text-primary mb-2">Citas por Doctor</h2>
+        <div class="mt-4 h-60 sm:h-80">
           <canvas ref="doctorsChart"></canvas>
         </div>
       </div>
@@ -295,3 +301,11 @@ watch(selectedMonth, () => {
   fetchDashboardData();
 });
 </script>
+
+<style scoped>
+/* Ajustes específicos para gráficos responsivos */
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+</style>

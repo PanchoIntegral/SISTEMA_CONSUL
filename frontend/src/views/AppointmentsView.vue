@@ -1,26 +1,26 @@
 <template>
-  <div class="p-4 md:p-8">
-    <h1 class="text-2xl font-semibold mb-6 text-gray-800">Gestión de Citas</h1>
+  <div class="p-2 sm:p-4 md:p-8">
+    <h1 class="text-2xl font-semibold mb-4 sm:mb-6 text-gray-800">Gestión de Citas</h1>
 
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-      <div class="flex items-center gap-2">
-        <label for="appointment-date" class="text-sm font-medium text-gray-700">Seleccionar Fecha:</label>
+    <div class="flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between gap-4 mb-6">
+      <div class="w-full sm:w-auto flex items-center gap-2">
+        <label for="appointment-date" class="text-sm font-medium text-gray-700 min-w-fit">Fecha:</label>
         <input
           type="date"
           id="appointment-date"
           v-model="localSelectedDate"
           @change="updateDate"
-          class="block w-full max-w-xs rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary sm:text-sm p-2"
         />
       </div>
-      <div class="flex gap-2">
+      <div class="flex flex-wrap gap-2 w-full sm:w-auto">
         <button
-           @click="isPatientModalOpen = true" class="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
+           @click="isPatientModalOpen = true" class="flex-1 sm:flex-none inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
         >
           + Nuevo Paciente
         </button>
         <button
-           @click="isAppointmentModalOpen = true" class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+           @click="isAppointmentModalOpen = true" class="flex-1 sm:flex-none inline-flex items-center justify-center rounded-md bg-secondary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-secondary-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary transition-colors"
         >
           + Nueva Cita
         </button>
@@ -28,18 +28,18 @@
     </div>
 
     <!-- Nuevos controles de filtro -->
-    <div class="bg-white p-4 rounded-lg shadow mb-6">
+    <div class="bg-white p-3 sm:p-4 rounded-lg shadow mb-6">
       <details class="w-full">
-        <summary class="font-medium text-gray-700 cursor-pointer">Filtros avanzados</summary>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+        <summary class="font-medium text-navy cursor-pointer">Filtros avanzados</summary>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
           <!-- Filtro por estado -->
           <div>
-            <label for="status-filter" class="block text-sm font-medium text-gray-700">Por estado:</label>
+            <label for="status-filter" class="block text-sm font-medium text-navy">Por estado:</label>
             <select
               id="status-filter"
               v-model="localSelectedStatus"
               @change="updateStatus"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary sm:text-sm p-2"
             >
               <option value="">Todos los estados</option>
               <option value="Programada">Programada</option>
@@ -53,12 +53,12 @@
 
           <!-- Filtro por doctor -->
           <div>
-            <label for="doctor-filter" class="block text-sm font-medium text-gray-700">Por doctor:</label>
+            <label for="doctor-filter" class="block text-sm font-medium text-navy">Por doctor:</label>
             <select
               id="doctor-filter"
               v-model="localSelectedDoctorId"
               @change="updateDoctorId"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary sm:text-sm p-2"
             >
               <option value="">Todos los doctores</option>
               <option v-for="doctor in doctorsStore.doctors" :key="doctor.id" :value="doctor.id">
@@ -69,14 +69,14 @@
 
           <!-- Filtro por nombre del paciente -->
           <div>
-            <label for="patient-filter" class="block text-sm font-medium text-gray-700">Por nombre del paciente:</label>
+            <label for="patient-filter" class="block text-sm font-medium text-navy">Por nombre del paciente:</label>
             <div class="mt-1 relative rounded-md shadow-sm">
               <input
                 type="text"
                 id="patient-filter"
                 v-model="localSearchPatientName"
                 @input="updatePatientName"
-                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary sm:text-sm p-2"
                 placeholder="Nombre del paciente..."
               />
               <div v-if="localSearchPatientName" @click="clearPatientSearch" class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer">
@@ -88,14 +88,14 @@
         
         <!-- Controles de ordenamiento -->
         <div class="mt-4 border-t pt-4">
-          <h4 class="text-sm font-medium text-gray-700 mb-2">Ordenar por:</h4>
+          <h4 class="text-sm font-medium text-navy mb-2">Ordenar por:</h4>
           <div class="flex flex-wrap gap-2">
             <button 
               @click="setSort('appointment_time')" 
               class="px-3 py-1 text-sm rounded-md border"
               :class="sortClasses('appointment_time')"
             >
-              Hora de cita 
+              Hora 
               <span v-if="localSortBy === 'appointment_time'">
                 {{ localSortDir === 'asc' ? '↑' : '↓' }}
               </span>
@@ -115,7 +115,7 @@
               class="px-3 py-1 text-sm rounded-md border"
               :class="sortClasses('patient.name')"
             >
-              Nombre del paciente 
+              Paciente 
               <span v-if="localSortBy === 'patient.name'">
                 {{ localSortDir === 'asc' ? '↑' : '↓' }}
               </span>
@@ -126,7 +126,7 @@
         <div class="flex justify-end mt-4">
           <button
             @click="clearAllFilters"
-            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
+            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-navy bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
           >
             Limpiar filtros
           </button>
@@ -134,17 +134,17 @@
         
         <!-- Etiquetas de filtros activos -->
         <div v-if="hasActiveFilters" class="mt-4 flex flex-wrap gap-2">
-          <span v-if="localSelectedStatus" class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+          <span v-if="localSelectedStatus" class="inline-flex items-center rounded-md bg-wave-blue bg-opacity-10 px-2 py-1 text-xs font-medium text-wave-blue ring-1 ring-inset ring-wave-blue/30">
             Estado: {{ localSelectedStatus }}
             <button type="button" @click="clearStatusFilter" class="ml-1">&times;</button>
           </span>
           
-          <span v-if="localSelectedDoctorId" class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-700/10">
+          <span v-if="localSelectedDoctorId" class="inline-flex items-center rounded-md bg-wave-teal bg-opacity-10 px-2 py-1 text-xs font-medium text-wave-teal ring-1 ring-inset ring-wave-teal/30">
             Doctor: {{ getDoctorName(localSelectedDoctorId) }}
             <button type="button" @click="clearDoctorFilter" class="ml-1">&times;</button>
           </span>
           
-          <span v-if="localSearchPatientName" class="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
+          <span v-if="localSearchPatientName" class="inline-flex items-center rounded-md bg-wave-green bg-opacity-10 px-2 py-1 text-xs font-medium text-wave-green ring-1 ring-inset ring-wave-green/30">
             Paciente: {{ localSearchPatientName }}
             <button type="button" @click="clearPatientSearch" class="ml-1">&times;</button>
           </span>
@@ -187,16 +187,18 @@
         <AppointmentForm ref="appointmentFormRef" @close="closeAppointmentModal" @submitted="handleAppointmentSubmitted"/>
       </template>
       <template #footer>
-        <button
-          type="button"
-          @click="submitAppointmentForm"
-          :disabled="appointmentFormRef?.isLoading"
-          class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 sm:ml-3 sm:w-auto disabled:opacity-50"
-        >
-          <span v-if="appointmentFormRef?.isLoading">Guardando...</span>
-          <span v-else>Agendar Cita</span>
-        </button>
-        <button type="button" @click="closeAppointmentModal" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancelar</button>
+        <div class="flex flex-col sm:flex-row-reverse w-full gap-2 sm:gap-0">
+          <button
+            type="button"
+            @click="submitAppointmentForm"
+            :disabled="appointmentFormRef?.isLoading"
+            class="inline-flex justify-center rounded-md bg-secondary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-secondary-light sm:ml-3 disabled:opacity-50 transition-colors"
+          >
+            <span v-if="appointmentFormRef?.isLoading">Guardando...</span>
+            <span v-else>Agendar Cita</span>
+          </button>
+          <button type="button" @click="closeAppointmentModal" class="inline-flex justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-navy shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors">Cancelar</button>
+        </div>
       </template>
     </BaseModal>
 
@@ -212,16 +214,18 @@
           @submitted="handleEditSubmitted"/>
       </template>
       <template #footer>
-        <button
-          type="button"
-          @click="submitEditForm"
-          :disabled="editFormRef?.isLoading"
-          class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 sm:ml-3 sm:w-auto disabled:opacity-50"
-        >
-          <span v-if="editFormRef?.isLoading">Guardando...</span>
-          <span v-else>Actualizar Cita</span>
-        </button>
-        <button type="button" @click="closeEditModal" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancelar</button>
+        <div class="flex flex-col sm:flex-row-reverse w-full gap-2 sm:gap-0">
+          <button
+            type="button"
+            @click="submitEditForm"
+            :disabled="editFormRef?.isLoading"
+            class="inline-flex justify-center rounded-md bg-secondary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-secondary-light sm:ml-3 disabled:opacity-50 transition-colors"
+          >
+            <span v-if="editFormRef?.isLoading">Guardando...</span>
+            <span v-else>Actualizar Cita</span>
+          </button>
+          <button type="button" @click="closeEditModal" class="inline-flex justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-navy shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors">Cancelar</button>
+        </div>
       </template>
     </BaseModal>
 
@@ -231,16 +235,18 @@
          <PatientForm ref="patientFormRef" @close="closePatientModal" @submitted="handlePatientSubmitted"/>
        </template>
        <template #footer>
-         <button
-           type="button"
-           @click="submitPatientForm"
-           :disabled="patientFormRef?.isLoading"
-           class="inline-flex w-full justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 sm:ml-3 sm:w-auto disabled:opacity-50"
-         >
-           <span v-if="patientFormRef?.isLoading">Guardando...</span>
-           <span v-else>Registrar Paciente</span>
-         </button>
-         <button type="button" @click="closePatientModal" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancelar</button>
+         <div class="flex flex-col sm:flex-row-reverse w-full gap-2 sm:gap-0">
+           <button
+             type="button"
+             @click="submitPatientForm"
+             :disabled="patientFormRef?.isLoading"
+             class="inline-flex justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-light sm:ml-3 disabled:opacity-50 transition-colors"
+           >
+             <span v-if="patientFormRef?.isLoading">Guardando...</span>
+             <span v-else>Registrar Paciente</span>
+           </button>
+           <button type="button" @click="closePatientModal" class="inline-flex justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-navy shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors">Cancelar</button>
+         </div>
        </template>
      </BaseModal>
 

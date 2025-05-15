@@ -1,0 +1,228 @@
+/* 
+ * Archivo especial para corregir problemas de visualización con las tarjetas de citas 
+ * en modo oscuro, aplicando estilos directos y específicos
+ */
+
+/* Asegurarse de que los contenedores principales sean claramente visibles */
+.dark [class*="cita"] > div:nth-child(1),
+.dark div:has(> [class*="time"]),
+.dark div:has(> [class*="hora"]),
+.dark .border.rounded-lg.shadow-sm.hover\:shadow-md.transition-all.duration-200.overflow-hidden.bg-white.group {
+  background-color: #232335 !important;
+  border-color: #3D3D5C !important;
+  border-bottom: 1px solid #3D3D5C !important;
+  padding: 16px 20px !important;
+  border-top-left-radius: 0.5rem !important;
+  border-top-right-radius: 0.5rem !important;
+}
+
+/* Corregir el fondo general de la tarjeta */
+.dark .border.rounded-lg.shadow-sm.hover\:shadow-md.transition-all.duration-200.overflow-hidden.bg-white.group {
+  background-color: #1E1E2D !important;
+  border: 1px solid #3D3D5C !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Corregir el encabezado de la tarjeta */
+.dark .flex.items-center.justify-between.px-4.py-3.border-b {
+  background-color: #232335 !important;
+  border-bottom-color: #3D3D5C !important;
+}
+
+/* Hacer que los horarios sean muy visibles */
+.dark [class*="time"],
+.dark [class*="hora"],
+.dark .time,
+.dark .hora,
+.dark .font-bold.text-lg.text-primary {
+  color: #00C7A0 !important;
+  font-weight: bold !important;
+  font-size: 1.25rem !important;
+}
+
+/* Mejorar la visibilidad de las fechas */
+.dark [class*="fecha"],
+.dark [class*="date"],
+.dark .date,
+.dark .fecha,
+.dark .text-xs.text-gray-500 {
+  color: #C8D1F7 !important;
+  margin-left: 8px !important;
+}
+
+/* Establecer un buen contraste para los nombres de pacientes */
+.dark [class*="paciente"],
+.dark [class*="patient"],
+.dark .paciente,
+.dark .patient-name,
+.dark .text-sm.font-semibold.text-navy {
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 1.125rem !important;
+}
+
+/* Mejorar visibilidad de la etiqueta recurrente */
+.dark [class*="recurrente"],
+.dark .recurrente,
+.dark .ml-2.inline-flex.items-center.px-2.py-0\.5.rounded-full.text-xs.font-medium.bg-secondary.bg-opacity-10.text-secondary {
+  background-color: rgba(0, 162, 134, 0.3) !important;
+  color: white !important;
+  padding: 2px 10px !important;
+  border-radius: 12px !important;
+  font-size: 0.75rem !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
+}
+
+/* Mejorar los estados de citas */
+.dark .programada,
+.dark [class*="programada"],
+.dark .text-xs.font-semibold.px-3.py-1.rounded-full.bg-gray-100.text-navy {
+  background-color: #3E5686 !important;
+  color: white !important;
+  padding: 4px 12px !important;
+  border-radius: 4px !important;
+}
+
+.dark .completada,
+.dark [class*="completada"],
+.dark .text-xs.font-semibold.px-3.py-1.rounded-full.bg-wave-green.bg-opacity-10.text-wave-green {
+  background-color: #2A6B60 !important;
+  color: #A1F0C8 !important;
+  padding: 4px 12px !important;
+  border-radius: 4px !important;
+}
+
+.dark .en-proceso,
+.dark [class*="en-proceso"],
+.dark [class*="consulta"],
+.dark .text-xs.font-semibold.px-3.py-1.rounded-full.bg-wave-blue.bg-opacity-10.text-wave-blue,
+.dark .text-xs.font-semibold.px-3.py-1.rounded-full.bg-wave-teal.bg-opacity-10.text-wave-teal {
+  background-color: #3E5686 !important;
+  color: white !important;
+  padding: 4px 12px !important;
+  border-radius: 4px !important;
+}
+
+/* Corregir colores de fondo para diferentes secciones */
+.dark .p-4,
+.dark .space-y-2,
+.dark .grid.grid-cols-1.md\:grid-cols-2.gap-3 {
+  background-color: #1E1E2D !important;
+}
+
+/* Corregir colores de íconos en círculos */
+.dark .w-8.h-8.bg-primary.bg-opacity-10.rounded-full,
+.dark .w-8.h-8.bg-wave-teal.bg-opacity-10.rounded-full,
+.dark .w-8.h-8.bg-gray-100.rounded-full {
+  background-color: #232335 !important;
+}
+
+.dark .h-4.w-4.text-primary,
+.dark .h-4.w-4.text-wave-teal,
+.dark .h-4.w-4.text-gray-500 {
+  color: #00C7A0 !important;
+}
+
+/* Corregir color de texto para doctores */
+.dark .text-sm.text-gray-600 {
+  color: #C8D1F7 !important;
+}
+
+/* Corregir color de notas */
+.dark .text-xs.text-gray-500.line-clamp-2 {
+  color: #A3A8C2 !important;
+}
+
+/* Corregir el color de fondo para las secciones de tiempo */
+.dark .bg-gray-50.rounded-md.p-2.flex.items-center.justify-between,
+.dark .bg-gray-50.rounded-md.p-2.flex.items-center {
+  background-color: #232335 !important;
+  border: 1px solid #3D3D5C !important;
+}
+
+.dark .text-xs.font-medium.text-gray-500,
+.dark .text-xs.font-semibold.text-navy.font-sans {
+  color: #C8D1F7 !important;
+}
+
+/* Corregir el fondo de los componentes de tiempo */
+.dark .flex-1.bg-wave-blue.bg-opacity-5.rounded-md.p-2.text-center,
+.dark .flex-1.bg-wave-green.bg-opacity-5.rounded-md.p-2.text-center {
+  background-color: #232335 !important;
+  border: 1px solid #3D3D5C !important;
+}
+
+.dark .text-xs.text-wave-blue.font-medium.block,
+.dark .text-xs.text-wave-green.font-medium.block {
+  color: #C8D1F7 !important;
+}
+
+.dark .text-sm.font-semibold.text-navy {
+  color: white !important;
+}
+
+/* Mejorar el pie de la tarjeta con los botones */
+.dark .px-4.py-3.bg-gray-50.border-t.flex.flex-wrap.gap-2.justify-end {
+  background-color: #1A1A28 !important;
+  border-top-color: #3D3D5C !important;
+}
+
+/* Mejorar los botones de acción */
+.dark button[class*="edit"],
+.dark button[class*="editar"],
+.dark .text-xs.bg-wave-blue.bg-opacity-10.text-wave-blue.px-3.py-1\.5.rounded-md {
+  background-color: #3E5686 !important;
+  color: white !important;
+  border: 1px solid #375592 !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.dark button[class*="cancel"],
+.dark button[class*="cancelar"],
+.dark .text-xs.bg-red-100.text-red-700.px-3.py-1\.5.rounded-md {
+  background-color: #7A3333 !important;
+  color: white !important;
+  border: 1px solid #B94D4D !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.dark button[class*="llegada"],
+.dark button[class*="confirm"],
+.dark .text-xs.bg-wave-green.bg-opacity-10.text-wave-green.px-3.py-1\.5.rounded-md,
+.dark .text-xs.bg-wave-teal.bg-opacity-10.text-wave-teal.px-3.py-1\.5.rounded-md {
+  background-color: #2A6B60 !important;
+  color: white !important;
+  border: 1px solid #2C9F80 !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.dark button[class*="eliminar"] {
+  background-color: #7A3333 !important; 
+  color: white !important;
+  border: 1px solid #B94D4D !important;
+  transition: all 0.2s ease-in-out !important;
+} 
+
+/* Mejorar efectos hover para botones */
+.dark button[class*="edit"]:hover,
+.dark button[class*="editar"]:hover,
+.dark .text-xs.bg-wave-blue.bg-opacity-10.text-wave-blue.px-3.py-1\.5.rounded-md:hover {
+  background-color: #4C6AA6 !important;
+}
+
+.dark button[class*="cancel"]:hover,
+.dark button[class*="cancelar"]:hover,
+.dark .text-xs.bg-red-100.text-red-700.px-3.py-1\.5.rounded-md:hover {
+  background-color: #933B3B !important;
+}
+
+.dark button[class*="llegada"]:hover,
+.dark button[class*="confirm"]:hover,
+.dark .text-xs.bg-wave-green.bg-opacity-10.text-wave-green.px-3.py-1\.5.rounded-md:hover,
+.dark .text-xs.bg-wave-teal.bg-opacity-10.text-wave-teal.px-3.py-1\.5.rounded-md:hover {
+  background-color: #348475 !important;
+}
+
+.dark button[class*="eliminar"]:hover {
+  background-color: #933B3B !important;
+} 

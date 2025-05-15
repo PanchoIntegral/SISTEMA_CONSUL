@@ -1,15 +1,23 @@
 <template>
-  <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+  <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8 flex-grow">
     <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-      <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+      <div class="flex justify-center mb-4">
+        <div class="brand-gradient h-1 w-48 rounded-full mb-2"></div>
+      </div>
+      <div class="flex justify-center items-center">
+        <span class="font-bold text-3xl mr-1 text-primary">Health</span>
+        <span class="font-bold text-3xl text-secondary">Flow</span>
+      </div>
+      <p class="mt-1 text-center text-sm text-gray-500">INNOVACIÓN EN GESTIÓN CLÍNICA</p>
+      <h2 class="mt-8 text-center text-2xl font-bold leading-9 tracking-tight text-navy">
         Iniciar sesión
       </h2>
     </div>
 
-    <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-sm">
       <form class="space-y-6" @submit.prevent="handleLogin">
         <div>
-          <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email</label>
+          <label for="email" class="block text-sm font-medium leading-6 text-navy">Email</label>
           <div class="mt-2">
             <input
               id="email"
@@ -19,14 +27,14 @@
               autocomplete="email"
               required
               placeholder="tu@email.com"
-              class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-2"
+              class="block w-full rounded-md border-0 py-1.5 text-navy shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-secondary sm:text-sm sm:leading-6 px-2"
             />
           </div>
         </div>
 
         <div>
           <div class="flex items-center justify-between">
-            <label for="password" class="block text-sm font-medium leading-6 text-gray-900">Contraseña</label>
+            <label for="password" class="block text-sm font-medium leading-6 text-navy">Contraseña</label>
             </div>
           <div class="mt-2">
             <input
@@ -37,7 +45,7 @@
               autocomplete="current-password"
               required
               placeholder="Tu contraseña"
-              class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-2"
+              class="block w-full rounded-md border-0 py-1.5 text-navy shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-secondary sm:text-sm sm:leading-6 px-2"
             />
           </div>
         </div>
@@ -50,15 +58,14 @@
           <button
             type="submit"
             :disabled="isLoading"
-            class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex w-full justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-primary-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <span v-if="isLoading">Ingresando...</span>
             <span v-else>Iniciar Sesión</span>
           </button>
         </div>
       </form>
-
-      </div>
+    </div>
   </div>
 </template>
 
@@ -120,6 +127,8 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-/* Estilos específicos para este componente si fueran necesarios */
 /* Tailwind se aplica globalmente si está bien configurado */
+.brand-gradient {
+  background: linear-gradient(90deg, #0F5FA3 0%, #00C7A0 50%, #19E8B5 100%);
+}
 </style>

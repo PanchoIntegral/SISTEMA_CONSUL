@@ -1,0 +1,108 @@
+/* 
+ * Archivo específico para corregir los problemas de visualización 
+ * de los modales en modo oscuro
+ */
+
+/* Fondo de overlay del modal */
+.dark .fixed.bg-navy.bg-opacity-75 {
+  background-color: rgba(10, 10, 20, 0.75) !important;
+}
+
+/* Contenedor principal del modal */
+.dark .rounded-lg.bg-white {
+  background-color: #232335 !important;
+  border-color: #3D3D5C !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Encabezado del modal */
+.dark .bg-white.px-4.pb-4.pt-5,
+.dark .sm\:p-6.sm\:pb-4 {
+  background-color: #232335 !important;
+}
+
+/* Título del modal */
+.dark h3#modal-title,
+.dark [id="modal-title"],
+.dark .font-semibold.leading-6.text-primary {
+  color: #ffffff !important;
+}
+
+/* Contenido del modal */
+.dark .mt-2 {
+  color: #C8D1F7 !important;
+}
+
+/* Footer del modal */
+.dark .bg-gray-50.px-4.py-3 {
+  background-color: #1E1E2D !important;
+  border-top: 1px solid #3D3D5C !important;
+}
+
+/* Botones de acción del modal */
+.dark .bg-white.px-3.py-2.text-sm.font-semibold.text-navy,
+.dark button[class*="cancelar"],
+.dark button[type="button"].bg-white {
+  background-color: #3D3D5C !important;
+  color: #ffffff !important;
+  border: 1px solid #4B4B70 !important;
+}
+
+.dark .bg-secondary.px-3.py-2.text-sm.font-semibold.text-white,
+.dark button[class*="submit"],
+.dark button[class*="guardar"],
+.dark button[class*="agendar"],
+.dark button[type="submit"] {
+  background-color: #00A286 !important;
+  color: #ffffff !important;
+  border: 1px solid #00C7A0 !important;
+}
+
+/* Inputs dentro de modales */
+.dark .modal-content input,
+.dark .rounded-lg.bg-white input,
+.dark .bg-white.px-4 input {
+  background-color: #1E1E2D !important;
+  border-color: #3D3D5C !important;
+  color: #ffffff !important;
+}
+
+/* Labels dentro de modales */
+.dark .modal-content label,
+.dark .rounded-lg.bg-white label,
+.dark .bg-white.px-4 label {
+  color: #C8D1F7 !important;
+}
+
+/* Scrollbar personalizado dentro de los modales */
+.dark .overflow-y-auto.max-h-\[calc\(90vh-8rem\)\]::-webkit-scrollbar-track {
+  background: #1E1E2D !important; 
+}
+
+.dark .overflow-y-auto.max-h-\[calc\(90vh-8rem\)\]::-webkit-scrollbar-thumb {
+  background: #3D3D5C !important;
+}
+
+/* Botón de cerrar modal */
+.dark .rounded-md.bg-white.text-gray-400 {
+  background-color: transparent !important;
+  color: #C8D1F7 !important;
+}
+
+/* Select y otros elementos de formulario en modales */
+.dark .modal-content select,
+.dark .rounded-lg.bg-white select,
+.dark .bg-white.px-4 select {
+  background-color: #1E1E2D !important;
+  border-color: #3D3D5C !important;
+  color: #ffffff !important;
+}
+
+/* Textarea en modales */
+.dark .modal-content textarea,
+.dark .rounded-lg.bg-white textarea,
+.dark .bg-white.px-4 textarea {
+  background-color: #1E1E2D !important;
+  border-color: #3D3D5C !important;
+  color: #ffffff !important;
+} 

@@ -1,41 +1,92 @@
 <template>
   <form @submit.prevent="handleSubmit" class="space-y-4">
-    <div>
-      <label for="patient-name" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
-      <input
-        type="text"
-        id="patient-name"
-        v-model="formData.name"
-        required
-        placeholder="Nombre Apellido"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-      />
-    </div>
+    <div class="grid grid-cols-1 gap-4">
+      <!-- Nombre -->
+      <div>
+        <label for="patient_name" class="block text-sm font-medium text-navy dark:text-dark-primary">Nombre completo *</label>
+        <div class="mt-1">
+          <input
+            type="text"
+            id="patient_name"
+            v-model="formData.name"
+            required
+            autocomplete="name"
+            placeholder="Nombre y apellidos"
+            class="block w-full rounded-md border-gray-300 dark:border-dark-border shadow-sm focus:border-secondary focus:ring-secondary dark:focus:border-secondary-dark dark:focus:ring-secondary-dark sm:text-sm text-navy dark:text-dark-primary dark:bg-dark-surface"
+          />
+        </div>
+      </div>
 
-    <div>
-      <label for="contact-info" class="block text-sm font-medium text-gray-700">Información de Contacto</label>
-      <input
-        type="text"
-        id="contact-info"
-        v-model="formData.contact_info"
-        placeholder="Email o Teléfono"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-      />
-    </div>
+      <!-- Información de contacto -->
+      <div>
+        <label for="patient_contact" class="block text-sm font-medium text-navy dark:text-dark-primary">Información de contacto</label>
+        <div class="mt-1">
+          <input
+            type="text"
+            id="patient_contact"
+            v-model="formData.contact_info"
+            placeholder="Teléfono o correo electrónico"
+            class="block w-full rounded-md border-gray-300 dark:border-dark-border shadow-sm focus:border-secondary focus:ring-secondary dark:focus:border-secondary-dark dark:focus:ring-secondary-dark sm:text-sm text-navy dark:text-dark-primary dark:bg-dark-surface"
+          />
+        </div>
+      </div>
 
-    <div>
-      <label for="date-of-birth" class="block text-sm font-medium text-gray-700">Fecha de Nacimiento</label>
-      <input
-        type="date"
-        id="date-of-birth"
-        v-model="formData.date_of_birth"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-      />
-    </div>
+      <!-- Fecha de nacimiento -->
+      <div>
+        <label for="patient_dob" class="block text-sm font-medium text-navy dark:text-dark-primary">Fecha de nacimiento</label>
+        <div class="mt-1">
+          <input
+            type="date"
+            id="patient_dob"
+            v-model="formData.date_of_birth"
+            class="block w-full rounded-md border-gray-300 dark:border-dark-border shadow-sm focus:border-secondary focus:ring-secondary dark:focus:border-secondary-dark dark:focus:ring-secondary-dark sm:text-sm text-navy dark:text-dark-primary dark:bg-dark-surface"
+          />
+        </div>
+      </div>
 
-     <div v-if="errorMessage" class="text-sm text-red-600" role="alert">
-       {{ errorMessage }}
-     </div>
+      <!-- Género -->
+      <div>
+        <label for="patient_gender" class="block text-sm font-medium text-navy dark:text-dark-primary">Género</label>
+        <div class="mt-1">
+          <select
+            id="patient_gender"
+            v-model="formData.gender"
+            class="block w-full rounded-md border-gray-300 dark:border-dark-border shadow-sm focus:border-secondary focus:ring-secondary dark:focus:border-secondary-dark dark:focus:ring-secondary-dark sm:text-sm text-navy dark:text-dark-primary dark:bg-dark-surface"
+          >
+            <option value="">No especificado</option>
+            <option value="male">Masculino</option>
+            <option value="female">Femenino</option>
+            <option value="other">Otro</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Información médica -->
+      <div>
+        <label for="patient_medical_info" class="block text-sm font-medium text-navy dark:text-dark-primary">Información médica (opcional)</label>
+        <div class="mt-1">
+          <textarea
+            id="patient_medical_info"
+            v-model="formData.medical_info"
+            rows="3"
+            placeholder="Alergias, condiciones médicas, medicamentos, etc."
+            class="block w-full rounded-md border-gray-300 dark:border-dark-border shadow-sm focus:border-secondary focus:ring-secondary dark:focus:border-secondary-dark dark:focus:ring-secondary-dark sm:text-sm text-navy dark:text-dark-primary dark:bg-dark-surface"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Error general -->
+      <div v-if="errorMessage" class="rounded-md bg-red-50 dark:bg-dark-danger/30 p-4">
+        <div class="flex">
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800 dark:text-dark-danger">Error al guardar</h3>
+            <div class="mt-2 text-sm text-red-700 dark:text-dark-danger">
+              <p>{{ errorMessage }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </form>
 </template>
 
@@ -63,6 +114,8 @@ const formData = reactive({
   name: '',
   contact_info: '',
   date_of_birth: '',
+  gender: '',
+  medical_info: '',
 });
 const isLoading = ref(false);
 const errorMessage = ref('');
@@ -76,6 +129,8 @@ watch(() => props.initialData, (newData) => {
     formData.name = newData.name || '';
     formData.contact_info = newData.contact_info || '';
     formData.date_of_birth = newData.date_of_birth || '';
+    formData.gender = newData.gender || '';
+    formData.medical_info = newData.medical_info || '';
   } else {
     // Resetear si no hay datos iniciales (modo creación)
     isEditing.value = false;
@@ -83,6 +138,8 @@ watch(() => props.initialData, (newData) => {
     formData.name = '';
     formData.contact_info = '';
     formData.date_of_birth = '';
+    formData.gender = '';
+    formData.medical_info = '';
   }
 }, { immediate: true }); // Ejecutar al inicio también
 
@@ -97,6 +154,8 @@ const handleSubmit = async () => {
     name: formData.name,
     contact_info: formData.contact_info || null,
     date_of_birth: formData.date_of_birth || null,
+    gender: formData.gender || null,
+    medical_info: formData.medical_info || null,
   };
 
   let success = false;

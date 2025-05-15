@@ -1,0 +1,410 @@
+/* Dark Mode Utilities */
+
+/* Tarjetas de información general */
+.dark .card,
+.dark [class*="card"],
+.dark [class*="tarjeta"] {
+  @apply bg-dark-card border-dark-border shadow-dark-card rounded-card;
+}
+
+/* Títulos de secciones */
+.dark h1.section-title,
+.dark h2.section-title,
+.dark h3.section-title,
+.dark [class*="titulo-seccion"],
+.dark [class*="section-title"] {
+  @apply text-dark-heading font-semibold mb-4;
+}
+
+/* Mejoras de legibilidad para el texto */
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  @apply text-dark-heading font-medium;
+}
+
+.dark p, .dark span, .dark div {
+  @apply text-dark-primary;
+}
+
+/* 
+ * IMPORTANTE: No aplicar estilos directamente a las clases utilitarias de Tailwind 
+ * como text-muted, text-secondary, text-sm, text-xs, etc.
+ * En su lugar, definimos nuestras propias clases personalizadas.
+ */
+
+/* Clases personalizadas para textos */
+.dark .texto-muted {
+  @apply text-dark-secondary;
+}
+
+.dark .texto-secundario {
+  @apply text-dark-secondary;
+}
+
+.dark .texto-pequeno, 
+.dark .texto-nota {
+  @apply text-dark-muted;
+}
+
+/* Estilos para etiquetas y hints */
+.dark .hint-text,
+.dark .meta-text {
+  @apply text-dark-muted;
+}
+
+/* Inputs, selects y áreas de texto */
+.dark input,
+.dark select,
+.dark textarea {
+  @apply bg-dark-elevated border-dark-border text-dark-primary transition-colors duration-200;
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  @apply border-secondary-dark outline-none ring-1 ring-secondary-dark;
+}
+
+.dark input::placeholder {
+  @apply text-dark-muted;
+}
+
+/* Botones */
+.dark button.btn-primary,
+.dark .btn-primary {
+  @apply bg-primary-dark hover:bg-primary text-white transition-colors;
+}
+
+.dark button.btn-secondary,
+.dark .btn-secondary {
+  @apply bg-secondary-dark hover:bg-secondary text-dark-heading transition-colors;
+}
+
+.dark button.btn-accent,
+.dark .btn-accent {
+  @apply bg-accent-dark hover:bg-accent text-navy transition-colors;
+}
+
+.dark button.btn-outline,
+.dark .btn-outline {
+  @apply border-dark-border text-dark-primary hover:bg-dark-elevated transition-colors;
+}
+
+/* Tablas */
+.dark .table th {
+  @apply bg-dark-elevated text-dark-heading border-dark-border font-medium;
+}
+
+.dark .table td {
+  @apply border-dark-border text-dark-primary;
+}
+
+.dark .table tr:hover {
+  @apply bg-dark-elevated/50;
+}
+
+/* Modales */
+.dark .modal-content {
+  @apply bg-dark-surface text-dark-primary border-dark-border shadow-dark;
+}
+
+.dark .modal-header {
+  @apply border-dark-border;
+}
+
+/* Elementos de navegación */
+.dark .nav-item.active {
+  @apply bg-dark-elevated text-secondary-dark;
+}
+
+.dark .sidebar {
+  @apply bg-dark-surface border-r border-dark-border;
+}
+
+/* Enlaces */
+.dark a:not(.btn) {
+  @apply text-secondary-dark hover:text-secondary transition-colors;
+}
+
+/*********************
+ * ESTILOS DE TARJETAS DE CITAS 
+ * Mejorado para resolver problemas de visibilidad
+ *********************/
+
+/* Tarjetas de citas - Estructura base */
+.dark .appointment-card,
+.dark [class*="cita-card"],
+.dark [class*="tarjeta-cita"] {
+  @apply bg-dark-card border border-dark-border rounded-card shadow-dark-card mb-5 overflow-hidden transition-all;
+  border-left: 4px solid theme('colors.secondary.dark');
+}
+
+/* Encabezado de tarjetas de cita - Esto arregla la visibilidad de la parte superior */
+.dark .appointment-card > div:first-child,
+.dark .appointment-card > div:first-of-type,
+.dark [class*="cita-card"] > div:first-child,
+.dark [class*="tarjeta-cita"] > div:first-child {
+  @apply bg-dark-surface px-5 py-4 border-b border-dark-border flex items-center justify-between;
+  background: linear-gradient(to right, rgba(46, 46, 72, 0.95), rgba(38, 38, 56, 0.7));
+}
+
+.dark .appointment-card .card-header,
+.dark [class*="cita-card"] .card-header,
+.dark [class*="tarjeta-cita"] .card-header {
+  @apply bg-dark-surface px-5 py-4 border-b border-dark-border flex items-center justify-between;
+  background: linear-gradient(to right, rgba(46, 46, 72, 0.95), rgba(38, 38, 56, 0.7));
+}
+
+/* Cuerpo de tarjetas de cita */
+.dark .appointment-card > div:not(:first-child),
+.dark .appointment-card > div:not(:first-of-type),
+.dark [class*="cita-card"] > div:not(:first-child),
+.dark [class*="tarjeta-cita"] > div:not(:first-child) {
+  @apply px-5 py-4;
+}
+
+.dark .appointment-card .card-body,
+.dark [class*="cita-card"] .card-body,
+.dark [class*="tarjeta-cita"] .card-body {
+  @apply px-5 py-4;
+}
+
+/* Estilos específicos para el tiempo/hora/fecha */
+.dark .appointment-card [class*="time"], 
+.dark [class*="cita-card"] [class*="time"],
+.dark [class*="tarjeta-cita"] [class*="time"],
+.dark .appointment-card [class*="hora"], 
+.dark [class*="cita-card"] [class*="hora"],
+.dark [class*="tarjeta-cita"] [class*="hora"] {
+  color: theme('colors.secondary.DEFAULT');
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.dark .appointment-card [class*="date"], 
+.dark [class*="cita-card"] [class*="date"],
+.dark [class*="tarjeta-cita"] [class*="date"],
+.dark .appointment-card [class*="fecha"], 
+.dark [class*="cita-card"] [class*="fecha"],
+.dark [class*="tarjeta-cita"] [class*="fecha"] {
+  @apply text-dark-secondary ml-2;
+}
+
+/* Corregir cualquier problema de selección de clase */
+.dark p[class*="time"], 
+.dark p[class*="hora"],
+.dark span[class*="time"], 
+.dark span[class*="hora"],
+.dark div[class*="time"], 
+.dark div[class*="hora"] {
+  color: theme('colors.secondary.DEFAULT');
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+/* Mejorar la visibilidad de nombres de pacientes */
+.dark [class*="nombre-paciente"], 
+.dark .patient-name {
+  @apply text-white font-semibold text-lg;
+}
+
+/* Mejorar la visibilidad del doctor */
+.dark [class*="nombre-doctor"],
+.dark .doctor-name {
+  @apply text-secondary;
+  position: relative;
+  padding-left: 20px;
+}
+
+.dark [class*="nombre-doctor"]::before,
+.dark .doctor-name::before {
+  content: "•";
+  position: absolute;
+  left: 5px;
+  color: theme('colors.secondary.DEFAULT');
+}
+
+/* Mejorar la visibilidad de la etiqueta "Recurrente" */
+.dark [class*="recurrente"],
+.dark .recurrente {
+  @apply bg-secondary-dark/30 text-white px-3 py-1 rounded-full font-medium;
+  font-size: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Mejorar estados de citas */
+.dark .appointment-status,
+.dark [class*="status"],
+.dark [class*="estado"] {
+  @apply bg-dark-elevated text-white font-medium px-3 py-1 rounded-md;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.dark .appointment-status.completed,
+.dark .appointment-status.completada,
+.dark .completed,
+.dark .completada {
+  @apply bg-dark-success text-dark-success font-medium;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
+}
+
+.dark .appointment-status.in-progress,
+.dark .appointment-status.en-proceso,
+.dark .in-progress,
+.dark .en-proceso,
+.dark .en-consulta {
+  @apply bg-dark-accent text-white font-medium;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
+}
+
+.dark .appointment-status.programada,
+.dark .programada {
+  @apply bg-primary-dark text-white font-medium;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
+}
+
+/* Contenedor de información de espera/consulta */
+.dark .appointment-info-container,
+.dark .appointment-times {
+  @apply bg-dark-elevated/40 p-3 rounded-md mt-2 border border-dark-border-light;
+}
+
+/* Etiquetas de tiempo de espera/consulta */
+.dark .espera-label,
+.dark .consulta-label {
+  @apply text-dark-secondary text-sm font-medium;
+}
+
+.dark .espera-time,
+.dark .consulta-time {
+  @apply text-lg font-bold text-white;
+}
+
+/* Mejorar los botones de acciones */
+.dark [class*="action-button"],
+.dark .action-button,
+.dark button[class*="action"] {
+  @apply bg-dark-button hover:bg-dark-elevated text-white border border-dark-border-light rounded px-4 py-2 transition-all;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.dark button.edit-btn,
+.dark button[class*="edit"],
+.dark button.editar {
+  @apply bg-dark-accent hover:bg-blue-700 text-white border-dark-border-accent;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.dark button.cancel-btn,
+.dark button[class*="cancel"],
+.dark button.cancelar {
+  @apply bg-dark-danger hover:bg-red-700 text-white border-dark-border-danger;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.dark button.success-btn,
+.dark button[class*="confirm"],
+.dark button.llegada,
+.dark button[class*="llegada"] {
+  @apply bg-dark-success hover:bg-green-700 text-white border-dark-border-success;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.dark button.delete-btn,
+.dark button[class*="delete"],
+.dark button.eliminar {
+  @apply bg-dark-danger hover:bg-red-700 text-white border-dark-border-danger;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Iconos en botones */
+.dark button svg,
+.dark .btn svg {
+  @apply text-white;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+}
+
+/* Botones de acción en el footer de la tarjeta */
+.dark .appointment-actions,
+.dark .card-footer {
+  @apply bg-dark-surface/50 mt-3 pt-3 border-t border-dark-border flex justify-end gap-2;
+}
+
+/* Filtros avanzados */
+.dark [class*="filtros"],
+.dark [class*="filter"] {
+  @apply bg-dark-surface border border-dark-border rounded-lg p-4;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Etiquetas */
+.dark .tag, .dark .badge {
+  @apply bg-dark-elevated text-dark-primary;
+}
+
+.dark .tag.primary, .dark .badge.primary {
+  @apply bg-primary-dark text-white;
+}
+
+.dark .tag.secondary, .dark .badge.secondary {
+  @apply bg-secondary-dark text-white;
+}
+
+/* Para la información de programación */
+.dark [class*="programada-para-hoy"],
+.dark [class*="scheduled-for-today"] {
+  @apply text-secondary font-medium;
+}
+
+/* Mejorar contendores principales */
+.dark #app-container main {
+  @apply bg-dark text-dark-primary;
+}
+
+/* Mejora de los encabezados de secciones */
+.dark [class*="gestion"],
+.dark [class*="titulo-principal"] {
+  @apply text-white font-bold text-xl mb-4;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* Mejora para campos de fecha/inputs especiales */
+.dark input[type="date"] {
+  @apply bg-dark-elevated border-dark-border text-white px-3 py-2 rounded;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Mejora de contraste para estados de citas y elementos críticos */
+.dark .appointment-status.programada, 
+.dark .programada,
+.dark [class*="programada"] {
+  @apply text-white bg-dark-accent font-medium px-3 py-1 rounded;
+}
+
+/* Estilo para divisores */
+.dark hr {
+  @apply border-dark-border;
+}
+
+/* Transiciones suaves para cambios de tema */
+.theme-transition,
+.dark .theme-transition {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+/* Scrollbars personalizados para modo oscuro */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  @apply bg-dark-surface;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-dark-elevated rounded-full;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-600;
+} 
