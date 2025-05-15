@@ -45,7 +45,7 @@
           <div class="h-6 w-px bg-white bg-opacity-20 dark:bg-dark-border-light mx-3 hidden sm:block"></div>
           <div class="flex items-center space-x-3">
             <DarkModeSwitch class="rounded-full" />
-            <button @click="handleLogout" class="px-4 py-2 text-sm font-medium bg-red-600 hover:bg-red-700 transition-all duration-200 dark:bg-dark-danger dark:hover:bg-red-700 flex items-center rounded-lg">
+            <button @click="showLogoutConfirm = true" class="px-4 py-2 text-sm font-medium bg-red-600 hover:bg-red-700 transition-all duration-200 dark:bg-dark-danger dark:hover:bg-red-700 flex items-center rounded-lg">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
@@ -69,24 +69,36 @@
         <p class="text-sm texto-muted dark:texto-muted">© 2025 HealthFlow - Innovación en Gestión Clínica</p>
       </div>
     </footer>
+
+    <!-- Diálogo de confirmación para cerrar sesión -->
+    <ConfirmDialog
+      :show="showLogoutConfirm"
+      title="Cerrar Sesión"
+      message="¿Estás seguro de que deseas cerrar sesión?"
+      confirm-text="Aceptar"
+      cancel-text="Cancelar"
+      @confirm="handleLogoutConfirmed"
+      @cancel="showLogoutConfirm = false"
+    />
   </div>
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth';
 import DarkModeSwitch from '@/components/DarkModeSwitch.vue';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
+const showLogoutConfirm = ref(false);
 
-const handleLogout = () => {
-    if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-        console.log("Cerrando sesión...");
-        authStore.clearAuth();
-        router.push({ name: 'login' });
-        
-    }
+const handleLogoutConfirmed = () => {
+    console.log("Cerrando sesión...");
+    authStore.clearAuth();
+    router.push({ name: 'login' });
+    showLogoutConfirm.value = false;
 };
 </script>
 
