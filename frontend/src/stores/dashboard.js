@@ -12,7 +12,10 @@ const mockData = {
     { doctorName: 'Dr. García', appointmentCount: 15 },
     { doctorName: 'Dra. Rodríguez', appointmentCount: 12 },
     { doctorName: 'Dr. Martínez', appointmentCount: 18 }
-  ]
+  ],
+  completedAppointments: 30,
+  canceledAppointments: 10,
+  noshowAppointments: 5
 };
 
 export const useDashboardStore = defineStore('dashboard', () => {
@@ -21,7 +24,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
     totalAppointments: 0,
     avgWaitTime: 0,
     avgConsultTime: 0,
-    appointmentsByDoctor: []
+    appointmentsByDoctor: [],
+    completedAppointments: 0,
+    canceledAppointments: 0,
+    noshowAppointments: 0
   });
   const isLoading = ref(false);
   const error = ref(null);

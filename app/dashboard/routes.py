@@ -57,7 +57,21 @@ def get_dashboard_stats(current_user):
         wait_times = []
         consult_times = []
         
+        # Contar citas por estado
+        completed_count = 0
+        canceled_count = 0
+        noshow_count = 0
+        
         for appointment in appointments:
+            # Contabilizar por estado
+            status = appointment.get('status', '')
+            if status == 'Completada':
+                completed_count += 1
+            elif status == 'Cancelada':
+                canceled_count += 1
+            elif status == 'No Asistió':
+                noshow_count += 1
+                
             # Calcular tiempo de espera (desde llegada hasta inicio de consulta)
             if appointment.get('arrival_time') and appointment.get('consultation_start_time'):
                 try:
@@ -88,7 +102,10 @@ def get_dashboard_stats(current_user):
         stats = {
             "totalAppointments": total_appointments,
             "avgWaitTime": avg_wait_time,
-            "avgConsultTime": avg_consult_time
+            "avgConsultTime": avg_consult_time,
+            "completedAppointments": completed_count,
+            "canceledAppointments": canceled_count,
+            "noshowAppointments": noshow_count
         }
         
         return jsonify(stats), 200

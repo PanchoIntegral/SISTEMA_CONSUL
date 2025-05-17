@@ -74,7 +74,7 @@
           
           <!-- Tiempos y métricas -->
           <div class="space-y-2 border-t pt-3 md:pt-0 md:border-t-0 md:border-l md:pl-4 mt-2 md:mt-0">
-            <div v-if="appointment.status === 'En Espera' || appointment.status === 'En Consulta'" 
+            <div v-if="appointment.status === 'En Espera'" 
                 class="bg-gray-50 rounded-md p-2 flex items-center justify-between">
               <span class="text-xs font-medium text-gray-500">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -82,9 +82,30 @@
                 </svg>
                 Timer:
               </span>
-              <TimerDisplay :status="appointment.status" :start-time="timerStartTime" class="text-xs font-semibold text-navy font-sans" />
+              <TimerDisplay :status="'En Espera'" :start-time="appointment.arrival_time" class="text-xs font-semibold text-navy font-sans" />
             </div>
             
+            <div v-if="appointment.status === 'En Consulta'" class="space-y-2">
+              <div class="bg-wave-blue bg-opacity-5 rounded-md p-2 flex items-center justify-between">
+                <span class="text-xs font-medium text-wave-blue">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Espera:
+                </span>
+                <TimerDisplay :status="'En Espera'" :start-time="appointment.arrival_time" class="text-xs font-semibold text-navy font-sans" />
+              </div>
+              <div class="bg-wave-teal bg-opacity-5 rounded-md p-2 flex items-center justify-between">
+                <span class="text-xs font-medium text-wave-teal">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Consulta:
+                </span>
+                <TimerDisplay :status="'En Consulta'" :start-time="appointment.consultation_start_time" class="text-xs font-semibold text-navy font-sans" />
+              </div>
+            </div>
+
             <div v-if="appointment.status === 'Completada' && (appointment.calculated_wait_time_seconds !== null || appointment.calculated_consultation_time_seconds !== null)" 
                 class="flex gap-2">
               <div class="flex-1 bg-wave-blue bg-opacity-5 rounded-md p-2 text-center">
@@ -243,16 +264,6 @@
       case 'No Asistió': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
     }
-  });
-  
-  // Computed para determinar qué timestamp pasar al TimerDisplay
-  const timerStartTime = computed(() => {
-      if (props.appointment.status === 'En Consulta') {
-          return props.appointment.consultation_start_time;
-      } else if (props.appointment.status === 'En Espera') {
-          return props.appointment.arrival_time;
-      }
-      return null; // No hay timer activo en otros estados
   });
   
   // Helper para formatear duración MM:SS
