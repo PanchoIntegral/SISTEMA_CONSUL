@@ -42,6 +42,8 @@
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary sm:text-sm p-2"
             >
               <option value="">Todos los estados</option>
+              <option value="Citas Activas">Citas Activas</option>
+              <option value="Citas Inactivas">Citas Inactivas</option>
               <option value="Programada">Programada</option>
               <option value="En Espera">En Espera</option>
               <option value="En Consulta">En Consulta</option>

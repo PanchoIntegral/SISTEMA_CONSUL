@@ -131,6 +131,8 @@ def get_appointments(current_user):
         filter_status = request.args.get('status')
         filter_doctor_id = request.args.get('doctor_id')
         filter_patient_name = request.args.get('patient_name')
+        filter_exclude_statuses = request.args.getlist('exclude_statuses[]')  # Obtener lista de estados a excluir
+        filter_include_statuses = request.args.getlist('include_statuses[]')  # Obtener lista de estados a incluir
 
         # Filtro por fecha
         if filter_date:
@@ -160,6 +162,23 @@ def get_appointments(current_user):
         if filter_status:
             query = query.eq('status', filter_status)
             current_app.logger.info(f"Filtrando citas por estado: {filter_status}")
+        
+        # Filtro para excluir estados
+        if filter_exclude_statuses:
+            for status_to_exclude in filter_exclude_statuses:
+                query = query.neq('status', status_to_exclude)
+            current_app.logger.info(f"Excluyendo citas con estados: {filter_exclude_statuses}")
+        
+        # Filtro para incluir solo ciertos estados
+        if filter_include_statuses:
+            # Usar or() para incluir cualquiera de los estados específicos
+            status_conditions = []
+            for status_to_include in filter_include_statuses:
+                status_conditions.append(f"status.eq.{status_to_include}")
+            
+            if status_conditions:
+                query = query.or_(",".join(status_conditions))
+                current_app.logger.info(f"Incluyendo solo citas con estados: {filter_include_statuses}")
         
         # Filtro por doctor_id
         if filter_doctor_id:

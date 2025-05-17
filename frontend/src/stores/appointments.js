@@ -34,7 +34,19 @@ export const useAppointmentsStore = defineStore('appointments', () => {
   const currentFilters = computed(() => {
     const filters = {};
     if (selectedDate.value) filters.date = selectedDate.value;
-    if (selectedStatus.value) filters.status = selectedStatus.value;
+    
+    // Handle special "Citas Activas" filter
+    if (selectedStatus.value === 'Citas Activas') {
+      filters.exclude_statuses = ['Completada', 'Cancelada', 'No Asistió'];
+    } 
+    // Handle special "Citas Inactivas" filter
+    else if (selectedStatus.value === 'Citas Inactivas') {
+      filters.exclude_statuses = ['Programada', 'En Espera', 'En Consulta'];
+    }
+    else if (selectedStatus.value) {
+      filters.status = selectedStatus.value;
+    }
+    
     if (selectedDoctorId.value) filters.doctor_id = selectedDoctorId.value;
     if (searchPatientName.value) filters.patient_name = searchPatientName.value;
     // Añadir parámetros de ordenamiento

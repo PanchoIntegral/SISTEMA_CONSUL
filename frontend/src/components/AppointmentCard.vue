@@ -121,6 +121,16 @@
           <span class="hidden sm:inline">Marcar</span> Llegada
         </button>
         <button
+          @click="$emit('change-status', 'No Asistió')"
+          v-if="appointment.status === 'Programada'"
+          class="text-xs bg-purple-100 text-purple-700 px-3 py-1.5 rounded-md hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          No Asistió
+        </button>
+        <button
           @click="$emit('change-status', 'En Consulta')"
           v-if="appointment.status === 'En Espera'"
           class="text-xs bg-wave-teal bg-opacity-10 text-wave-teal px-3 py-1.5 rounded-md hover:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-wave-teal focus:ring-offset-1 transition-colors"

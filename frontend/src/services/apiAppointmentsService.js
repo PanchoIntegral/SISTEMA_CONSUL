@@ -2,14 +2,31 @@ import apiClient from './apiClient'; // Importar la instancia configurada de Axi
 
 /**
  * Obtiene las citas con filtros opcionales.
- * @param {object} filters - Objeto con filtros { date, status, doctor_id, patient_name }.
+ * @param {object} filters - Objeto con filtros { date, status, doctor_id, patient_name, exclude_statuses, include_statuses }.
  * @returns {Promise<Array>} - Promesa que resuelve con el array de citas.
  */
 export const getAppointments = async (filters = {}) => {
   try {
+    // Crear copia de los filtros para no modificar el objeto original
+    const queryParams = { ...filters };
+    
+    // Procesamos el array exclude_statuses para el formato correcto en la API
+    if (filters.exclude_statuses && Array.isArray(filters.exclude_statuses)) {
+      // Convertir el array a múltiples parámetros con el mismo nombre
+      delete queryParams.exclude_statuses; // Eliminar el array del objeto
+      queryParams['exclude_statuses[]'] = filters.exclude_statuses; // Agregar con el formato correcto
+    }
+    
+    // Procesamos el array include_statuses para el formato correcto en la API
+    if (filters.include_statuses && Array.isArray(filters.include_statuses)) {
+      // Convertir el array a múltiples parámetros con el mismo nombre
+      delete queryParams.include_statuses; // Eliminar el array del objeto
+      queryParams['include_statuses[]'] = filters.include_statuses; // Agregar con el formato correcto
+    }
+    
     // El interceptor de apiClient añadirá el token automáticamente
     const response = await apiClient.get('/appointments', {
-      params: filters // Pasar todos los filtros como query parameters
+      params: queryParams
     });
     return response.data; // Devuelve el array de citas
   } catch (error) {
