@@ -127,82 +127,85 @@
           Estado de Citas
         </h2>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <!-- Citas Completadas -->
-          <div class="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-5 rounded-xl border border-green-200 dark:border-green-800 shadow-sm hover:shadow-md transition-shadow">
-            <div class="flex items-center mb-3">
-              <div class="bg-green-100 dark:bg-green-800/50 p-2 rounded-full mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600 dark:text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        <div class="mt-8">
+          <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden">
+            <div class="p-5 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900/80 border-b border-gray-200 dark:border-gray-700">
+              <h3 class="flex items-center text-lg font-semibold text-gray-800 dark:text-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
                 </svg>
+                Distribución de Citas por Estado
+              </h3>
+            </div>
+            
+            <div class="p-6">
+              <div class="flex flex-col lg:flex-row">
+                <div class="w-full lg:w-1/2 flex justify-center">
+                  <div class="relative h-72 md:h-80 w-full max-w-sm">
+                    <canvas ref="statusChart" class="mx-auto"></canvas>
+                  </div>
+                </div>
+                
+                <div class="w-full lg:w-1/2 mt-6 lg:mt-0 flex flex-col justify-center">
+                  <div class="space-y-5">
+                    <div class="flex items-center">
+                      <div class="w-3 h-10 bg-green-500 rounded-sm mr-3"></div>
+                      <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                          <div>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Citas Completadas</p>
+                            <p class="text-xl font-bold text-green-600 dark:text-green-400">{{ stats.completedAppointments }}</p>
+                          </div>
+                          <span class="bg-green-100 dark:bg-green-800/40 text-green-800 dark:text-green-300 text-xs font-semibold px-3 py-1 rounded-full">
+                            {{ calculatePercentage(stats.completedAppointments, stats.totalAppointments) }}%
+                          </span>
+                        </div>
+                        <div class="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                          <div class="bg-green-500 h-1.5 rounded-full" :style="`width: ${calculatePercentage(stats.completedAppointments, stats.totalAppointments)}%`"></div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                      <div class="w-3 h-10 bg-red-500 rounded-sm mr-3"></div>
+                      <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                          <div>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Citas Canceladas</p>
+                            <p class="text-xl font-bold text-red-600 dark:text-red-400">{{ stats.canceledAppointments }}</p>
+                          </div>
+                          <span class="bg-red-100 dark:bg-red-800/40 text-red-800 dark:text-red-300 text-xs font-semibold px-3 py-1 rounded-full">
+                            {{ calculatePercentage(stats.canceledAppointments, stats.totalAppointments) }}%
+                          </span>
+                        </div>
+                        <div class="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                          <div class="bg-red-500 h-1.5 rounded-full" :style="`width: ${calculatePercentage(stats.canceledAppointments, stats.totalAppointments)}%`"></div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                      <div class="w-3 h-10 bg-purple-500 rounded-sm mr-3"></div>
+                      <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                          <div>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">No Asistió</p>
+                            <p class="text-xl font-bold text-purple-600 dark:text-purple-400">{{ stats.noshowAppointments }}</p>
+                          </div>
+                          <span class="bg-purple-100 dark:bg-purple-800/40 text-purple-800 dark:text-purple-300 text-xs font-semibold px-3 py-1 rounded-full">
+                            {{ calculatePercentage(stats.noshowAppointments, stats.totalAppointments) }}%
+                          </span>
+                        </div>
+                        <div class="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                          <div class="bg-purple-500 h-1.5 rounded-full" :style="`width: ${calculatePercentage(stats.noshowAppointments, stats.totalAppointments)}%`"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h3 class="text-lg font-semibold text-green-800 dark:text-green-300">Citas Completadas</h3>
             </div>
-            <div class="flex items-end justify-between">
-              <p class="text-3xl font-bold text-green-700 dark:text-green-400">{{ stats.completedAppointments }}</p>
-              <p class="text-sm font-medium bg-green-200 dark:bg-green-800/70 text-green-800 dark:text-green-200 px-2 py-1 rounded-full">
-                {{ calculatePercentage(stats.completedAppointments, stats.totalAppointments) }}% del total
-              </p>
-            </div>
-          </div>
-          
-          <!-- Citas Canceladas -->
-          <div class="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 p-5 rounded-xl border border-red-200 dark:border-red-800 shadow-sm hover:shadow-md transition-shadow">
-            <div class="flex items-center mb-3">
-              <div class="bg-red-100 dark:bg-red-800/50 p-2 rounded-full mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600 dark:text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </div>
-              <h3 class="text-lg font-semibold text-red-800 dark:text-red-300">Citas Canceladas</h3>
-            </div>
-            <div class="flex items-end justify-between">
-              <p class="text-3xl font-bold text-red-700 dark:text-red-400">{{ stats.canceledAppointments }}</p>
-              <p class="text-sm font-medium bg-red-200 dark:bg-red-800/70 text-red-800 dark:text-red-200 px-2 py-1 rounded-full">
-                {{ calculatePercentage(stats.canceledAppointments, stats.totalAppointments) }}% del total
-              </p>
-            </div>
-          </div>
-          
-          <!-- No Asistió -->
-          <div class="bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 p-5 rounded-xl border border-purple-200 dark:border-purple-800 shadow-sm hover:shadow-md transition-shadow">
-            <div class="flex items-center mb-3">
-              <div class="bg-purple-100 dark:bg-purple-800/50 p-2 rounded-full mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600 dark:text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 class="text-lg font-semibold text-purple-800 dark:text-purple-300">No Asistió</h3>
-            </div>
-            <div class="flex items-end justify-between">
-              <p class="text-3xl font-bold text-purple-700 dark:text-purple-400">{{ stats.noshowAppointments }}</p>
-              <p class="text-sm font-medium bg-purple-200 dark:bg-purple-800/70 text-purple-800 dark:text-purple-200 px-2 py-1 rounded-full">
-                {{ calculatePercentage(stats.noshowAppointments, stats.totalAppointments) }}% del total
-              </p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="mt-8 p-4 bg-white dark:bg-gray-900/30 rounded-xl border border-gray-100 dark:border-gray-700 shadow-inner">
-          <div class="flex flex-col md:flex-row items-center justify-between mb-4">
-            <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 md:mb-0">Distribución de citas por estado</h4>
-            <div class="flex gap-4">
-              <div class="flex items-center">
-                <div class="w-3 h-3 bg-green-500 rounded-full mr-1"></div>
-                <span class="text-xs text-gray-600 dark:text-gray-300">Completadas</span>
-              </div>
-              <div class="flex items-center">
-                <div class="w-3 h-3 bg-red-500 rounded-full mr-1"></div>
-                <span class="text-xs text-gray-600 dark:text-gray-300">Canceladas</span>
-              </div>
-              <div class="flex items-center">
-                <div class="w-3 h-3 bg-purple-500 rounded-full mr-1"></div>
-                <span class="text-xs text-gray-600 dark:text-gray-300">No Asistió</span>
-              </div>
-            </div>
-          </div>
-          <div class="h-64">
-            <canvas ref="statusChart"></canvas>
           </div>
         </div>
       </div>
@@ -451,30 +454,41 @@
                         stats.value.noshowAppointments
                     ],
                     backgroundColor: [
-                        'rgba(34, 197, 94, 0.7)', // Verde para Completadas
-                        'rgba(239, 68, 68, 0.7)',  // Rojo para Canceladas
-                        'rgba(147, 51, 234, 0.7)'  // Morado para No Asistió
+                        'rgba(34, 197, 94, 0.85)', // Verde más vibrante para Completadas
+                        'rgba(239, 68, 68, 0.85)',  // Rojo más vibrante para Canceladas
+                        'rgba(147, 51, 234, 0.85)'  // Morado más vibrante para No Asistió
                     ],
                     borderColor: [
                         'rgb(22, 163, 74)',        // Verde oscuro borde
                         'rgb(220, 38, 38)',        // Rojo oscuro borde
                         'rgb(126, 34, 206)'        // Morado oscuro borde
                     ],
-                    borderWidth: 1
+                    borderWidth: 2,
+                    hoverOffset: 15,
+                    borderRadius: 4,
+                    spacing: 2
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                cutout: '65%',
                 plugins: {
                     legend: { 
-                        position: 'bottom',
-                        labels: { 
-                            padding: 20,
-                            color: textColor
-                        }
+                        display: false
                     },
                     tooltip: {
+                        backgroundColor: isDarkMode.value ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                        titleColor: isDarkMode.value ? '#e5e7eb' : '#111827',
+                        bodyColor: isDarkMode.value ? '#d1d5db' : '#1f2937',
+                        borderColor: isDarkMode.value ? 'rgba(75, 85, 99, 0.3)' : 'rgba(229, 231, 235, 0.8)',
+                        borderWidth: 1,
+                        padding: 12,
+                        boxPadding: 5,
+                        cornerRadius: 8,
+                        titleFont: {
+                            weight: 'bold'
+                        },
                         callbacks: {
                             label: function(context) {
                                 let label = context.label || '';
@@ -485,6 +499,15 @@
                             }
                         }
                     }
+                },
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 1000,
+                    easing: 'easeOutQuart'
+                },
+                layout: {
+                    padding: 10
                 }
             }
         });
