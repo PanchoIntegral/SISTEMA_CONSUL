@@ -40,26 +40,49 @@
         </div>
       </div>
       
-      <!-- Selector de etiqueta de proceso médico mejorado -->
-      <div v-if="['En Espera', 'En Consulta'].includes(appointment.status)" class="px-4 pt-2 pb-1">
-        <div class="flex items-center gap-2">
-          <div class="w-7 h-7 bg-gradient-to-r from-amber-50 to-yellow-100 rounded-full flex items-center justify-center shrink-0 border border-amber-200">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      <!-- Selector de etiqueta de proceso médico (botón +) -->
+      <div v-if="['En Espera', 'En Consulta'].includes(appointment.status)" class="px-4 pt-1 pb-0 relative">
+        <div v-if="!showTagSelector" class="flex justify-start">
+          <button 
+            @click="toggleTagSelector"
+            class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 p-1 rounded-full border border-amber-200 flex items-center justify-center w-6 h-6 transition-colors"
+            title="Añadir etiqueta de proceso médico">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
+          </button>
+        </div>
+        
+        <!-- Panel emergente para seleccionar etiqueta -->
+        <div v-if="showTagSelector" class="absolute z-50 left-4 mt-1 bg-white rounded-md shadow-md border border-gray-200 p-2 min-w-[180px] max-h-[200px] overflow-y-auto tag-selector">
+          <div class="flex justify-between items-center mb-2 pb-1 border-b sticky top-0 bg-white z-10">
+            <span class="text-xs font-medium text-gray-700">Proceso médico</span>
+            <button @click="toggleTagSelector" class="text-gray-400 hover:text-gray-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
-          <select 
-            v-model="selectedMedicalProcessTag" 
-            class="text-xs border-gray-200 rounded-md focus:ring-amber-500 focus:border-amber-500 w-full shadow-sm"
-            @change="updateMedicalProcessTag">
-            <option value="">Sin proceso médico</option>
-            <option value="Dilatación">Dilatación</option>
-            <option value="Inyección">Inyección</option>
-            <option value="Láser">Láser</option>
-            <option value="OCT">OCT</option>
-            <option value="OCT/Campimetría">OCT/Campimetría</option>
-            <option value="Campimetría">Campimetría</option>
-          </select>
+          <div class="space-y-1">
+            <button 
+              @click="selectTag('')"
+              class="w-full text-left text-xs p-1.5 rounded hover:bg-gray-100 flex items-center"
+              :class="{'bg-gray-100': selectedMedicalProcessTag === ''}">
+              <span class="text-gray-700">Sin etiqueta</span>
+            </button>
+            <button 
+              v-for="tag in medicalProcessTags" 
+              :key="tag"
+              @click="selectTag(tag)"
+              class="w-full text-left text-xs p-1.5 rounded hover:bg-amber-50 flex items-center"
+              :class="{'bg-amber-50': selectedMedicalProcessTag === tag}">
+              <svg v-if="selectedMedicalProcessTag === tag" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-amber-600 mr-1.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span v-else class="w-3 h-3 mr-1.5 flex-shrink-0"></span>
+              <span class="text-amber-800">{{ tag }}</span>
+            </button>
+          </div>
         </div>
       </div>
       
@@ -266,6 +289,31 @@
   // Estado para la etiqueta seleccionada
   const selectedMedicalProcessTag = ref(props.appointment.medical_process_tag || '');
   
+  // Estado para controlar la visibilidad del selector
+  const showTagSelector = ref(false);
+  
+  // Lista de etiquetas de procesos médicos disponibles
+  const medicalProcessTags = [
+    'Dilatación',
+    'Inyección',
+    'Láser',
+    'OCT',
+    'OCT/Campimetría',
+    'Campimetría'
+  ];
+  
+  // Función para alternar la visibilidad del selector
+  const toggleTagSelector = () => {
+    showTagSelector.value = !showTagSelector.value;
+  };
+  
+  // Función para seleccionar una etiqueta
+  const selectTag = (tag) => {
+    selectedMedicalProcessTag.value = tag;
+    emit('update-tag', tag);
+    showTagSelector.value = false;
+  };
+  
   // Función para actualizar la etiqueta de proceso médico
   const updateMedicalProcessTag = () => {
     emit('update-tag', selectedMedicalProcessTag.value);
@@ -338,5 +386,16 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  /* Tamaño de texto extra pequeño para el selector compacto */
+  .text-2xs {
+    font-size: 0.65rem; /* Más pequeño que text-xs */
+    line-height: 1rem;
+  }
+
+  /* Estilos para el selector de etiquetas */
+  .tag-selector {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
   </style>
