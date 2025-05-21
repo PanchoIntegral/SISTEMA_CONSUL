@@ -31,8 +31,8 @@ def create_appointment(current_user):
         # Verificar si el doctor ya tiene una cita en la misma hora
         doctor_id = data.get("doctor_id")
         if doctor_id is not None and doctor_id != "":
-            # Definir ventana de tiempo para verificar (±30 minutos)
-            time_window = timedelta(minutes=30)
+            # Definir ventana de tiempo para verificar (±1 minuto)
+            time_window = timedelta(minutes=1)
             start_time = (appointment_dt - time_window).isoformat()
             end_time = (appointment_dt + time_window).isoformat()
             
@@ -353,8 +353,8 @@ def update_appointment(current_user, appointment_id):
             else:
                 appointment_dt = datetime.fromisoformat(update_data["appointment_time"].replace('Z', '+00:00'))
             
-            # Definir ventana de tiempo para verificar (±30 minutos)
-            time_window = timedelta(minutes=30)
+            # Definir ventana de tiempo para verificar (±1 minuto)
+            time_window = timedelta(minutes=1)
             start_time = (appointment_dt - time_window).isoformat()
             end_time = (appointment_dt + time_window).isoformat()
             

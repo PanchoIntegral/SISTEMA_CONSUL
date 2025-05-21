@@ -28,14 +28,14 @@
       </div>
       
       <!-- Etiqueta de proceso médico (sticky note) mejorada -->
-      <div v-if="appointment.medical_process_tag" class="relative mt-1 mb-2">
+      <div v-if="appointment.medical_process_tag && appointment.status !== 'Completada'" class="relative mt-1 mb-2">
         <div class="flex items-center">
-          <div class="ml-4 px-3 py-1.5 text-xs font-semibold rounded-md shadow-sm bg-gradient-to-r from-amber-50 to-yellow-100 border-l-4 border-l-amber-400 flex items-center space-x-1.5" 
+          <div class="ml-4 px-3 py-1.5 text-xs font-semibold rounded-md shadow-sm dark:shadow-md flex items-center space-x-1.5 tag-container" 
                style="max-width: 90%;">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-            <span class="text-amber-800 font-medium">{{ appointment.medical_process_tag }}</span>
+            <span class="text-amber-800 dark:text-amber-300 font-medium">{{ appointment.medical_process_tag }}</span>
           </div>
         </div>
       </div>
@@ -45,7 +45,7 @@
         <div v-if="!showTagSelector" class="flex justify-start">
           <button 
             @click="toggleTagSelector"
-            class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 p-1 rounded-full border border-amber-200 flex items-center justify-center w-6 h-6 transition-colors"
+            class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-800/30 dark:hover:bg-amber-700/40 dark:text-amber-300 p-1 rounded-full border border-amber-200 dark:border-amber-700 flex items-center justify-center w-6 h-6 transition-colors"
             title="Añadir etiqueta de proceso médico">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -54,10 +54,10 @@
         </div>
         
         <!-- Panel emergente para seleccionar etiqueta -->
-        <div v-if="showTagSelector" class="absolute z-50 left-4 mt-1 bg-white rounded-md shadow-md border border-gray-200 p-2 min-w-[180px] max-h-[200px] overflow-y-auto tag-selector">
-          <div class="flex justify-between items-center mb-2 pb-1 border-b sticky top-0 bg-white z-10">
-            <span class="text-xs font-medium text-gray-700">Proceso médico</span>
-            <button @click="toggleTagSelector" class="text-gray-400 hover:text-gray-600">
+        <div v-if="showTagSelector" class="absolute z-50 left-4 mt-1 bg-white dark:bg-slate-800 rounded-md shadow-md border border-gray-200 dark:border-slate-700 p-2 min-w-[180px] max-h-[200px] overflow-y-auto tag-selector">
+          <div class="flex justify-between items-center mb-2 pb-1 border-b dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800 z-10">
+            <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Proceso médico</span>
+            <button @click="toggleTagSelector" class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -66,21 +66,21 @@
           <div class="space-y-1">
             <button 
               @click="selectTag('')"
-              class="w-full text-left text-xs p-1.5 rounded hover:bg-gray-100 flex items-center"
-              :class="{'bg-gray-100': selectedMedicalProcessTag === ''}">
-              <span class="text-gray-700">Sin etiqueta</span>
+              class="w-full text-left text-xs p-1.5 rounded hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center"
+              :class="{'bg-gray-100 dark:bg-slate-700': selectedMedicalProcessTag === ''}">
+              <span class="text-gray-700 dark:text-gray-300">Sin etiqueta</span>
             </button>
             <button 
               v-for="tag in medicalProcessTags" 
               :key="tag"
               @click="selectTag(tag)"
-              class="w-full text-left text-xs p-1.5 rounded hover:bg-amber-50 flex items-center"
-              :class="{'bg-amber-50': selectedMedicalProcessTag === tag}">
-              <svg v-if="selectedMedicalProcessTag === tag" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-amber-600 mr-1.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              class="w-full text-left text-xs p-1.5 rounded hover:bg-amber-50 dark:hover:bg-amber-800/30 flex items-center"
+              :class="{'bg-amber-50 dark:bg-amber-800/40': selectedMedicalProcessTag === tag}">
+              <svg v-if="selectedMedicalProcessTag === tag" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-amber-600 dark:text-amber-400 mr-1.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
               <span v-else class="w-3 h-3 mr-1.5 flex-shrink-0"></span>
-              <span class="text-amber-800">{{ tag }}</span>
+              <span class="text-amber-800 dark:text-amber-300">{{ tag }}</span>
             </button>
           </div>
         </div>
@@ -397,5 +397,14 @@
   /* Estilos para el selector de etiquetas */
   .tag-selector {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Estilos específicos para modo claro/oscuro */
+  .tag-container {
+    @apply bg-gradient-to-r from-amber-50 to-yellow-100 border-l-4 border-l-amber-400;
+  }
+
+  :global(.dark) .tag-container {
+    @apply bg-gradient-to-r from-amber-900/40 to-amber-800/40 border-l-amber-600;
   }
   </style>
