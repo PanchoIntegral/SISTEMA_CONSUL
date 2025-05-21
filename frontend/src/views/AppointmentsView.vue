@@ -175,6 +175,7 @@
              @change-status="changeAppointmentStatus(appointment.id, $event)"
              @edit-appointment="openEditModal(appointment)"
              @delete-appointment="deleteAppointment"
+             @update-tag="updateMedicalProcessTag(appointment.id, $event)"
            />
         </div>
       </div>
@@ -377,6 +378,11 @@ const clearAllFilters = () => {
   clearStatusFilter();
   clearDoctorFilter();
   clearPatientSearch();
+};
+
+const updateMedicalProcessTag = async (appointmentId, tag) => {
+    await appointmentsStore.updateAppointmentData(appointmentId, { medical_process_tag: tag });
+    // No es necesario refrescar completo, ya que updateAppointmentData actualiza la lista
 };
 
 const changeAppointmentStatus = async (appointmentId, newStatus) => {

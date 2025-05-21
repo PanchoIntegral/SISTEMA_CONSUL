@@ -27,6 +27,42 @@
         </span>
       </div>
       
+      <!-- Etiqueta de proceso médico (sticky note) mejorada -->
+      <div v-if="appointment.medical_process_tag" class="relative mt-1 mb-2">
+        <div class="flex items-center">
+          <div class="ml-4 px-3 py-1.5 text-xs font-semibold rounded-md shadow-sm bg-gradient-to-r from-amber-50 to-yellow-100 border-l-4 border-l-amber-400 flex items-center space-x-1.5" 
+               style="max-width: 90%;">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            <span class="text-amber-800 font-medium">{{ appointment.medical_process_tag }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Selector de etiqueta de proceso médico mejorado -->
+      <div v-if="['En Espera', 'En Consulta'].includes(appointment.status)" class="px-4 pt-2 pb-1">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 bg-gradient-to-r from-amber-50 to-yellow-100 rounded-full flex items-center justify-center shrink-0 border border-amber-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <select 
+            v-model="selectedMedicalProcessTag" 
+            class="text-xs border-gray-200 rounded-md focus:ring-amber-500 focus:border-amber-500 w-full shadow-sm"
+            @change="updateMedicalProcessTag">
+            <option value="">Sin proceso médico</option>
+            <option value="Dilatación">Dilatación</option>
+            <option value="Inyección">Inyección</option>
+            <option value="Láser">Láser</option>
+            <option value="OCT">OCT</option>
+            <option value="OCT/Campimetría">OCT/Campimetría</option>
+            <option value="Campimetría">Campimetría</option>
+          </select>
+        </div>
+      </div>
+      
       <!-- Cuerpo de la tarjeta con información del paciente y doctor -->
       <div class="p-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -213,7 +249,7 @@
   </template>
   
   <script setup>
-  import { computed } from 'vue';
+  import { computed, ref } from 'vue';
   import TimerDisplay from './TimerDisplay.vue';
   
   // Props
@@ -225,7 +261,15 @@
   });
   
   // Emits
-  const emit = defineEmits(['change-status', 'edit-appointment', 'delete-appointment']);
+  const emit = defineEmits(['change-status', 'edit-appointment', 'delete-appointment', 'update-tag']);
+  
+  // Estado para la etiqueta seleccionada
+  const selectedMedicalProcessTag = ref(props.appointment.medical_process_tag || '');
+  
+  // Función para actualizar la etiqueta de proceso médico
+  const updateMedicalProcessTag = () => {
+    emit('update-tag', selectedMedicalProcessTag.value);
+  };
   
   // Función para confirmar eliminación
   const confirmDelete = () => {

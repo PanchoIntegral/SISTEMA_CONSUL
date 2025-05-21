@@ -57,7 +57,8 @@ def create_appointment(current_user):
             "doctor_id": data.get("doctor_id"),
             "appointment_time": data.get("appointment_time"),
             "notes": data.get("notes"),
-            "status": "Programada"
+            "status": "Programada",
+            "medical_process_tag": data.get("medical_process_tag")
         }
         if "doctor_id" not in data:
              appointment_data["doctor_id"] = None
@@ -112,6 +113,7 @@ def get_appointments(current_user):
             query = supabase.table('appointments').select('''
                 id, appointment_time, status, notes, created_at,
                 arrival_time, consultation_start_time, consultation_end_time,
+                medical_process_tag,
                 patient:patients (id, name),
                 doctor:doctors (id, name)
             ''')
@@ -120,6 +122,7 @@ def get_appointments(current_user):
             query = supabase.table('appointments').select('''
                 id, appointment_time, status, notes, created_at,
                 arrival_time, consultation_start_time, consultation_end_time,
+                medical_process_tag,
                 patient:patients (id, name),
                 doctor:doctors (id, name)
             ''').order(sort_by, desc=(sort_dir.lower() == 'desc'))
@@ -257,6 +260,7 @@ def get_appointment_by_id(current_user, appointment_id):
         response = supabase.table('appointments').select('''
             id, appointment_time, status, notes, created_at,
             arrival_time, consultation_start_time, consultation_end_time,
+            medical_process_tag,
             patient:patients (id, name),
             doctor:doctors (id, name)
         ''').eq('id', appointment_id).maybe_single().execute()
@@ -317,7 +321,7 @@ def update_appointment(current_user, appointment_id):
 
         # Preparar datos generales para actualizar (excluyendo status por ahora)
         update_data = {}
-        allowed_fields_to_update_anytime = ["doctor_id", "appointment_time", "notes"]
+        allowed_fields_to_update_anytime = ["doctor_id", "appointment_time", "notes", "medical_process_tag"]
         for field in allowed_fields_to_update_anytime:
             if field in data:
                  # Validaciones específicas
@@ -332,7 +336,7 @@ def update_appointment(current_user, appointment_id):
                           update_data[field] = data[field]
                      except ValueError:
                           return jsonify({"message": "Formato inválido para appointment_time. Usar formato ISO 8601"}), 400
-                else: # Para 'notes'
+                else: # Para 'notes' y 'medical_process_tag'
                     update_data[field] = data[field]
 
         # Verificar disponibilidad del doctor si se está actualizando doctor_id o appointment_time
@@ -411,6 +415,7 @@ def update_appointment(current_user, appointment_id):
                   fetch_response = supabase.table('appointments').select('''
                       id, appointment_time, status, notes, created_at,
                       arrival_time, consultation_start_time, consultation_end_time,
+                      medical_process_tag,
                       patient:patients (id, name),
                       doctor:doctors (id, name)
                   ''').eq('id', appointment_id).maybe_single().execute()
@@ -440,6 +445,7 @@ def update_appointment(current_user, appointment_id):
         fetch_response = supabase.table('appointments').select('''
             id, appointment_time, status, notes, created_at,
             arrival_time, consultation_start_time, consultation_end_time,
+            medical_process_tag,
             patient:patients (id, name),
             doctor:doctors (id, name)
         ''').eq('id', appointment_id).maybe_single().execute()
