@@ -93,7 +93,12 @@
                   </svg>
                   Espera:
                 </span>
-                <TimerDisplay :status="'En Espera'" :start-time="appointment.arrival_time" class="text-xs font-semibold text-navy font-sans" />
+                <TimerDisplay 
+                  :status="'En Espera'" 
+                  :start-time="appointment.arrival_time" 
+                  :end-time="appointment.consultation_start_time"
+                  class="text-xs font-semibold text-navy font-sans" 
+                />
               </div>
               <div class="bg-wave-teal bg-opacity-5 rounded-md p-2 flex items-center justify-between">
                 <span class="text-xs font-medium text-wave-teal">
