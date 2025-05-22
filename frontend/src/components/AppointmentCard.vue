@@ -269,11 +269,25 @@
         </button>
       </div>
     </div>
+    
+    <!-- Diálogo de confirmación para eliminar cita -->
+    <ConfirmDialog
+      :show="showDeleteConfirm"
+      title="Eliminar Cita"
+      :message="`¿Está seguro que desea eliminar la cita de ${appointment.patient?.name || 'este paciente'}?`"
+      confirm-text="Eliminar"
+      cancel-text="Cancelar"
+      @confirm="handleDeleteConfirmed"
+      @cancel="showDeleteConfirm = false"
+      type="delete"
+    />
   </template>
   
   <script setup>
   import { computed, ref } from 'vue';
   import TimerDisplay from './TimerDisplay.vue';
+  import ConfirmDialog from './ConfirmDialog.vue';
+  import { toastService } from '../services/toastService';
   
   // Props
   const props = defineProps({
@@ -291,6 +305,9 @@
   
   // Estado para controlar la visibilidad del selector
   const showTagSelector = ref(false);
+  
+  // Estado para controlar el diálogo de confirmación
+  const showDeleteConfirm = ref(false);
   
   // Lista de etiquetas de procesos médicos disponibles
   const medicalProcessTags = [
@@ -319,11 +336,19 @@
     emit('update-tag', selectedMedicalProcessTag.value);
   };
   
-  // Función para confirmar eliminación
+  // Función para abrir el diálogo de confirmación de eliminación
   const confirmDelete = () => {
-    if (confirm(`¿Está seguro que desea eliminar la cita de ${props.appointment.patient?.name || 'este paciente'}?`)) {
-      emit('delete-appointment', props.appointment.id);
-    }
+    showDeleteConfirm.value = true;
+  };
+
+  // Función para manejar la confirmación de eliminación
+  const handleDeleteConfirmed = () => {
+    emit('delete-appointment', props.appointment.id);
+    showDeleteConfirm.value = false;
+    toastService.success(
+      'Cita eliminada', 
+      `La cita de ${props.appointment.patient?.name || 'este paciente'} ha sido eliminada.`
+    );
   };
   
   // Computed para formatear hora

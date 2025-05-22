@@ -41,6 +41,16 @@
               </svg>
               Dashboard
             </RouterLink>
+            <RouterLink
+              to="/blocked-days"
+              class="px-4 py-2 text-sm font-medium hover:bg-white hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 transition-all duration-200 relative flex items-center rounded-lg"
+              :class="{ 'nav-active': $route.path === '/blocked-days' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Días Bloqueados
+            </RouterLink>
           </div>
           <div class="h-6 w-px bg-white bg-opacity-20 dark:bg-dark-border-light mx-3 hidden sm:block"></div>
           <div class="flex items-center space-x-3">
@@ -79,7 +89,11 @@
       cancel-text="Cancelar"
       @confirm="handleLogoutConfirmed"
       @cancel="showLogoutConfirm = false"
+      type="warning"
     />
+    
+    <!-- Sistema de notificaciones toast -->
+    <ToastContainer />
   </div>
 </template>
 
@@ -89,6 +103,7 @@ import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth';
 import DarkModeSwitch from '@/components/DarkModeSwitch.vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
+import ToastContainer from '@/components/ToastContainer.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();

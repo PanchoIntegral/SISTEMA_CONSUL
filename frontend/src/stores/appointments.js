@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import apiAppointmentsService from '@/services/apiAppointmentsService';
+import { toastService } from '@/services/toastService';
 
 const getTodayDateString = () => {
     const today = new Date();
@@ -121,20 +122,85 @@ export const useAppointmentsStore = defineStore('appointments', () => {
     }
   }
 
+  /**
+   * Actualiza el estado de una cita.
+   * @param {number} id - ID de la cita a actualizar.
+   * @param {string} newStatus - Nuevo estado para la cita.
+   * @returns {Promise<boolean>} - True si se actualizó exitosamente, false si hubo error.
+   */
   async function updateAppointmentStatus(id, newStatus) {
-     error.value = null;
-     try {
-        const updatedAppointment = await apiAppointmentsService.updateAppointment(id, { status: newStatus });
-        const idx = appointmentsList.value.findIndex(appt => appt.id === id);
-        if (idx !== -1) {
-            appointmentsList.value[idx] = updatedAppointment;
-        } else {
-             fetchAppointments();
-        }
-     } catch (err) {
-        console.error(`Error updating appointment ${id} status:`, err);
-        error.value = err.message || 'Error al actualizar estado.';
-     }
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const updatedAppointment = await apiAppointmentsService.updateAppointment(id, { status: newStatus });
+      
+      // Actualizar la cita en la lista local
+      const index = appointmentsList.value.findIndex(appt => appt.id === id);
+      if (index !== -1) {
+        appointmentsList.value[index] = { ...appointmentsList.value[index], ...updatedAppointment };
+      }
+      
+      // Mostrar notificación según el estado
+      const patientName = appointmentsList.value[index]?.patient?.name || 'el paciente';
+      if (newStatus === 'En Espera') {
+        toastService.info('Paciente en espera', `Se ha registrado la llegada de ${patientName}.`);
+      } else if (newStatus === 'En Consulta') {
+        toastService.info('Consulta iniciada', `La consulta con ${patientName} ha comenzado.`);
+      } else if (newStatus === 'Completada') {
+        toastService.success('Consulta finalizada', `La consulta con ${patientName} ha sido completada.`);
+      } else if (newStatus === 'Cancelada') {
+        toastService.warning('Cita cancelada', `La cita con ${patientName} ha sido cancelada.`);
+      } else if (newStatus === 'No Asistió') {
+        toastService.error('Inasistencia', `${patientName} no asistió a la cita programada.`);
+      }
+      
+      return true; // Indicar éxito
+    } catch (err) {
+      console.error(`Error updating appointment status ${id}:`, err);
+      error.value = err.message || 'Error al actualizar el estado de la cita.';
+      toastService.error('Error', `No se pudo actualizar el estado de la cita: ${err.message || 'Error desconocido'}`);
+      return false; // Indicar fallo
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /**
+   * Actualiza los datos de una cita existente.
+   * @param {number} id - ID de la cita a actualizar.
+   * @param {object} appointmentData - Datos actualizados de la cita.
+   * @returns {Promise<boolean>} - True si se actualizó exitosamente, false si hubo error.
+   */
+  async function updateAppointmentData(id, appointmentData) {
+    isLoading.value = true;
+    error.value = null;
+    try {
+      const updatedAppointment = await apiAppointmentsService.updateAppointment(id, appointmentData);
+      
+      // Actualizar la cita en la lista local
+      const index = appointmentsList.value.findIndex(appt => appt.id === id);
+      if (index !== -1) {
+        appointmentsList.value[index] = { ...appointmentsList.value[index], ...updatedAppointment };
+      }
+
+      // Mostrar notificación para actualización de datos
+      if (appointmentData.date || appointmentData.time) {
+        toastService.info('Cita actualizada', 'Se actualizó la fecha u hora de la cita.');
+      } else if (appointmentData.medical_process_tag) {
+        toastService.info('Proceso médico actualizado', `Se asignó la etiqueta "${appointmentData.medical_process_tag}".`);
+      } else {
+        toastService.info('Cita actualizada', 'Los datos de la cita han sido actualizados.');
+      }
+      
+      return true; // Indicar éxito
+    } catch (err) {
+      console.error(`Error updating appointment data ${id}:`, err);
+      error.value = err.message || 'Error al actualizar los datos de la cita.';
+      toastService.error('Error', `No se pudieron actualizar los datos de la cita: ${err.message || 'Error desconocido'}`);
+      return false; // Indicar fallo
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   /**
@@ -149,10 +215,33 @@ export const useAppointmentsStore = defineStore('appointments', () => {
         const newAppointment = await apiAppointmentsService.createAppointment(appointmentData);
         // Refrescar la lista con los filtros actuales
         await fetchAppointments();
+        
+        // Mostrar notificación de éxito
+        const patientName = newAppointment.patient?.name || 'el paciente';
+        const appointmentDate = new Date(newAppointment.date).toLocaleDateString();
+        toastService.success(
+          'Cita agendada', 
+          `Se ha agendado correctamente la cita para ${patientName} el ${appointmentDate}.`
+        );
+        
         return true; // Indicar éxito
     } catch (err) {
         console.error("Error creating appointment:", err);
         error.value = err.message || 'Error al crear la cita.';
+        
+        // Mostrar notificación de error
+        if (err.error_type === 'doctor_unavailable') {
+            toastService.error(
+              'Doctor no disponible', 
+              'El doctor seleccionado no está disponible en este horario.'
+            );
+        } else {
+            toastService.error(
+              'Error', 
+              `No se pudo agendar la cita: ${err.message || 'Error desconocido'}`
+            );
+        }
+        
         // Si es el error específico de doctor no disponible, propagarlo
         if (err.error_type === 'doctor_unavailable') {
             throw err; // Propagar el error con su tipo específico
@@ -172,41 +261,27 @@ export const useAppointmentsStore = defineStore('appointments', () => {
     isLoading.value = true;
     error.value = null;
     try {
+      // Guardar información de la cita antes de eliminarla para la notificación
+      const appointmentToDelete = appointmentsList.value.find(appt => appt.id === id);
+      const patientName = appointmentToDelete?.patient?.name || 'el paciente';
+      
       await apiAppointmentsService.deleteAppointment(id);
       // Eliminar la cita de la lista local
       appointmentsList.value = appointmentsList.value.filter(appt => appt.id !== id);
+      
+      // No mostramos notificación aquí porque ya se maneja en el componente
+      
       return true; // Indicar éxito
     } catch (err) {
       console.error(`Error deleting appointment ${id}:`, err);
       error.value = err.message || 'Error al eliminar la cita.';
+      
+      toastService.error(
+        'Error', 
+        `No se pudo eliminar la cita: ${err.message || 'Error desconocido'}`
+      );
+      
       return false; // Indicar fallo
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  /**
-   * Actualiza los datos de una cita existente.
-   * @param {number} id - ID de la cita a actualizar.
-   * @param {object} appointmentData - Datos actualizados de la cita.
-   * @returns {Promise<boolean>} - True si se actualizó exitosamente, false si hubo error.
-   */
-  async function updateAppointmentData(id, appointmentData) {
-    isLoading.value = true;
-    error.value = null;
-    try {
-      const updatedAppointment = await apiAppointmentsService.updateAppointment(id, appointmentData);
-      // Refrescar la lista con los filtros actuales
-      await fetchAppointments();
-      return true; // Indicar éxito
-    } catch (err) {
-      console.error(`Error updating appointment ${id}:`, err);
-      error.value = err.message || 'Error al actualizar la cita.';
-      // Si es el error específico de doctor no disponible, propagarlo
-      if (err.error_type === 'doctor_unavailable') {
-        throw err; // Propagar el error con su tipo específico
-      }
-      return false; // Indicar fallo para otros errores
     } finally {
       isLoading.value = false;
     }

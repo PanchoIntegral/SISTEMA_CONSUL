@@ -1,7 +1,7 @@
 <template>
     <div
       v-if="show"
-      class="fixed inset-0 bg-navy dark:bg-black bg-opacity-75 dark:bg-opacity-80 transition-opacity z-40"
+      class="fixed inset-0 bg-navy dark:bg-black bg-opacity-75 dark:bg-opacity-80 backdrop-blur-xs transition-opacity z-40 animate-fade-in"
       aria-hidden="true"
       @click="close"
     ></div>
@@ -10,14 +10,17 @@
       v-if="show"
       class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
     >
-      <div class="relative w-full max-h-[90vh] transform overflow-hidden rounded-lg bg-white dark:bg-dark-elevated text-left shadow-xl dark:shadow-dark-md transition-all sm:my-8 sm:max-w-lg border-t-4 border-secondary dark:border-secondary-dark">
-        <div class="absolute top-0 right-0 pt-4 pr-4 block sm:hidden">
+      <div 
+        class="relative w-full max-h-[90vh] transform overflow-hidden rounded-lg bg-white dark:bg-dark-elevated text-left shadow-xl dark:shadow-dark-md transition-all sm:my-8 sm:max-w-lg border-t-4 border-secondary dark:border-secondary-dark animate-modal-entry"
+        @click.stop
+      >
+        <div class="absolute top-0 right-0 pt-4 pr-4">
           <button
             type="button"
             @click="close"
-            class="rounded-md bg-white dark:bg-dark-elevated text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-secondary dark:focus:ring-secondary-dark"
+            class="rounded-md bg-white dark:bg-dark-elevated text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-secondary dark:focus:ring-secondary-dark transition-colors"
+            aria-label="Cerrar"
           >
-            <span class="sr-only">Cerrar</span>
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -27,7 +30,7 @@
         <div class="bg-white dark:bg-dark-elevated px-4 pb-4 pt-5 sm:p-6 sm:pb-4 overflow-y-auto max-h-[calc(90vh-8rem)]">
           <div class="sm:flex sm:items-start">
             <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
-              <h3 class="text-base font-semibold leading-6 text-primary dark:text-dark-heading mb-2" id="modal-title">
+              <h3 class="text-lg font-semibold leading-6 text-primary dark:text-dark-heading mb-2" id="modal-title">
                 <slot name="title">Título del Modal</slot>
               </h3>
               <div class="mt-2">
@@ -41,7 +44,7 @@
             <button
               type="button"
               @click="close"
-              class="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-dark-button px-3 py-2 text-sm font-semibold text-navy dark:text-white shadow-sm dark:shadow-dark-sm ring-1 ring-inset ring-gray-300 dark:ring-dark-border hover:bg-gray-50 dark:hover:bg-dark-accent/30 sm:mt-0 sm:w-auto transition-colors"
+              class="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-dark-button px-3 py-2 text-sm font-semibold text-navy dark:text-white shadow-sm dark:shadow-dark-sm ring-1 ring-inset ring-gray-300 dark:ring-dark-border hover:bg-gray-50 dark:hover:bg-dark-accent/30 sm:mt-0 sm:w-auto transition-colors focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-secondary-dark"
             >
               Cerrar
             </button>
@@ -98,5 +101,21 @@
   
   .dark .overflow-y-auto::-webkit-scrollbar-thumb:hover {
     background: #5A5A7A;
+  }
+
+  /* Animación de entrada para el modal */
+  @keyframes modalEntry {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-modal-entry {
+    animation: modalEntry 0.2s ease-out forwards;
   }
   </style>

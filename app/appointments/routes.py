@@ -28,9 +28,25 @@ def create_appointment(current_user):
         except ValueError:
             return jsonify({"message": "Formato inválido para appointment_time. Usar formato ISO 8601 (ej: geliştirmeler-MM-DDTHH:mm:ssZ)"}), 400
 
-        # Verificar si el doctor ya tiene una cita en la misma hora
         doctor_id = data.get("doctor_id")
         if doctor_id is not None and doctor_id != "":
+            # Verificar si el doctor tiene bloqueado ese día
+            appointment_date = appointment_dt.date().isoformat()
+            blocked_day_check = supabase.table('doctor_blocked_days')\
+                .select('id, reason')\
+                .eq('doctor_id', doctor_id)\
+                .eq('blocked_date', appointment_date)\
+                .execute()
+                
+            if hasattr(blocked_day_check, 'data') and blocked_day_check.data:
+                reason = blocked_day_check.data[0].get('reason', 'No disponible')
+                current_app.logger.info(f"Doctor ID {doctor_id} tiene bloqueado el día {appointment_date}: {reason}")
+                return jsonify({
+                    "message": f"El doctor no está disponible en esta fecha. Motivo: {reason}",
+                    "error_type": "doctor_day_blocked",
+                    "blocked_date": appointment_date
+                }), 409  # Conflict status code
+                
             # Definir ventana de tiempo para verificar (±1 minuto)
             time_window = timedelta(minutes=1)
             start_time = (appointment_dt - time_window).isoformat()

@@ -5,6 +5,7 @@ import AppointmentsView from '../views/AppointmentsView.vue'
 
 const PatientsView = () => import('../views/PatientsView.vue')
 const DashboardView = () => import('../views/DashboardView.vue')
+const BlockedDaysView = () => import('../views/BlockedDaysView.vue')
 
 // Importar el store de auth para la guarda de navegación
 import { useAuthStore } from '@/stores/auth'
@@ -36,6 +37,12 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: DashboardView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/blocked-days',
+      name: 'blocked-days',
+      component: BlockedDaysView,
       meta: { requiresAuth: true }
     }
     
