@@ -517,8 +517,24 @@ const handleDeleteBlockedDay = async (id) => {
 };
 
 const formatDate = (dateString) => {
-  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  return new Date(dateString).toLocaleDateString('es-ES', options);
+  if (!dateString) return '';
+  
+  // Asegurar que estamos trabajando con el formato YYYY-MM-DD
+  const dateParts = dateString.split('T')[0].split('-');
+  if (dateParts.length !== 3) return dateString;
+  
+  // Crear la fecha usando los componentes explícitos para evitar problemas de zona horaria
+  // Importante: el mes en JavaScript es base 0 (0-11), por lo que restamos 1 al mes
+  const year = parseInt(dateParts[0]);
+  const month = parseInt(dateParts[1]) - 1;
+  const day = parseInt(dateParts[2]);
+  
+  // Crear la fecha usando UTC para evitar ajustes por zona horaria
+  const date = new Date(Date.UTC(year, month, day));
+  
+  // Formatear la fecha usando Intl.DateTimeFormat para mayor precisión
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' };
+  return new Intl.DateTimeFormat('es-ES', options).format(date);
 };
 </script>
 
