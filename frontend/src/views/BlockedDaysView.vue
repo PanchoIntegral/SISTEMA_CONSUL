@@ -1,29 +1,29 @@
 <template>
-  <div class="bg-white dark:bg-dark-background min-h-screen py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
+  <div class="bg-white dark:bg-dark-elevated min-h-screen py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
       <div class="md:flex md:items-center md:justify-between mb-6">
         <div class="flex-1 min-w-0">
-          <h1 class="text-2xl font-bold leading-7 text-navy dark:text-dark-primary sm:text-3xl">
+          <h1 class="text-2xl font-bold leading-7 text-navy dark:text-cyan-400 sm:text-3xl">
             Días bloqueados
           </h1>
-          <p class="mt-1 text-sm text-gray-500 dark:text-dark-secondary">
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-300">
             Gestiona los días en los que no aceptarás citas
           </p>
         </div>
       </div>
 
       <!-- Selector de doctor -->
-      <div class="bg-white dark:bg-dark-surface shadow overflow-hidden sm:rounded-lg p-4 mb-6">
+      <div class="bg-white dark:bg-dark-elevated shadow overflow-hidden sm:rounded-lg p-4 mb-6 border dark:border-dark-border">
         <div class="flex flex-col sm:flex-row sm:items-center gap-4">
           <div class="w-full sm:w-1/3">
-            <label for="doctor-select" class="block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-1">
+            <label for="doctor-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Selecciona un doctor
             </label>
             <select
               id="doctor-select"
               v-model="selectedDoctorId"
               @change="handleDoctorChange"
-              class="block w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-navy focus:border-navy dark:bg-dark-surface dark:text-dark-primary"
+              class="block w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-navy focus:border-navy dark:bg-dark-elevated dark:text-white"
             >
               <option value="" disabled>Selecciona un doctor</option>
               <option v-for="doctor in doctorsStore.doctors" :key="doctor.id" :value="doctor.id">
@@ -34,7 +34,7 @@
           
           <!-- Estado de carga -->
           <div v-if="doctorsStore.loadingBlockedDays" class="flex items-center text-gray-500 dark:text-gray-300">
-            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-navy dark:border-dark-accent mr-2"></div>
+            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-navy dark:border-cyan-400 mr-2"></div>
             <span>Cargando días bloqueados...</span>
           </div>
           
@@ -48,23 +48,23 @@
       <!-- Calendario y formulario -->
       <div v-if="selectedDoctorId" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Calendario -->
-        <div class="lg:col-span-2 bg-white dark:bg-dark-surface shadow overflow-hidden sm:rounded-lg p-4">
-          <h2 class="text-lg font-medium text-navy dark:text-dark-primary mb-4 flex items-center justify-between">
+        <div class="lg:col-span-2 bg-white dark:bg-dark-elevated shadow overflow-hidden sm:rounded-lg p-4 border dark:border-dark-border">
+          <h2 class="text-lg font-medium text-navy dark:text-cyan-400 mb-4 flex items-center justify-between">
             <span>Calendario</span>
-            <span class="text-sm text-gray-500" v-if="blockedDaysCountText">
+            <span class="text-sm text-gray-500 dark:text-gray-300" v-if="blockedDaysCountText">
               {{ blockedDaysCountText }}
             </span>
           </h2>
           
           <div v-if="doctorsStore.loadingBlockedDays" class="flex justify-center items-center py-8">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-navy dark:border-dark-accent"></div>
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-navy dark:border-cyan-400"></div>
           </div>
           
-          <div v-else-if="doctorsStore.errorBlockedDays" class="rounded-md bg-red-50 dark:bg-dark-danger/30 p-4">
+          <div v-else-if="doctorsStore.errorBlockedDays" class="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
             <div class="flex">
               <div class="ml-3">
-                <h3 class="text-sm font-medium text-red-800 dark:text-dark-danger">Error al cargar días bloqueados</h3>
-                <div class="mt-2 text-sm text-red-700 dark:text-dark-danger">
+                <h3 class="text-sm font-medium text-red-800 dark:text-red-400">Error al cargar días bloqueados</h3>
+                <div class="mt-2 text-sm text-red-700 dark:text-red-300">
                   <p>{{ doctorsStore.errorBlockedDays }}</p>
                 </div>
               </div>
@@ -76,19 +76,19 @@
             <div class="flex items-center justify-between mb-4">
               <button 
                 @click="previousMonth" 
-                class="p-1 text-gray-400 hover:text-navy dark:hover:text-dark-accent"
+                class="p-1 text-gray-400 hover:text-navy dark:text-gray-400 dark:hover:text-cyan-400"
               >
                 <span class="sr-only">Mes anterior</span>
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <h3 class="text-lg font-medium text-navy dark:text-dark-primary">
+              <h3 class="text-lg font-medium text-navy dark:text-cyan-400">
                 {{ currentMonthName }} {{ currentYear }}
               </h3>
               <button 
                 @click="nextMonth" 
-                class="p-1 text-gray-400 hover:text-navy dark:hover:text-dark-accent"
+                class="p-1 text-gray-400 hover:text-navy dark:text-gray-400 dark:hover:text-cyan-400"
               >
                 <span class="sr-only">Mes siguiente</span>
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -99,7 +99,7 @@
             
             <!-- Días de la semana -->
             <div class="grid grid-cols-7 gap-px">
-              <div v-for="day in daysOfWeek" :key="day" class="text-center py-2 text-sm font-medium text-gray-700 dark:text-dark-secondary">
+              <div v-for="day in daysOfWeek" :key="day" class="text-center py-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                 {{ day }}
               </div>
             </div>
@@ -115,18 +115,18 @@
                 <div class="py-2 px-1">
                   <span 
                     v-if="day.isCurrentMonth"
-                    :class="{'font-bold': isSelectedDate(day.date), 'text-navy dark:text-dark-accent': isSelectedDate(day.date)}"
+                    :class="{'font-bold': isSelectedDate(day.date), 'text-navy dark:text-cyan-400': isSelectedDate(day.date)}"
                   >
                     {{ day.dayNumber }}
                   </span>
-                  <span v-else class="text-gray-400 dark:text-dark-border">
+                  <span v-else class="text-gray-400 dark:text-gray-600">
                     {{ day.dayNumber }}
                   </span>
                   
                   <!-- Indicador de día bloqueado - Mejorado visualmente -->
                   <div 
                     v-if="isBlockedDay(day.date)" 
-                    class="mt-1 w-full h-3 bg-red-500 dark:bg-red-700 rounded-full flex items-center justify-center"
+                    class="mt-1 w-full h-3 bg-red-500 dark:bg-red-500 rounded-full flex items-center justify-center"
                     :title="getBlockedDayReason(day.date)"
                   >
                     <span class="text-xs text-white font-bold">✕</span>
@@ -135,7 +135,7 @@
                 <!-- Overlay para día bloqueado -->
                 <div 
                   v-if="isBlockedDay(day.date)" 
-                  class="absolute inset-0 border-2 border-red-500 dark:border-red-700 rounded-sm opacity-60 pointer-events-none"
+                  class="absolute inset-0 border-2 border-red-500 dark:border-red-500 rounded-sm opacity-60 pointer-events-none"
                 ></div>
               </div>
             </div>
@@ -143,12 +143,12 @@
         </div>
         
         <!-- Formulario para bloquear días -->
-        <div class="bg-white dark:bg-dark-surface shadow overflow-hidden sm:rounded-lg p-4">
-          <h2 class="text-lg font-medium text-navy dark:text-dark-primary mb-4">Bloquear día</h2>
+        <div class="bg-white dark:bg-dark-elevated shadow overflow-hidden sm:rounded-lg p-4 border dark:border-dark-border">
+          <h2 class="text-lg font-medium text-navy dark:text-cyan-400 mb-4">Bloquear día</h2>
           
           <form @submit.prevent="handleBlockDay">
             <div class="mb-4">
-              <label for="selected-date" class="block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-1">
+              <label for="selected-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Fecha seleccionada
               </label>
               <input 
@@ -157,12 +157,12 @@
                 v-model="selectedDate"
                 :min="today"
                 required
-                class="block w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-navy focus:border-navy dark:bg-dark-surface dark:text-dark-primary"
+                class="block w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-navy focus:border-navy dark:bg-dark-elevated dark:text-white"
               />
             </div>
             
             <div class="mb-4">
-              <label for="block-reason" class="block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-1">
+              <label for="block-reason" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Motivo
               </label>
               <input 
@@ -170,7 +170,7 @@
                 id="block-reason"
                 v-model="blockReason"
                 placeholder="Ej: Vacaciones, Capacitación, etc."
-                class="block w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-navy focus:border-navy dark:bg-dark-surface dark:text-dark-primary"
+                class="block w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-md shadow-sm focus:outline-none focus:ring-navy focus:border-navy dark:bg-dark-elevated dark:text-white"
               />
             </div>
             
@@ -178,7 +178,7 @@
               <button
                 type="submit"
                 :disabled="doctorsStore.loadingBlockedDays || !selectedDate || !selectedDoctorId"
-                class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-navy hover:bg-navy-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy dark:bg-dark-accent dark:hover:bg-dark-accent-hover disabled:opacity-50"
+                class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-navy hover:bg-navy-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy dark:bg-cyan-600 dark:hover:bg-cyan-700 disabled:opacity-50"
               >
                 <span v-if="doctorsStore.loadingBlockedDays">Guardando...</span>
                 <span v-else>Bloquear día</span>
@@ -188,11 +188,11 @@
           
           <!-- Lista de días bloqueados -->
           <div class="mt-6">
-            <h3 class="text-md font-medium text-navy dark:text-dark-primary mb-2">
+            <h3 class="text-md font-medium text-navy dark:text-cyan-400 mb-2">
               Días bloqueados
             </h3>
             
-            <div v-if="doctorsStore.blockedDays.length === 0" class="text-sm text-gray-500 dark:text-dark-secondary">
+            <div v-if="doctorsStore.blockedDays.length === 0" class="text-sm text-gray-500 dark:text-gray-400">
               No hay días bloqueados
             </div>
             
@@ -204,10 +204,10 @@
               >
                 <div class="flex items-center justify-between">
                   <div>
-                    <p class="text-sm font-medium text-navy dark:text-dark-primary">
+                    <p class="text-sm font-medium text-navy dark:text-white">
                       {{ formatDate(day.blocked_date) }}
                     </p>
-                    <p class="text-sm text-gray-500 dark:text-dark-secondary">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
                       {{ day.reason }}
                     </p>
                   </div>
@@ -227,8 +227,8 @@
         </div>
       </div>
       
-      <div v-else class="bg-white dark:bg-dark-surface shadow overflow-hidden sm:rounded-lg p-6 text-center">
-        <p class="text-gray-500 dark:text-dark-secondary">
+      <div v-else class="bg-white dark:bg-dark-elevated shadow overflow-hidden sm:rounded-lg p-6 text-center border dark:border-dark-border">
+        <p class="text-gray-500 dark:text-gray-300">
           Selecciona un doctor para gestionar sus días bloqueados
         </p>
       </div>
@@ -467,7 +467,7 @@ const getBlockedDayReason = (date) => {
   return day ? day.reason : '';
 };
 
-// Clases CSS para los días del calendario
+// Reemplazar getDayClasses para resaltar claramente los días bloqueados
 const getDayClasses = (day) => {
   const baseClasses = 'text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-border/20 relative';
   const todayClasses = day.date === today ? 'bg-blue-50 dark:bg-blue-900/20' : '';
@@ -546,7 +546,8 @@ const formatDate = (dateString) => {
 }
 
 .dark .calendar-day-blocked {
-  box-shadow: 0 0 0 1px theme('colors.red.700') inset;
+  box-shadow: 0 0 0 1px theme('colors.red.500') inset;
+  background-color: rgba(239, 68, 68, 0.2) !important; /* red-500 con transparencia */
 }
 
 @keyframes pulse-red {
@@ -555,7 +556,94 @@ const formatDate = (dateString) => {
   100% { box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.7) inset; }
 }
 
+@keyframes pulse-red-dark {
+  0% { box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.5) inset; }
+  50% { box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.8) inset; }
+  100% { box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.5) inset; }
+}
+
 .calendar-day-blocked {
   animation: pulse-red 2s infinite;
+}
+
+.dark .calendar-day-blocked {
+  animation: pulse-red-dark 2s infinite;
+}
+
+/* Indicador de día bloqueado en modo oscuro */
+.dark .calendar-day-blocked .h-3.bg-red-700 {
+  background-color: #ef4444 !important; /* red-500 para mejor visibilidad */
+}
+
+.dark .calendar-day-blocked .text-white {
+  color: #ffffff !important;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+  font-weight: bold;
+}
+
+/* Mejorar el overlay de días bloqueados en modo oscuro */
+.dark .absolute.border-red-700 {
+  border-color: #ef4444 !important;
+  opacity: 0.7 !important;
+}
+
+/* Estilos para el modo oscuro integrado con el sistema */
+.dark .dark\:bg-dark-elevated {
+  background-color: #1f2937 !important; /* Gris oscuro que coincide con el sistema */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .dark\:border-dark-border {
+  border-color: #374151 !important; /* Borde sutil para los componentes */
+}
+
+.dark .dark\:text-cyan-400 {
+  color: #22d3ee !important; /* Color cian similar al del sistema */
+}
+
+/* Modo oscuro para los días del calendario */
+.dark .dark\:bg-blue-900\/20 {
+  background-color: rgba(34, 211, 238, 0.1) !important; /* Cian con transparencia */
+  border: 1px solid rgba(34, 211, 238, 0.2) !important;
+}
+
+.dark .dark\:bg-red-900\/30 {
+  background-color: rgba(239, 68, 68, 0.2) !important; /* Rojo con transparencia */
+}
+
+/* Botón en modo oscuro */
+.dark .dark\:bg-cyan-600 {
+  background-color: #0891b2 !important; /* Cian oscuro que coincide con el sistema */
+}
+
+.dark .dark\:hover\:bg-cyan-700:hover {
+  background-color: #0e7490 !important;
+}
+
+/* Ajustar selección y foco */
+.dark input:focus, .dark select:focus {
+  border-color: #22d3ee !important;
+  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.25) !important;
+}
+
+/* Mejor integración con el sistema en modo oscuro */
+.dark .dark\:bg-dark-background {
+  background-color: #111827 !important; /* Fondo principal del sistema */
+}
+
+.dark .calendar-day-blocked {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+.dark .dark\:text-gray-300 {
+  color: #d1d5db !important;
+}
+
+.dark .dark\:text-gray-400 {
+  color: #9ca3af !important;
+}
+
+.dark .dark\:text-gray-600 {
+  color: #4b5563 !important;
 }
 </style> 
