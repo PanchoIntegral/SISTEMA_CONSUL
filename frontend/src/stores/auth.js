@@ -14,6 +14,8 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!token.value)
 
   // Acciones
+
+  
   function setAuth(newSessionData) {
     sessionData.value = newSessionData
     if (newSessionData) {
