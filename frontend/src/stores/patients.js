@@ -56,7 +56,13 @@ export const usePatientsStore = defineStore('patients', () => {
         return newPatient;
     } catch (err) {
         console.error("Error creating patient:", err);
-        error.value = err.message || 'Error al crear el paciente.';
+        
+        // Manejo específico para pacientes duplicados
+        if (err.duplicate_patient) {
+            error.value = `Ya existe un paciente con los mismos datos: "${err.duplicate_patient.name}"`;
+        } else {
+            error.value = err.message || 'Error al crear el paciente.';
+        }
         return null;
     } finally {
         // isLoading.value = false;
@@ -82,7 +88,13 @@ export const usePatientsStore = defineStore('patients', () => {
         return true;
     } catch (err) {
         console.error(`Error updating patient ${id}:`, err);
-        error.value = err.message || 'Error al actualizar el paciente.';
+        
+        // Manejo específico para pacientes duplicados
+        if (err.duplicate_patient) {
+            error.value = `Ya existe otro paciente con los mismos datos: "${err.duplicate_patient.name}"`;
+        } else {
+            error.value = err.message || 'Error al actualizar el paciente.';
+        }
         return false;
     }
   }

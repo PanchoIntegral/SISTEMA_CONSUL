@@ -130,6 +130,17 @@
            </div>
          </template>
        </BaseModal>
+
+      <ConfirmDialog
+        :show="showDeleteConfirm"
+        type="delete"
+        title="Confirmar Eliminación"
+        :message="`¿Estás seguro de que deseas eliminar a ${patientToDelete?.name}? Esta acción no se puede deshacer.`"
+        confirm-text="Eliminar"
+        cancel-text="Cancelar"
+        @confirm="handleDeleteConfirmed"
+        @cancel="handleDeleteCancelled"
+      />
   
     </div>
   </template>
@@ -139,6 +150,7 @@
   import { usePatientsStore } from '@/stores/patients';
   import BaseModal from '@/components/BaseModal.vue';
   import PatientForm from '@/components/PatientForm.vue';
+  import ConfirmDialog from '@/components/ConfirmDialog.vue';
   
   const patientsStore = usePatientsStore();
   
@@ -147,6 +159,8 @@
   const isEditing = ref(false);
   const editingPatient = ref(null);
   const searchQuery = ref('');
+  const showDeleteConfirm = ref(false);
+  const patientToDelete = ref(null);
   
   // Debounce para la búsqueda
   let searchTimeout = null;
@@ -201,11 +215,12 @@
   // Cierra modal y resetea estado de edición
   const closePatientModal = () => {
       isPatientModalOpen.value = false;
-      // Pequeño delay para que no se vea el cambio de datos antes de cerrar
-      setTimeout(() => {
-          isEditing.value = false;
-          editingPatient.value = null;
-      }, 300); // Ajustar si es necesario
+      editingPatient.value = null;
+      // Resetear el estado de error del store al cerrar el modal principal
+      if (patientsStore.currentError) {
+        patientsStore.clearError(); // Asumiendo que tienes una acción para limpiar el error
+      }
+      window.location.reload(); // Recargar la página
   };
   
   // Llama al método submit del formulario hijo
@@ -222,10 +237,22 @@
   
   // Confirmar y eliminar paciente
   const confirmDeletePatient = (patient) => {
-      if (confirm(`¿Estás seguro de que deseas eliminar a ${patient.name}? Esta acción no se puede deshacer.`)) {
-          console.log('Eliminando paciente:', patient.id);
-          patientsStore.deletePatient(patient.id); // Llamar a la acción del store
-      }
+      patientToDelete.value = patient;
+      showDeleteConfirm.value = true;
+  };
+
+  const handleDeleteConfirmed = () => {
+    if (patientToDelete.value) {
+      console.log('Eliminando paciente:', patientToDelete.value.id);
+      patientsStore.deletePatient(patientToDelete.value.id);
+    }
+    showDeleteConfirm.value = false;
+    patientToDelete.value = null;
+  };
+
+  const handleDeleteCancelled = () => {
+    showDeleteConfirm.value = false;
+    patientToDelete.value = null;
   };
   </script>
   

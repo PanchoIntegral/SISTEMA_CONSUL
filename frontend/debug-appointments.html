@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Appointments</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .appointment { border: 1px solid #ccc; margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .error { color: red; }
+        .success { color: green; }
+        .loading { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Debug Appointments</h1>
+    <div id="status" class="loading">Cargando...</div>
+    <div id="appointments"></div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:5000/api/v1';
+        
+        async function testAppointments() {
+            const statusDiv = document.getElementById('status');
+            const appointmentsDiv = document.getElementById('appointments');
+            
+            try {
+                statusDiv.textContent = 'Conectando a la API...';
+                
+                // Primero probar si la API está disponible
+                const healthResponse = await fetch(`${API_URL}/health`);
+                if (!healthResponse.ok) {
+                    throw new Error(`API no disponible: ${healthResponse.status}`);
+                }
+                
+                statusDiv.textContent = 'API disponible. Obteniendo citas...';
+                
+                // Obtener token (esto normalmente vendría del localStorage o store)
+                const token = localStorage.getItem('auth_token');
+                if (!token) {
+                    throw new Error('No hay token de autenticación');
+                }
+                
+                // Obtener citas
+                const today = new Date().toISOString().split('T')[0];
+                const appointmentsResponse = await fetch(`${API_URL}/appointments?date=${today}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!appointmentsResponse.ok) {
+                    throw new Error(`Error al obtener citas: ${appointmentsResponse.status}`);
+                }
+                
+                const appointments = await appointmentsResponse.json();
+                
+                statusDiv.innerHTML = `<span class="success">✓ Citas cargadas exitosamente (${appointments.length} encontradas)</span>`;
+                
+                if (appointments.length === 0) {
+                    appointmentsDiv.innerHTML = '<p>No hay citas para hoy</p>';
+                } else {
+                    appointmentsDiv.innerHTML = appointments.map(apt => `
+                        <div class="appointment">
+                            <h3>Cita ID: ${apt.id}</h3>
+                            <p><strong>Paciente:</strong> ${apt.patient?.name || 'N/A'}</p>
+                            <p><strong>Doctor:</strong> ${apt.doctor?.name || 'N/A'}</p>
+                            <p><strong>Hora:</strong> ${apt.appointment_time}</p>
+                            <p><strong>Estado:</strong> ${apt.status}</p>
+                            <p><strong>Notas:</strong> ${apt.notes || 'Sin notas'}</p>
+                        </div>
+                    `).join('');
+                }
+                
+            } catch (error) {
+                statusDiv.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+                console.error('Error completo:', error);
+            }
+        }
+        
+        // Ejecutar al cargar la página
+        testAppointments();
+    </script>
+</body>
+</html> 
