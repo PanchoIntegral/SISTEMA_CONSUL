@@ -444,6 +444,8 @@ const closeAppointmentModal = () => {
 const closePatientModal = () => {
   isPatientModalOpen.value = false;
   refreshDataOnModalClose();
+  // Also refresh patients list to clear any potential errors from patient store
+  patientsStore.fetchPatients(); 
 };
 
 const closeEditModal = () => {

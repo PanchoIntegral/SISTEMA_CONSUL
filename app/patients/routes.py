@@ -6,6 +6,51 @@ from datetime import datetime, timedelta
 
 supabase = get_supabase()
 
+def check_duplicate_patient(name, contact_info, date_of_birth, exclude_id=None):
+    """
+    Verifica si ya existe un paciente con los mismos datos exactos.
+    
+    Args:
+        name (str): Nombre del paciente
+        contact_info (str): Información de contacto
+        date_of_birth (str): Fecha de nacimiento
+        exclude_id (int, optional): ID a excluir de la búsqueda (para actualizaciones)
+    
+    Returns:
+        dict: Paciente duplicado encontrado o None si no hay duplicado
+    """
+    try:
+        # Construir la consulta base
+        query = supabase.table('patients').select('*')
+        
+        # Agregar filtros para los campos que no son None
+        query = query.eq('name', name)
+        
+        if contact_info is not None:
+            query = query.eq('contact_info', contact_info)
+        else:
+            query = query.is_('contact_info', None)
+            
+        if date_of_birth is not None:
+            query = query.eq('date_of_birth', date_of_birth)
+        else:
+            query = query.is_('date_of_birth', None)
+        
+        # Excluir el ID especificado si se proporciona (para actualizaciones)
+        if exclude_id is not None:
+            query = query.neq('id', exclude_id)
+        
+        response = query.execute()
+        
+        if response.data and len(response.data) > 0:
+            return response.data[0]  # Retornar el primer duplicado encontrado
+        
+        return None
+        
+    except Exception as e:
+        current_app.logger.exception("Error verificando paciente duplicado")
+        raise e
+
 # CORRECCIÓN: Ruta base del blueprint debe ser "" si el prefijo ya tiene el nombre
 @patients_bp.route("", methods=["POST"])
 @token_required
@@ -18,10 +63,26 @@ def create_patient(current_user):
         return jsonify({"message": "El campo 'name' es requerido"}), 400
 
     try:
+        name = data.get("name")
+        contact_info = data.get("contact_info")
+        date_of_birth = data.get("date_of_birth")
+        
+        # Verificar si ya existe un paciente con los mismos datos
+        duplicate_patient = check_duplicate_patient(name, contact_info, date_of_birth)
+        if duplicate_patient:
+            current_app.logger.warning(f"Intento de crear paciente duplicado: {name}")
+            return jsonify({
+                "message": "Ya existe un paciente con exactamente los mismos datos",
+                "duplicate_patient": {
+                    "id": duplicate_patient['id'],
+                    "name": duplicate_patient['name']
+                }
+            }), 409  # Conflict
+
         patient_data = {
-            "name": data.get("name"),
-            "contact_info": data.get("contact_info"),
-            "date_of_birth": data.get("date_of_birth")
+            "name": name,
+            "contact_info": contact_info,
+            "date_of_birth": date_of_birth
         }
         patient_data = {k: v for k, v in patient_data.items() if v is not None}
 
@@ -93,6 +154,13 @@ def update_patient(current_user, patient_id):
         return jsonify({"message": "Datos requeridos en el body"}), 400
 
     try:
+        # Primero verificar si el paciente existe
+        existing_patient_response = supabase.table('patients').select('*').eq('id', patient_id).maybe_single().execute()
+        if not existing_patient_response.data:
+            return jsonify({"message": "Paciente no encontrado para actualizar"}), 404
+        
+        existing_patient = existing_patient_response.data
+        
         update_data = {
             "name": data.get("name"),
             "contact_info": data.get("contact_info"),
@@ -102,6 +170,27 @@ def update_patient(current_user, patient_id):
 
         if not update_data:
              return jsonify({"message": "No hay campos válidos para actualizar"}), 400
+
+        # Crear los datos finales combinando los existentes con las actualizaciones
+        final_data = {**existing_patient, **update_data}
+        
+        # Verificar si ya existe un paciente con los mismos datos (excluyendo el actual)
+        duplicate_patient = check_duplicate_patient(
+            final_data.get("name"),
+            final_data.get("contact_info"),
+            final_data.get("date_of_birth"),
+            exclude_id=patient_id
+        )
+        
+        if duplicate_patient:
+            current_app.logger.warning(f"Intento de actualizar paciente {patient_id} con datos duplicados")
+            return jsonify({
+                "message": "Ya existe otro paciente con exactamente los mismos datos",
+                "duplicate_patient": {
+                    "id": duplicate_patient['id'],
+                    "name": duplicate_patient['name']
+                }
+            }), 409  # Conflict
 
         # 1. Ejecutar la actualización (sin .select())
         update_response = supabase.table('patients').update(update_data).eq('id', patient_id).execute()

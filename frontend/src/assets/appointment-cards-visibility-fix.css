@@ -1,0 +1,133 @@
+/* 
+ * CSS específico para corregir problemas de visibilidad de tarjetas de citas
+ * Este archivo fuerza la visibilidad de las tarjetas independientemente del tema
+ */
+
+/* Forzar visibilidad de las tarjetas de citas */
+.appointment-card,
+[class*="appointment"],
+div[class*="border rounded-lg shadow-sm"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Asegurar que el contenedor de citas sea visible */
+.space-y-4 {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Forzar visibilidad del contenido de las tarjetas */
+.appointment-card * {
+  visibility: visible !important;
+}
+
+/* Corregir cualquier problema de altura */
+.appointment-card {
+  min-height: 200px !important;
+  height: auto !important;
+}
+
+/* Asegurar que los textos sean legibles */
+.appointment-card .text-primary,
+.appointment-card .font-bold,
+.appointment-card .text-lg {
+  color: #1A2A47 !important;
+  font-weight: bold !important;
+}
+
+/* Modo oscuro - forzar visibilidad */
+.dark .appointment-card {
+  background-color: #1E1E2D !important;
+  border-color: #3D3D5C !important;
+  color: white !important;
+}
+
+.dark .appointment-card .text-primary,
+.dark .appointment-card .font-bold,
+.dark .appointment-card .text-lg {
+  color: #00C7A0 !important;
+}
+
+/* Forzar visibilidad de nombres de pacientes */
+.appointment-card .text-navy,
+.appointment-card .font-semibold {
+  color: #1A2A47 !important;
+  font-weight: 600 !important;
+}
+
+.dark .appointment-card .text-navy,
+.dark .appointment-card .font-semibold {
+  color: white !important;
+}
+
+/* Asegurar que los botones sean visibles */
+.appointment-card button {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Corregir problemas de overflow */
+.appointment-card {
+  overflow: visible !important;
+}
+
+/* Debug: Agregar borde rojo temporal para identificar las tarjetas */
+.debug-appointments .appointment-card {
+  border: 2px solid red !important;
+  background-color: yellow !important;
+}
+
+/* Forzar el layout del grid/flex */
+.appointment-card .grid,
+.appointment-card .flex {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+@media (min-width: 768px) {
+  .appointment-card .grid-cols-1.md\\:grid-cols-2 {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* Asegurar que los iconos sean visibles */
+.appointment-card svg {
+  display: inline-block !important;
+  visibility: visible !important;
+}
+
+/* Corregir problemas específicos de Tailwind que podrían ocultar elementos */
+.appointment-card .hidden {
+  display: block !important;
+}
+
+.appointment-card .invisible {
+  visibility: visible !important;
+}
+
+.appointment-card .opacity-0 {
+  opacity: 1 !important;
+}
+
+/* Forzar altura mínima para el contenedor de citas */
+div[class*="space-y-4"] {
+  min-height: 100px !important;
+}
+
+/* Asegurar que el mensaje de "no hay citas" no interfiera */
+.text-center.py-10 {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Debugging: Hacer visible cualquier elemento que pueda estar oculto */
+.debug-mode * {
+  border: 1px solid rgba(255, 0, 0, 0.3) !important;
+  background-color: rgba(255, 255, 0, 0.1) !important;
+} 
