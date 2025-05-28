@@ -21,87 +21,76 @@ def create_appointment(current_user):
     if not data or not all(field in data and data[field] is not None for field in required_fields):
         return jsonify({"message": f"Campos requeridos faltantes o nulos: {required_fields}"}), 400
 
+    # Validar formato de fecha
     try:
-        # Validar formato de fecha/hora
-        try:
-            appointment_dt = datetime.fromisoformat(data["appointment_time"].replace('Z', '+00:00'))
-        except ValueError:
-            return jsonify({"message": "Formato inválido para appointment_time. Usar formato ISO 8601 (ej: geliştirmeler-MM-DDTHH:mm:ssZ)"}), 400
+        appointment_dt = datetime.fromisoformat(data["appointment_time"].replace('Z', '+00:00'))
+    except ValueError:
+        return jsonify({"message": "Formato de fecha inválido. Use formato ISO 8601."}), 400
 
-        doctor_id = data.get("doctor_id")
-        if doctor_id is not None and doctor_id != "":
-            # Verificar si el doctor tiene bloqueado ese día
-            appointment_date = appointment_dt.date().isoformat()
-            blocked_day_check = supabase.table('doctor_blocked_days')\
-                .select('id, reason')\
-                .eq('doctor_id', doctor_id)\
-                .eq('blocked_date', appointment_date)\
-                .execute()
-                
-            if hasattr(blocked_day_check, 'data') and blocked_day_check.data:
-                reason = blocked_day_check.data[0].get('reason', 'No disponible')
-                current_app.logger.info(f"Doctor ID {doctor_id} tiene bloqueado el día {appointment_date}: {reason}")
-                return jsonify({
-                    "message": f"El doctor no está disponible en esta fecha. Motivo: {reason}",
-                    "error_type": "doctor_day_blocked",
-                    "blocked_date": appointment_date
-                }), 409  # Conflict status code
-                
-            # Definir ventana de tiempo para verificar (±1 minuto)
-            time_window = timedelta(minutes=1)
-            start_time = (appointment_dt - time_window).isoformat()
-            end_time = (appointment_dt + time_window).isoformat()
+    # Validar que la fecha no sea en el pasado
+    now_utc = datetime.now(timezone.utc)
+    if appointment_dt < now_utc:
+        return jsonify({"message": "No se pueden programar citas en el pasado."}), 400
+
+    # Verificar disponibilidad del doctor si se proporciona doctor_id
+    if data.get("doctor_id"):
+        doctor_id = data["doctor_id"]
+        
+        # Definir ventana de tiempo para verificar (±1 minuto)
+        time_window = timedelta(minutes=1)
+        start_time = (appointment_dt - time_window).isoformat()
+        end_time = (appointment_dt + time_window).isoformat()
+        
+        # Buscar citas del doctor en la ventana de tiempo
+        existing_appointments = supabase.table('appointments')\
+            .select('id, appointment_time')\
+            .eq('doctor_id', doctor_id)\
+            .gte('appointment_time', start_time)\
+            .lte('appointment_time', end_time)\
+            .execute()
             
-            # Buscar citas del doctor en la ventana de tiempo
-            existing_appointments = supabase.table('appointments')\
-                .select('id, appointment_time')\
-                .eq('doctor_id', doctor_id)\
-                .gte('appointment_time', start_time)\
-                .lte('appointment_time', end_time)\
-                .execute()
-                
-            if hasattr(existing_appointments, 'data') and existing_appointments.data:
-                current_app.logger.info(f"Doctor ID {doctor_id} ya tiene cita(s) en horario similar: {existing_appointments.data}")
-                return jsonify({
-                    "message": "El doctor seleccionado ya tiene una cita programada en este horario.",
-                    "error_type": "doctor_unavailable",
-                    "conflict_time": data["appointment_time"]
-                }), 409  # Conflict status code
+        if hasattr(existing_appointments, 'data') and existing_appointments.data:
+            current_app.logger.info(f"Doctor ID {doctor_id} ya tiene cita(s) en horario similar: {existing_appointments.data}")
+            return jsonify({
+                "message": "El doctor seleccionado ya tiene una cita programada en este horario.",
+                "error_type": "doctor_unavailable",
+                "conflict_time": data["appointment_time"]
+            }), 409  # Conflict status code
 
-        appointment_data = {
-            "patient_id": data.get("patient_id"),
-            "doctor_id": data.get("doctor_id"),
-            "appointment_time": data.get("appointment_time"),
-            "notes": data.get("notes"),
-            "status": "Programada",
-            "medical_process_tag": data.get("medical_process_tag")
-        }
-        if "doctor_id" not in data:
-             appointment_data["doctor_id"] = None
-        appointment_data_filtered = {k: v for k, v in appointment_data.items() if k == "doctor_id" or v is not None}
+    appointment_data = {
+        "patient_id": data.get("patient_id"),
+        "doctor_id": data.get("doctor_id"),
+        "appointment_time": data.get("appointment_time"),
+        "notes": data.get("notes"),
+        "status": "Programada",
+        "medical_process_tag": data.get("medical_process_tag")
+    }
+    if "doctor_id" not in data:
+         appointment_data["doctor_id"] = None
+    appointment_data_filtered = {k: v for k, v in appointment_data.items() if k == "doctor_id" or v is not None}
 
-        # Ejecutar insert SIN encadenar .select()
-        response = supabase.table('appointments').insert(appointment_data_filtered).execute()
-        current_app.logger.debug(f"Respuesta de Supabase (create appointment): {response}")
+    # Ejecutar insert SIN encadenar .select()
+    response = supabase.table('appointments').insert(appointment_data_filtered).execute()
+    current_app.logger.debug(f"Respuesta de Supabase (create appointment): {response}")
 
-        if response.data:
-            current_app.logger.info(f"Cita creada con ID: {response.data[0]['id']}")
-            return jsonify(response.data[0]), 201
-        else:
-            error_message = "Error al crear la cita"
-            if hasattr(response, 'error') and response.error:
-                 error_message = response.error.message
-                 if "violates foreign key constraint" in error_message:
-                      if "appointments_patient_id_fkey" in error_message:
-                           return jsonify({"message": "ID de paciente inválido"}), 400
-                      if "appointments_doctor_id_fkey" in error_message:
-                           return jsonify({"message": "ID de doctor inválido"}), 400
-            current_app.logger.error(f"Error en Supabase al crear cita: {error_message}")
-            return jsonify({"message": error_message or "Error inesperado al crear cita"}), 500
+    # Verificar si hubo error en la inserción
+    if hasattr(response, 'error') and response.error:
+        error_message = response.error.message
+        current_app.logger.error(f"Error en Supabase al crear cita: {error_message}")
+        if "violates foreign key constraint" in error_message and "appointments_patient_id_fkey" in error_message:
+            return jsonify({"message": "ID de paciente inválido"}), 400
+        if "violates foreign key constraint" in error_message and "appointments_doctor_id_fkey" in error_message:
+            return jsonify({"message": "ID de doctor inválido"}), 400
+        return jsonify({"message": error_message}), 400
 
-    except Exception as e:
-        current_app.logger.exception("Error creando cita")
-        return jsonify({"message": "Error interno al crear la cita"}), 500
+    # Si no hay error, obtener los datos insertados
+    if response.data and len(response.data) > 0:
+        new_appointment = response.data[0]
+        current_app.logger.info(f"Cita creada con ID: {new_appointment.get('id')}")
+        return jsonify(new_appointment), 201
+    else:
+        current_app.logger.error("Cita creada pero no se devolvieron datos")
+        return jsonify({"message": "Cita creada pero no se pudieron recuperar los datos"}), 201
 
 # CORRECCIÓN: Ruta base del blueprint debe ser "" si el prefijo ya tiene el nombre
 @appointments_bp.route("", methods=["GET"])
@@ -329,7 +318,7 @@ def update_appointment(current_user, appointment_id):
 
     try:
         # Obtener estado actual para validación
-        current_appointment_response = supabase.table('appointments').select('status, arrival_time, consultation_start_time, consultation_end_time').eq('id', appointment_id).maybe_single().execute()
+        current_appointment_response = supabase.table('appointments').select('status, arrival_time, consultation_start_time, consultation_end_time, appointment_time').eq('id', appointment_id).maybe_single().execute()
         if not current_appointment_response.data:
              return jsonify({"message": "Cita no encontrada"}), 404
         current_appointment = current_appointment_response.data
@@ -338,22 +327,10 @@ def update_appointment(current_user, appointment_id):
         # Preparar datos generales para actualizar (excluyendo status por ahora)
         update_data = {}
         allowed_fields_to_update_anytime = ["doctor_id", "appointment_time", "notes", "medical_process_tag"]
+
         for field in allowed_fields_to_update_anytime:
-            if field in data:
-                 # Validaciones específicas
-                if field == "doctor_id" and data[field] is not None:
-                    try:
-                        update_data[field] = int(data[field])
-                    except (ValueError, TypeError):
-                         return jsonify({"message": "doctor_id debe ser un número entero o null"}), 400
-                elif field == "appointment_time" and data[field] is not None:
-                     try:
-                          appointment_dt = datetime.fromisoformat(data[field].replace('Z', '+00:00'))
-                          update_data[field] = data[field]
-                     except ValueError:
-                          return jsonify({"message": "Formato inválido para appointment_time. Usar formato ISO 8601"}), 400
-                else: # Para 'notes' y 'medical_process_tag'
-                    update_data[field] = data[field]
+            if field in data and data[field] is not None:
+                update_data[field] = data[field]
 
         # Verificar disponibilidad del doctor si se está actualizando doctor_id o appointment_time
         if ("doctor_id" in update_data or "appointment_time" in update_data) and "doctor_id" in update_data and update_data["doctor_id"] is not None:
@@ -396,6 +373,36 @@ def update_appointment(current_user, appointment_id):
         new_status = data.get("status")
 
         if new_status and new_status != current_status:
+            # VALIDACIÓN ESPECIAL PARA "En Espera" - Solo permitir si estamos en el día de la cita
+            if new_status == "En Espera":
+                try:
+                    # Obtener la fecha de la cita
+                    appointment_time_str = current_appointment.get('appointment_time')
+                    if not appointment_time_str:
+                        return jsonify({"message": "No se pudo obtener la fecha de la cita"}), 500
+                    
+                    # Convertir a datetime
+                    appointment_dt = datetime.fromisoformat(appointment_time_str.replace('Z', '+00:00'))
+                    current_dt = datetime.now(timezone.utc)
+                    
+                    # Comparar solo las fechas (día, mes, año)
+                    appointment_date = appointment_dt.date()
+                    current_date = current_dt.date()
+                    
+                    if appointment_date != current_date:
+                        # Formatear fechas para el mensaje de error
+                        appointment_date_formatted = appointment_date.strftime("%d/%m/%Y")
+                        current_date_formatted = current_date.strftime("%d/%m/%Y")
+                        
+                        current_app.logger.warning(f"Intento de marcar llegada para cita del {appointment_date_formatted} cuando estamos en {current_date_formatted}")
+                        return jsonify({
+                            "message": f"No se puede marcar la llegada de una cita programada para el {appointment_date_formatted}. Solo se pueden marcar llegadas de citas del día actual ({current_date_formatted})."
+                        }), 400
+                        
+                except Exception as e:
+                    current_app.logger.error(f"Error validando fecha de cita para llegada: {e}")
+                    return jsonify({"message": "Error al validar la fecha de la cita"}), 500
+
             # Define allowed transitions
             allowed_transitions = {
                 "Programada": ["En Espera", "Cancelada", "No Asistió"],
@@ -477,7 +484,7 @@ def update_appointment(current_user, appointment_id):
 
     except Exception as e:
         current_app.logger.exception(f"Error actualizando cita ID: {appointment_id}")
-        return jsonify({"message": "Error interno al actualizar la cita"}), 500
+        return jsonify({"message": "Error actualizando la cita"}), 500
 
 
 @appointments_bp.route("/<int:appointment_id>", methods=["DELETE"])
