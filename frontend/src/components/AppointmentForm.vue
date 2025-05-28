@@ -430,11 +430,11 @@ const handleSubmit = async () => {
     if (!formData.appointment_date || !formData.appointment_time) throw new Error("Fecha y hora requeridas");
     
     // Crear la fecha en UTC para evitar problemas de zona horaria
-    // Esto asegura que la fecha seleccionada por el usuario se mantenga
+    // Esto asegura que la fecha seleccionada por el usuario se mantenga exacta
     const [year, month, day] = formData.appointment_date.split('-').map(Number);
     const [hours, minutes] = formData.appointment_time.split(':').map(Number);
     
-    // Crear fecha directamente en UTC para mantener la fecha seleccionada
+    // Crear fecha directamente en UTC para mantener la fecha seleccionada exacta
     const utcDate = new Date(Date.UTC(year, month - 1, day, hours, minutes));
     
     if (isNaN(utcDate.getTime())) throw new Error("Fecha y hora inválidas");
