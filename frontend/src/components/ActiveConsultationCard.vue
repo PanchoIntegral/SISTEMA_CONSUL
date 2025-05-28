@@ -34,7 +34,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
-            <p class="text-sm text-gray-600">Dr. {{ consultation.doctor?.name || 'N/A' }}</p>
+            <p class="text-sm text-gray-600">{{ formattedDoctorName }}</p>
           </div>
           
           <div v-if="consultation.notes" class="flex mt-2">
@@ -121,12 +121,32 @@ const props = defineProps({
 // Emits
 const emit = defineEmits(['complete-consultation', 'cancel-consultation']);
 
+// Computed para formatear el nombre del doctor
+const formattedDoctorName = computed(() => {
+  const doctorName = props.consultation.doctor?.name;
+  if (!doctorName || doctorName === 'N/A') return 'N/A';
+  
+  // Verificar si el nombre ya incluye un título (Dr., Dra., Doctor, Doctora)
+  const hasTitle = /^(Dr\.?|Dra\.?|Doctor|Doctora)/i.test(doctorName);
+  
+  return hasTitle ? doctorName : `Dr. ${doctorName}`;
+});
+
 // Computed para formatear hora
 const formattedTime = computed(() => {
   if (!props.consultation.appointment_time) return 'N/A';
   try {
     const date = new Date(props.consultation.appointment_time);
-    return date.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit', hour12: true });
+    // Usar UTC para mostrar la hora exacta que seleccionó el usuario
+    const hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
+    
+    // Formatear en formato 12 horas
+    const hour12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+    const ampm = hours >= 12 ? 'p.m.' : 'a.m.';
+    const minutesStr = minutes.toString().padStart(2, '0');
+    
+    return `${hour12}:${minutesStr} ${ampm}`;
   } catch (e) {
     console.error("Error formatting time:", e);
     return 'Hora inválida';
@@ -138,7 +158,14 @@ const formattedDate = computed(() => {
   if (!props.consultation.appointment_time) return '';
   try {
     const date = new Date(props.consultation.appointment_time);
-    return date.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+    // Usar UTC para mostrar la fecha exacta que seleccionó el usuario
+    const day = date.getUTCDate();
+    const month = date.getUTCMonth();
+    
+    const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 
+                       'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    
+    return `${day} ${monthNames[month]}`;
   } catch (e) {
     console.error("Error formatting date:", e);
     return '';

@@ -5,7 +5,11 @@ import { toastService } from '@/services/toastService';
 
 const getTodayDateString = () => {
     const today = new Date();
-    return today.toISOString().split('T')[0];
+    // Usar la fecha local del usuario en lugar de UTC
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 };
 
 export const useAppointmentsStore = defineStore('appointments', () => {

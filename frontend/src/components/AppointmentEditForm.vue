@@ -108,11 +108,19 @@
   onMounted(() => {
     if (props.appointment.appointment_time) {
       try {
-        const date = new Date(props.appointment.appointment_time);
+        // Parsear la fecha ISO UTC y extraer componentes
+        const isoString = props.appointment.appointment_time;
+        const date = new Date(isoString);
+        
+        // Extraer componentes de la fecha UTC para mantener la fecha original
+        const year = date.getUTCFullYear();
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const hours = String(date.getUTCHours()).padStart(2, '0');
+        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+        
         // Formato YYYY-MM-DDThh:mm requerido por input datetime-local
-        formData.appointment_time_local = new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
-          .toISOString()
-          .slice(0, 16);
+        formData.appointment_time_local = `${year}-${month}-${day}T${hours}:${minutes}`;
       } catch (e) {
         console.error("Error formatting appointment time:", e);
         errorMessage.value = "Error al cargar la fecha de la cita";
@@ -129,15 +137,24 @@
     errorMessage.value = '';
     showDoctorUnavailableAlert.value = false;
   
-    // Convertir fecha/hora local a ISO string UTC (formato Z)
+    // Convertir fecha/hora local a ISO string manteniendo la fecha seleccionada
     let appointmentTimeISO = '';
     try {
       if (!formData.appointment_time_local) throw new Error("Fecha y hora requeridas");
-      // Crear objeto Date desde el input local. El navegador lo interpreta en la zona local.
-      const localDate = new Date(formData.appointment_time_local);
-      if (isNaN(localDate.getTime())) throw new Error("Fecha y hora inválidas");
-      // Convertir a ISO string. toISOString() SIEMPRE devuelve UTC (con Z)
-      appointmentTimeISO = localDate.toISOString();
+      
+      // Extraer componentes de fecha y hora del input datetime-local
+      const dateTimeLocal = formData.appointment_time_local; // Formato: "YYYY-MM-DDTHH:MM"
+      const [datePart, timePart] = dateTimeLocal.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hours, minutes] = timePart.split(':').map(Number);
+      
+      // Crear fecha directamente en UTC para mantener la fecha seleccionada
+      const utcDate = new Date(Date.UTC(year, month - 1, day, hours, minutes));
+      
+      if (isNaN(utcDate.getTime())) throw new Error("Fecha y hora inválidas");
+      
+      // Convertir a ISO string UTC
+      appointmentTimeISO = utcDate.toISOString();
     } catch (err) {
        errorMessage.value = err.message || "Error procesando fecha y hora.";
        isLoading.value = false;

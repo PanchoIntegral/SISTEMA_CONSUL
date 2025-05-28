@@ -298,7 +298,7 @@ const filterSuffix = computed(() => {
     parts.push(`con estado "${localSelectedStatus.value}"`);
   }
   if (localSelectedDoctorId.value) {
-    parts.push(`del Dr. ${getDoctorName(localSelectedDoctorId.value)}`);
+    parts.push(`de ${getDoctorName(localSelectedDoctorId.value)}`);
   }
   if (localSearchPatientName.value) {
     parts.push(`que coinciden con "${localSearchPatientName.value}"`);
@@ -309,14 +309,26 @@ const filterSuffix = computed(() => {
 
 const formattedDate = computed(() => {
   if (!localSelectedDate.value) return '';
-  const date = new Date(localSelectedDate.value + 'T00:00:00');
-  return date.toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+  // Parsear la fecha directamente sin conversión de zona horaria
+  const [year, month, day] = localSelectedDate.value.split('-').map(Number);
+  const date = new Date(year, month - 1, day); // Crear fecha local
+  
+  const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                     'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  
+  return `${day} de ${monthNames[month - 1]} de ${year}`;
 });
 
 // Función para obtener el nombre del doctor a partir de su ID
 const getDoctorName = (doctorId) => {
   const doctor = doctorsStore.doctors.find(d => d.id === parseInt(doctorId));
-  return doctor ? doctor.name : 'Desconocido';
+  if (!doctor) return 'Desconocido';
+  
+  const doctorName = doctor.name;
+  // Verificar si el nombre ya incluye un título (Dr., Dra., Doctor, Doctora)
+  const hasTitle = /^(Dr\.?|Dra\.?|Doctor|Doctora)/i.test(doctorName);
+  
+  return hasTitle ? doctorName : `Dr. ${doctorName}`;
 };
 
 // Función para determinar las clases de los botones de ordenamiento

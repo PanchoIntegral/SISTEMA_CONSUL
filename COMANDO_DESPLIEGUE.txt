@@ -1,0 +1,8 @@
+cd /home/SISTEMA_CONSUL
+sudo supervisorctl stop sistema_consul
+git pull origin MasterServer
+source venv/bin/activate
+pip install -r requirements.txt
+cd frontend && npm install && npm run build && cd ..
+sudo supervisorctl start sistema_consul
+sudo supervisorctl status sistema_consul
