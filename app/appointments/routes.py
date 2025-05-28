@@ -29,8 +29,20 @@ def create_appointment(current_user):
 
     # Validar que la fecha no sea en el pasado
     now_utc = datetime.now(timezone.utc)
-    if appointment_dt < now_utc:
-        return jsonify({"message": "No se pueden programar citas en el pasado."}), 400
+    appointment_date = appointment_dt.date()
+    current_date = now_utc.date()
+    
+    if appointment_date < current_date:
+        return jsonify({"message": "No se pueden programar citas en días pasados."}), 400
+    
+    # Si es el día actual, validar que la hora no sea muy en el pasado
+    # Permitir un margen de 12 horas para manejar diferentes zonas horarias
+    if appointment_date == current_date:
+        time_margin = timedelta(hours=12)
+        earliest_allowed = now_utc - time_margin
+        
+        if appointment_dt < earliest_allowed:
+            return jsonify({"message": "No se pueden programar citas muy en el pasado del día actual."}), 400
 
     # Verificar disponibilidad del doctor si se proporciona doctor_id
     if data.get("doctor_id"):
@@ -332,6 +344,31 @@ def update_appointment(current_user, appointment_id):
             if field in data and data[field] is not None:
                 update_data[field] = data[field]
 
+        # Validar que la nueva fecha/hora no sea en el pasado si se está actualizando appointment_time
+        if "appointment_time" in update_data:
+            try:
+                new_appointment_dt = datetime.fromisoformat(update_data["appointment_time"].replace('Z', '+00:00'))
+                now_utc = datetime.now(timezone.utc)
+                
+                # Validar que no sea un día pasado
+                new_appointment_date = new_appointment_dt.date()
+                current_date = now_utc.date()
+                
+                if new_appointment_date < current_date:
+                    return jsonify({"message": "No se pueden programar citas en días pasados."}), 400
+                
+                # Si es el día actual, validar que la hora no sea muy en el pasado
+                # Permitir un margen de 12 horas para manejar diferentes zonas horarias
+                if new_appointment_date == current_date:
+                    time_margin = timedelta(hours=12)
+                    earliest_allowed = now_utc - time_margin
+                    
+                    if new_appointment_dt < earliest_allowed:
+                        return jsonify({"message": "No se pueden programar citas muy en el pasado del día actual."}), 400
+                        
+            except ValueError:
+                return jsonify({"message": "Formato de fecha inválido en appointment_time."}), 400
+
         # Verificar disponibilidad del doctor si se está actualizando doctor_id o appointment_time
         if ("doctor_id" in update_data or "appointment_time" in update_data) and "doctor_id" in update_data and update_data["doctor_id"] is not None:
             doctor_id = update_data["doctor_id"]
@@ -385,7 +422,7 @@ def update_appointment(current_user, appointment_id):
                     appointment_dt = datetime.fromisoformat(appointment_time_str.replace('Z', '+00:00'))
                     current_dt = datetime.now(timezone.utc)
                     
-                    # Comparar solo las fechas (día, mes, año)
+                    # Comparar solo las fechas (día), no horas - permitir cualquier hora del día actual
                     appointment_date = appointment_dt.date()
                     current_date = current_dt.date()
                     

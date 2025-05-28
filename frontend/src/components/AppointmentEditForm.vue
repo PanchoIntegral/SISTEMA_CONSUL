@@ -112,7 +112,7 @@
         const isoString = props.appointment.appointment_time;
         const date = new Date(isoString);
         
-        // Extraer componentes de la fecha UTC para mantener la fecha original
+        // Extraer componentes de la fecha UTC para mantener la fecha original exacta
         const year = date.getUTCFullYear();
         const month = String(date.getUTCMonth() + 1).padStart(2, '0');
         const day = String(date.getUTCDate()).padStart(2, '0');
@@ -148,7 +148,7 @@
       const [year, month, day] = datePart.split('-').map(Number);
       const [hours, minutes] = timePart.split(':').map(Number);
       
-      // Crear fecha directamente en UTC para mantener la fecha seleccionada
+      // Crear fecha directamente en UTC para mantener la fecha seleccionada exacta
       const utcDate = new Date(Date.UTC(year, month - 1, day, hours, minutes));
       
       if (isNaN(utcDate.getTime())) throw new Error("Fecha y hora inválidas");
