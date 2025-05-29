@@ -5,7 +5,7 @@ from datetime import datetime, timezone, timedelta # Asegúrate de importar time
 from . import appointments_bp
 from app.extensions import get_supabase
 from app.utils.decorators import token_required
-from app.utils.helpers import calculate_durations # Importar helper
+from app.utils.helpers import calculate_durations, get_current_date_tijuana, get_current_time_tijuana, get_tijuana_timezone
 
 supabase = get_supabase()
 
@@ -27,21 +27,25 @@ def create_appointment(current_user):
     except ValueError:
         return jsonify({"message": "Formato de fecha inválido. Use formato ISO 8601."}), 400
 
-    # Validar que la fecha no sea en el pasado
-    now_utc = datetime.now(timezone.utc)
-    appointment_date = appointment_dt.date()
-    current_date = now_utc.date()
+    # Validar que la fecha no sea en el pasado - usar zona horaria de Tijuana
+    current_date_tijuana = get_current_date_tijuana()
+    tijuana_tz = get_tijuana_timezone()
+    appointment_date = appointment_dt.astimezone(tijuana_tz).date()
     
-    if appointment_date < current_date:
+    if appointment_date < current_date_tijuana:
         return jsonify({"message": "No se pueden programar citas en días pasados."}), 400
     
     # Si es el día actual, validar que la hora no sea muy en el pasado
     # Permitir un margen de 12 horas para manejar diferentes zonas horarias
-    if appointment_date == current_date:
-        time_margin = timedelta(hours=12)
-        earliest_allowed = now_utc - time_margin
+    if appointment_date == current_date_tijuana:
+        # Usar hora de Tijuana para la validación
+        current_time_tijuana = get_current_time_tijuana()
+        appointment_dt_tijuana = appointment_dt.astimezone(tijuana_tz)
         
-        if appointment_dt < earliest_allowed:
+        time_margin = timedelta(hours=12)
+        earliest_allowed = current_time_tijuana - time_margin
+        
+        if appointment_dt_tijuana < earliest_allowed:
             return jsonify({"message": "No se pueden programar citas muy en el pasado del día actual."}), 400
 
     # Verificar disponibilidad del doctor si se proporciona doctor_id
@@ -350,20 +354,28 @@ def update_appointment(current_user, appointment_id):
                 new_appointment_dt = datetime.fromisoformat(update_data["appointment_time"].replace('Z', '+00:00'))
                 now_utc = datetime.now(timezone.utc)
                 
-                # Validar que no sea un día pasado
-                new_appointment_date = new_appointment_dt.date()
-                current_date = now_utc.date()
+                # Validar fechas solo si appointment_time está presente
+                now_utc = datetime.now(timezone.utc)
                 
-                if new_appointment_date < current_date:
+                # Validar que no sea un día pasado - usar zona horaria de Tijuana
+                new_appointment_date = new_appointment_dt.date()
+                current_date_tijuana = get_current_date_tijuana()
+                
+                if new_appointment_date < current_date_tijuana:
                     return jsonify({"message": "No se pueden programar citas en días pasados."}), 400
                 
                 # Si es el día actual, validar que la hora no sea muy en el pasado
                 # Permitir un margen de 12 horas para manejar diferentes zonas horarias
-                if new_appointment_date == current_date:
-                    time_margin = timedelta(hours=12)
-                    earliest_allowed = now_utc - time_margin
+                if new_appointment_date == current_date_tijuana:
+                    # Usar hora de Tijuana para la validación
+                    current_time_tijuana = get_current_time_tijuana()
+                    tijuana_tz = get_tijuana_timezone()
+                    new_appointment_dt_tijuana = new_appointment_dt.astimezone(tijuana_tz)
                     
-                    if new_appointment_dt < earliest_allowed:
+                    time_margin = timedelta(hours=12)
+                    earliest_allowed = current_time_tijuana - time_margin
+                    
+                    if new_appointment_dt_tijuana < earliest_allowed:
                         return jsonify({"message": "No se pueden programar citas muy en el pasado del día actual."}), 400
                         
             except ValueError:
@@ -420,18 +432,19 @@ def update_appointment(current_user, appointment_id):
                     
                     # Convertir a datetime
                     appointment_dt = datetime.fromisoformat(appointment_time_str.replace('Z', '+00:00'))
-                    current_dt = datetime.now(timezone.utc)
+                    # Usar zona horaria de Tijuana para obtener la fecha actual
+                    current_date_tijuana = get_current_date_tijuana()
                     
-                    # Comparar solo las fechas (día), no horas - permitir cualquier hora del día actual
-                    appointment_date = appointment_dt.date()
-                    current_date = current_dt.date()
+                    # Convertir la fecha de la cita a la zona horaria de Tijuana para comparación
+                    tijuana_tz = get_tijuana_timezone()
+                    appointment_date = appointment_dt.astimezone(tijuana_tz).date()
                     
-                    if appointment_date != current_date:
+                    if appointment_date != current_date_tijuana:
                         # Formatear fechas para el mensaje de error
                         appointment_date_formatted = appointment_date.strftime("%d/%m/%Y")
-                        current_date_formatted = current_date.strftime("%d/%m/%Y")
+                        current_date_formatted = current_date_tijuana.strftime("%d/%m/%Y")
                         
-                        current_app.logger.warning(f"Intento de marcar llegada para cita del {appointment_date_formatted} cuando estamos en {current_date_formatted}")
+                        current_app.logger.warning(f"Intento de marcar llegada para cita del {appointment_date_formatted} cuando estamos en {current_date_formatted} (zona horaria Tijuana)")
                         return jsonify({
                             "message": f"No se puede marcar la llegada de una cita programada para el {appointment_date_formatted}. Solo se pueden marcar llegadas de citas del día actual ({current_date_formatted})."
                         }), 400

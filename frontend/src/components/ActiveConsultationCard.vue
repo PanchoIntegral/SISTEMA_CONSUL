@@ -136,15 +136,28 @@ const formattedDoctorName = computed(() => {
 const formattedTime = computed(() => {
   if (!props.consultation.appointment_time) return 'N/A';
   try {
-    const date = new Date(props.consultation.appointment_time);
-    // Usar UTC para mostrar la hora exacta que seleccionó el usuario
-    const hours = date.getUTCHours();
-    const minutes = date.getUTCMinutes();
+    // Convertir UTC a Tijuana manualmente
+    const utcDate = new Date(props.consultation.appointment_time);
+    const year = utcDate.getUTCFullYear();
+    const month = utcDate.getUTCMonth() + 1;
+    const day = utcDate.getUTCDate();
+    const utcHours = utcDate.getUTCHours();
+    const utcMinutes = utcDate.getUTCMinutes();
+    
+    // Calcular offset de Tijuana (horario de verano/estándar)
+    const tijuanaOffset = getTijuanaOffsetForDisplay(year, month, day);
+    
+    // Convertir UTC a hora de Tijuana
+    const tijuanaHours = utcHours + tijuanaOffset;
+    
+    // Manejar cambios de día si es necesario
+    const finalHours = tijuanaHours >= 24 ? tijuanaHours - 24 : 
+                      tijuanaHours < 0 ? tijuanaHours + 24 : tijuanaHours;
     
     // Formatear en formato 12 horas
-    const hour12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-    const ampm = hours >= 12 ? 'p.m.' : 'a.m.';
-    const minutesStr = minutes.toString().padStart(2, '0');
+    const hour12 = finalHours === 0 ? 12 : finalHours > 12 ? finalHours - 12 : finalHours;
+    const ampm = finalHours >= 12 ? 'p.m.' : 'a.m.';
+    const minutesStr = utcMinutes.toString().padStart(2, '0');
     
     return `${hour12}:${minutesStr} ${ampm}`;
   } catch (e) {
@@ -157,20 +170,69 @@ const formattedTime = computed(() => {
 const formattedDate = computed(() => {
   if (!props.consultation.appointment_time) return '';
   try {
-    const date = new Date(props.consultation.appointment_time);
-    // Usar UTC para mostrar la fecha exacta que seleccionó el usuario
-    const day = date.getUTCDate();
-    const month = date.getUTCMonth();
+    const utcDate = new Date(props.consultation.appointment_time);
+    const year = utcDate.getUTCFullYear();
+    const month = utcDate.getUTCMonth() + 1;
+    const day = utcDate.getUTCDate();
+    const utcHours = utcDate.getUTCHours();
+    
+    // Calcular offset de Tijuana
+    const tijuanaOffset = getTijuanaOffsetForDisplay(year, month, day);
+    
+    // Verificar si el cambio de hora causa cambio de día
+    const tijuanaHours = utcHours + tijuanaOffset;
+    let finalDay = day;
+    let finalMonth = month;
+    let finalYear = year;
+    
+    if (tijuanaHours >= 24) {
+      // Día siguiente
+      const nextDay = new Date(Date.UTC(year, month - 1, day + 1));
+      finalYear = nextDay.getUTCFullYear();
+      finalMonth = nextDay.getUTCMonth() + 1;
+      finalDay = nextDay.getUTCDate();
+    } else if (tijuanaHours < 0) {
+      // Día anterior
+      const prevDay = new Date(Date.UTC(year, month - 1, day - 1));
+      finalYear = prevDay.getUTCFullYear();
+      finalMonth = prevDay.getUTCMonth() + 1;
+      finalDay = prevDay.getUTCDate();
+    }
     
     const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 
                        'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
     
-    return `${day} ${monthNames[month]}`;
+    return `${finalDay} ${monthNames[finalMonth - 1]}`;
   } catch (e) {
     console.error("Error formatting date:", e);
     return '';
   }
 });
+
+// Función helper para calcular el offset de Tijuana (similar a la del timezoneUtils)
+const getTijuanaOffsetForDisplay = (year, month, day) => {
+  // Tijuana sigue las reglas de horario de verano del Pacífico (PST/PDT)
+  
+  // Calcular segundo domingo de marzo
+  const march = new Date(year, 2, 1); // Marzo
+  const firstSundayMarch = 7 - march.getDay();
+  const secondSundayMarch = firstSundayMarch + 7;
+  
+  // Calcular primer domingo de noviembre
+  const november = new Date(year, 10, 1); // Noviembre
+  const firstSundayNovember = 7 - november.getDay();
+  
+  const currentDate = new Date(year, month - 1, day);
+  const dstStart = new Date(year, 2, secondSundayMarch);
+  const dstEnd = new Date(year, 10, firstSundayNovember);
+  
+  // Si estamos en horario de verano (entre segundo domingo de marzo y primer domingo de noviembre)
+  if (currentDate >= dstStart && currentDate < dstEnd) {
+    return -7; // UTC-7 (PDT)
+  } else {
+    return -8; // UTC-8 (PST)
+  }
+};
 </script>
 
 <style scoped>

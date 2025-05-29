@@ -424,23 +424,20 @@ const handleSubmit = async () => {
   errorMessage.value = '';
   showDoctorUnavailableAlert.value = false;
 
-  // Convertir fecha/hora local a ISO string manteniendo la fecha seleccionada
+  // Convertir fecha/hora usando la utilidad de zona horaria de Tijuana
   let appointmentTimeISO = '';
   try {
     if (!formData.appointment_date || !formData.appointment_time) throw new Error("Fecha y hora requeridas");
     
-    // Crear la fecha en UTC para evitar problemas de zona horaria
-    // Esto asegura que la fecha seleccionada por el usuario se mantenga exacta
-    const [year, month, day] = formData.appointment_date.split('-').map(Number);
-    const [hours, minutes] = formData.appointment_time.split(':').map(Number);
+    // Importar la utilidad de zona horaria
+    const { createTijuanaDateTimeAsUTC } = await import('@/utils/timezoneUtils.js');
     
-    // Crear fecha directamente en UTC para mantener la fecha seleccionada exacta
-    const utcDate = new Date(Date.UTC(year, month - 1, day, hours, minutes));
+    // Convertir la fecha/hora seleccionada a UTC considerando zona horaria de Tijuana
+    appointmentTimeISO = createTijuanaDateTimeAsUTC(formData.appointment_date, formData.appointment_time);
     
-    if (isNaN(utcDate.getTime())) throw new Error("Fecha y hora inválidas");
+    console.log('Fecha seleccionada:', formData.appointment_date, formData.appointment_time);
+    console.log('Fecha convertida a UTC (desde Tijuana):', appointmentTimeISO);
     
-    // Convertir a ISO string UTC
-    appointmentTimeISO = utcDate.toISOString();
   } catch (err) {
      errorMessage.value = err.message || "Error procesando fecha y hora.";
      isLoading.value = false;
