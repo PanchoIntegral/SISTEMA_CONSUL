@@ -105,22 +105,21 @@
   const showDoctorUnavailableAlert = ref(false);
   
   // Convertir la fecha ISO a formato local para el input datetime-local
-  onMounted(() => {
+  onMounted(async () => {
     if (props.appointment.appointment_time) {
       try {
-        // Parsear la fecha ISO UTC y extraer componentes
-        const isoString = props.appointment.appointment_time;
-        const date = new Date(isoString);
+        // Importar la utilidad de zona horaria
+        const { convertUTCToTijuanaLocal } = await import('@/utils/timezoneUtils.js');
         
-        // Extraer componentes de la fecha UTC para mantener la fecha original exacta
-        const year = date.getUTCFullYear();
-        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(date.getUTCDate()).padStart(2, '0');
-        const hours = String(date.getUTCHours()).padStart(2, '0');
-        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+        // Convertir la fecha UTC a hora local de Tijuana
+        const tijuanaTime = convertUTCToTijuanaLocal(props.appointment.appointment_time);
         
         // Formato YYYY-MM-DDThh:mm requerido por input datetime-local
-        formData.appointment_time_local = `${year}-${month}-${day}T${hours}:${minutes}`;
+        formData.appointment_time_local = `${tijuanaTime.date}T${tijuanaTime.time}`;
+        
+        console.log('Fecha UTC original:', props.appointment.appointment_time);
+        console.log('Fecha convertida a Tijuana:', formData.appointment_time_local);
+        
       } catch (e) {
         console.error("Error formatting appointment time:", e);
         errorMessage.value = "Error al cargar la fecha de la cita";
@@ -137,7 +136,7 @@
     errorMessage.value = '';
     showDoctorUnavailableAlert.value = false;
   
-    // Convertir fecha/hora local a ISO string manteniendo la fecha seleccionada
+    // Convertir fecha/hora usando la utilidad de zona horaria de Tijuana
     let appointmentTimeISO = '';
     try {
       if (!formData.appointment_time_local) throw new Error("Fecha y hora requeridas");
@@ -145,16 +144,16 @@
       // Extraer componentes de fecha y hora del input datetime-local
       const dateTimeLocal = formData.appointment_time_local; // Formato: "YYYY-MM-DDTHH:MM"
       const [datePart, timePart] = dateTimeLocal.split('T');
-      const [year, month, day] = datePart.split('-').map(Number);
-      const [hours, minutes] = timePart.split(':').map(Number);
       
-      // Crear fecha directamente en UTC para mantener la fecha seleccionada exacta
-      const utcDate = new Date(Date.UTC(year, month - 1, day, hours, minutes));
+      // Importar la utilidad de zona horaria
+      const { createTijuanaDateTimeAsUTC } = await import('@/utils/timezoneUtils.js');
       
-      if (isNaN(utcDate.getTime())) throw new Error("Fecha y hora inválidas");
+      // Convertir la fecha/hora seleccionada a UTC considerando zona horaria de Tijuana
+      appointmentTimeISO = createTijuanaDateTimeAsUTC(datePart, timePart);
       
-      // Convertir a ISO string UTC
-      appointmentTimeISO = utcDate.toISOString();
+      console.log('Fecha/hora seleccionada:', dateTimeLocal);
+      console.log('Fecha convertida a UTC (desde Tijuana):', appointmentTimeISO);
+      
     } catch (err) {
        errorMessage.value = err.message || "Error procesando fecha y hora.";
        isLoading.value = false;
