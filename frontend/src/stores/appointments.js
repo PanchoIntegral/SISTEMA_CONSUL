@@ -222,10 +222,23 @@ export const useAppointmentsStore = defineStore('appointments', () => {
         
         // Mostrar notificación de éxito
         const patientName = newAppointment.patient?.name || 'el paciente';
-        const appointmentDate = new Date(newAppointment.date).toLocaleDateString();
+        let appointmentDateFormatted = 'fecha no disponible';
+        if (newAppointment.appointment_time) {
+          try {
+            // Convertir UTC a fecha local de Tijuana para mostrar
+            const { convertUTCToTijuanaLocal } = await import('@/utils/timezoneUtils.js');
+            const tijuanaTime = convertUTCToTijuanaLocal(newAppointment.appointment_time);
+            const [year, month, day] = tijuanaTime.date.split('-');
+            appointmentDateFormatted = `${day}/${month}/${year}`;
+          } catch (error) {
+            console.error('Error convirtiendo fecha para notificación:', error);
+            // Fallback: usar Date directamente (puede tener problemas de zona horaria pero es mejor que nada)
+            appointmentDateFormatted = new Date(newAppointment.appointment_time).toLocaleDateString('es-MX');
+          }
+        }
         toastService.success(
           'Cita agendada', 
-          `Se ha agendado correctamente la cita para ${patientName} el ${appointmentDate}.`
+          `Se ha agendado correctamente la cita para ${patientName} el ${appointmentDateFormatted}.`
         );
         
         return true; // Indicar éxito

@@ -351,11 +351,43 @@
     );
   };
   
+  // Función helper para calcular el offset de Tijuana (versión corregida)
+  const getTijuanaOffsetForDisplay = (year, month, day) => {
+    // Tijuana sigue las reglas de horario de verano del Pacífico (PST/PDT)
+    // Horario de verano: segundo domingo de marzo al primer domingo de noviembre
+    
+    // Calcular segundo domingo de marzo
+    const march1 = new Date(year, 2, 1); // Marzo 1 (mes 2 porque es 0-based)
+    const march1DayOfWeek = march1.getDay(); // 0=domingo, 1=lunes, etc.
+    // Días hasta el primer domingo de marzo
+    const daysToFirstSunday = march1DayOfWeek === 0 ? 0 : 7 - march1DayOfWeek;
+    const firstSundayMarch = 1 + daysToFirstSunday;
+    const secondSundayMarch = firstSundayMarch + 7;
+    
+    // Calcular primer domingo de noviembre
+    const november1 = new Date(year, 10, 1); // Noviembre 1 (mes 10 porque es 0-based)
+    const november1DayOfWeek = november1.getDay();
+    // Días hasta el primer domingo de noviembre
+    const daysToFirstSundayNov = november1DayOfWeek === 0 ? 0 : 7 - november1DayOfWeek;
+    const firstSundayNovember = 1 + daysToFirstSundayNov;
+    
+    const currentDate = new Date(year, month - 1, day);
+    const dstStart = new Date(year, 2, secondSundayMarch, 2, 0, 0); // 2:00 AM del segundo domingo de marzo
+    const dstEnd = new Date(year, 10, firstSundayNovember, 2, 0, 0); // 2:00 AM del primer domingo de noviembre
+    
+    // Si estamos en horario de verano (entre segundo domingo de marzo y primer domingo de noviembre)
+    if (currentDate >= dstStart && currentDate < dstEnd) {
+      return -7; // UTC-7 (PDT)
+    } else {
+      return -8; // UTC-8 (PST)
+    }
+  };
+
   // Computed para formatear hora
   const formattedTime = computed(() => {
     if (!props.appointment.appointment_time) return 'N/A';
     try {
-      // Convertir UTC a Tijuana manualmente
+      // Convertir UTC a Tijuana usando la lógica corregida
       const utcDate = new Date(props.appointment.appointment_time);
       const year = utcDate.getUTCFullYear();
       const month = utcDate.getUTCMonth() + 1;
@@ -363,11 +395,11 @@
       const utcHours = utcDate.getUTCHours();
       const utcMinutes = utcDate.getUTCMinutes();
       
-      // Calcular offset de Tijuana (horario de verano/estándar)
+      // Calcular offset de Tijuana
       const tijuanaOffset = getTijuanaOffsetForDisplay(year, month, day);
       
       // Convertir UTC a hora de Tijuana
-      const tijuanaHours = utcHours + tijuanaOffset;
+      const tijuanaHours = utcHours + tijuanaOffset; // Si tijuanaOffset es -7, entonces utcHours + (-7) = utcHours - 7
       
       // Manejar cambios de día si es necesario
       const finalHours = tijuanaHours >= 24 ? tijuanaHours - 24 : 
@@ -389,6 +421,7 @@
   const formattedDate = computed(() => {
     if (!props.appointment.appointment_time) return '';
     try {
+      // Convertir UTC a Tijuana usando la lógica corregida
       const utcDate = new Date(props.appointment.appointment_time);
       const year = utcDate.getUTCFullYear();
       const month = utcDate.getUTCMonth() + 1;
@@ -399,7 +432,7 @@
       const tijuanaOffset = getTijuanaOffsetForDisplay(year, month, day);
       
       // Verificar si el cambio de hora causa cambio de día
-      const tijuanaHours = utcHours + tijuanaOffset;
+      const tijuanaHours = utcHours + tijuanaOffset; // Si tijuanaOffset es -7, entonces utcHours + (-7) = utcHours - 7
       let finalDay = day;
       let finalMonth = month;
       let finalYear = year;
@@ -428,20 +461,7 @@
     }
   });
   
-  // Computed para clases de estado
-  const statusClass = computed(() => {
-     switch (props.appointment.status) {
-      case 'Programada': return 'bg-gray-100 text-navy';
-      case 'En Espera': return 'bg-wave-blue bg-opacity-10 text-wave-blue';
-      case 'En Consulta': return 'bg-wave-teal bg-opacity-10 text-wave-teal';
-      case 'Completada': return 'bg-wave-green bg-opacity-10 text-wave-green';
-      case 'Cancelada': return 'bg-red-100 text-red-800';
-      case 'No Asistió': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  });
-  
-  // Helper para formatear duración MM:SS
+  // Función para formatear duración MM:SS
   const formatDuration = (seconds) => {
       if (seconds === null || seconds === undefined || seconds < 0) return '--:--';
       const mins = Math.floor(seconds / 60);
@@ -460,30 +480,18 @@
     return hasTitle ? doctorName : `Dr. ${doctorName}`;
   });
 
-  // Función helper para calcular el offset de Tijuana (similar a la del timezoneUtils)
-  const getTijuanaOffsetForDisplay = (year, month, day) => {
-    // Tijuana sigue las reglas de horario de verano del Pacífico (PST/PDT)
-    
-    // Calcular segundo domingo de marzo
-    const march = new Date(year, 2, 1); // Marzo
-    const firstSundayMarch = 7 - march.getDay();
-    const secondSundayMarch = firstSundayMarch + 7;
-    
-    // Calcular primer domingo de noviembre
-    const november = new Date(year, 10, 1); // Noviembre
-    const firstSundayNovember = 7 - november.getDay();
-    
-    const currentDate = new Date(year, month - 1, day);
-    const dstStart = new Date(year, 2, secondSundayMarch);
-    const dstEnd = new Date(year, 10, firstSundayNovember);
-    
-    // Si estamos en horario de verano (entre segundo domingo de marzo y primer domingo de noviembre)
-    if (currentDate >= dstStart && currentDate < dstEnd) {
-      return -7; // UTC-7 (PDT)
-    } else {
-      return -8; // UTC-8 (PST)
+  // Computed para clases de estado
+  const statusClass = computed(() => {
+     switch (props.appointment.status) {
+      case 'Programada': return 'bg-gray-100 text-navy';
+      case 'En Espera': return 'bg-wave-blue bg-opacity-10 text-wave-blue';
+      case 'En Consulta': return 'bg-wave-teal bg-opacity-10 text-wave-teal';
+      case 'Completada': return 'bg-wave-green bg-opacity-10 text-wave-green';
+      case 'Cancelada': return 'bg-red-100 text-red-800';
+      case 'No Asistió': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
-  };
+  });
   </script>
   
   <style scoped>

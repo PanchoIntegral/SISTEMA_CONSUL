@@ -17,8 +17,8 @@ export function createTijuanaDateTimeAsUTC(dateStr, timeStr) {
   const tijuanaOffset = getTijuanaOffset(year, month, day);
   
   // Convertir la hora de Tijuana a UTC
-  // Si Tijuana está en UTC-7 y son las 11:00, en UTC son las 11:00 + 7 = 18:00
-  const utcHours = hours - tijuanaOffset; // -(-7) = +7
+  // Si Tijuana está en UTC-7 y son las 11:00, en UTC son las 11:00 - (-7) = 18:00
+  const utcHours = hours - tijuanaOffset; // Si tijuanaOffset es -7, entonces hours - (-7) = hours + 7
   
   // Crear fecha UTC directamente
   const utcDate = new Date(Date.UTC(year, month - 1, day, utcHours, minutes));
@@ -49,17 +49,23 @@ function getTijuanaOffset(year, month, day) {
   // Horario de verano: segundo domingo de marzo al primer domingo de noviembre
   
   // Calcular segundo domingo de marzo
-  const march = new Date(year, 2, 1); // Marzo
-  const firstSundayMarch = 7 - march.getDay();
+  const march1 = new Date(year, 2, 1); // Marzo 1 (mes 2 porque es 0-based)
+  const march1DayOfWeek = march1.getDay(); // 0=domingo, 1=lunes, etc.
+  // Días hasta el primer domingo de marzo
+  const daysToFirstSunday = march1DayOfWeek === 0 ? 0 : 7 - march1DayOfWeek;
+  const firstSundayMarch = 1 + daysToFirstSunday;
   const secondSundayMarch = firstSundayMarch + 7;
   
   // Calcular primer domingo de noviembre
-  const november = new Date(year, 10, 1); // Noviembre
-  const firstSundayNovember = 7 - november.getDay();
+  const november1 = new Date(year, 10, 1); // Noviembre 1 (mes 10 porque es 0-based)
+  const november1DayOfWeek = november1.getDay();
+  // Días hasta el primer domingo de noviembre
+  const daysToFirstSundayNov = november1DayOfWeek === 0 ? 0 : 7 - november1DayOfWeek;
+  const firstSundayNovember = 1 + daysToFirstSundayNov;
   
   const currentDate = new Date(year, month - 1, day);
-  const dstStart = new Date(year, 2, secondSundayMarch);
-  const dstEnd = new Date(year, 10, firstSundayNovember);
+  const dstStart = new Date(year, 2, secondSundayMarch, 2, 0, 0); // 2:00 AM del segundo domingo de marzo
+  const dstEnd = new Date(year, 10, firstSundayNovember, 2, 0, 0); // 2:00 AM del primer domingo de noviembre
   
   // Si estamos en horario de verano (entre segundo domingo de marzo y primer domingo de noviembre)
   if (currentDate >= dstStart && currentDate < dstEnd) {
@@ -88,8 +94,8 @@ export function convertUTCToTijuanaLocal(utcDateStr) {
   const tijuanaOffset = getTijuanaOffset(year, month, day);
   
   // Convertir UTC a hora de Tijuana
-  // Si UTC son las 18:00 y Tijuana está en UTC-7, entonces en Tijuana son las 18:00 - 7 = 11:00
-  const tijuanaHours = hours + tijuanaOffset; // + (-7) = -7
+  // Si UTC son las 18:00 y Tijuana está en UTC-7, entonces en Tijuana son las 18:00 + (-7) = 11:00
+  const tijuanaHours = hours + tijuanaOffset; // Si tijuanaOffset es -7, entonces hours + (-7) = hours - 7
   
   // Manejar cambios de día
   let finalYear = year;
