@@ -163,19 +163,36 @@ def get_appointments(current_user):
             try:
                 valid_date = datetime.strptime(filter_date, '%Y-%m-%d').date()
 
-                # Crear objetos datetime conscientes de UTC para inicio y fin del día
-                start_dt = datetime(valid_date.year, valid_date.month, valid_date.day, 0, 0, 0, tzinfo=timezone.utc)
-                # El fin es el inicio del día siguiente (exclusivo)
-                end_dt = start_dt + timedelta(days=1)
+                # Usar la zona horaria de Tijuana para crear el rango de fechas correcto
+                tijuana_tz = get_tijuana_timezone()
+                
+                # Crear el inicio y fin del día en zona horaria de Tijuana
+                # Usar un enfoque compatible con ambos tipos de timezone
+                start_dt_naive = datetime(valid_date.year, valid_date.month, valid_date.day, 0, 0, 0)
+                end_dt_naive = datetime(valid_date.year, valid_date.month, valid_date.day, 23, 59, 59, 999999)
+                
+                # Convertir a zona horaria de Tijuana y luego a UTC
+                if hasattr(tijuana_tz, 'localize'):
+                    # ZoneInfo o pytz timezone
+                    start_dt_tijuana = tijuana_tz.localize(start_dt_naive)
+                    end_dt_tijuana = tijuana_tz.localize(end_dt_naive)
+                else:
+                    # timezone simple
+                    start_dt_tijuana = start_dt_naive.replace(tzinfo=tijuana_tz)
+                    end_dt_tijuana = end_dt_naive.replace(tzinfo=tijuana_tz)
+                
+                # Convertir a UTC para la consulta en la base de datos
+                start_dt_utc = start_dt_tijuana.astimezone(timezone.utc)
+                end_dt_utc = end_dt_tijuana.astimezone(timezone.utc)
 
                 # Convertir a strings ISO 8601
-                start_dt_iso = start_dt.isoformat()
-                end_dt_iso = end_dt.isoformat()
+                start_dt_iso = start_dt_utc.isoformat()
+                end_dt_iso = end_dt_utc.isoformat()
 
-                current_app.logger.info(f"Filtrando citas por fecha UTC: >= {start_dt_iso} y < {end_dt_iso}")
-                # Aplicar filtros gte (>=) y lt (<)
+                current_app.logger.info(f"Filtrando citas por fecha {filter_date} (Tijuana) = UTC: >= {start_dt_iso} y <= {end_dt_iso}")
+                # Aplicar filtros gte (>=) y lte (<=)
                 query = query.gte('appointment_time', start_dt_iso)
-                query = query.lt('appointment_time', end_dt_iso)
+                query = query.lte('appointment_time', end_dt_iso)
             except ValueError:
                 return jsonify({"message": "Formato de fecha inválido, usar YYYY-MM-DD"}), 400
             except Exception as filter_error:

@@ -1,0 +1,796 @@
+/* 
+ * HealthFlow - Sistema de Diseño Responsivo Completo
+ * Optimizado para todos los dispositivos móviles incluyendo iPhone
+ */
+
+/* ==============================================
+   VARIABLES CSS PARA MOBILE-FIRST DESIGN  
+============================================== */
+:root {
+  /* Espaciado responsivo */
+  --spacing-xs: 0.25rem;    /* 4px */
+  --spacing-sm: 0.5rem;     /* 8px */
+  --spacing-md: 0.75rem;    /* 12px */
+  --spacing-lg: 1rem;       /* 16px */
+  --spacing-xl: 1.5rem;     /* 24px */
+  --spacing-2xl: 2rem;      /* 32px */
+  
+  /* Tamaños de fuente responsivos */
+  --text-xs: 0.75rem;       /* 12px */
+  --text-sm: 0.875rem;      /* 14px */
+  --text-base: 1rem;        /* 16px */
+  --text-lg: 1.125rem;      /* 18px */
+  --text-xl: 1.25rem;       /* 20px */
+  --text-2xl: 1.5rem;       /* 24px */
+  
+  /* Alturas mínimas de toque para móviles */
+  --touch-target: 44px;     /* Recomendación de Apple/Google */
+  --touch-target-sm: 38px;  /* Para elementos secundarios */
+  
+  /* Radios de bordes */
+  --radius-sm: 0.375rem;    /* 6px */
+  --radius-md: 0.5rem;      /* 8px */
+  --radius-lg: 0.75rem;     /* 12px */
+  
+  /* Sombras optimizadas para móviles */
+  --shadow-mobile: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-mobile-elevated: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* ==============================================
+   BASE MOBILE-FIRST STYLES 
+============================================== */
+
+/* Asegurar que el body tenga el comportamiento correcto en móviles */
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%; /* Soporte moderno */
+  font-size: 16px; /* Base font size para cálculos rem */
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* Prevenir zoom en inputs en iOS */
+  font-size: var(--text-base);
+}
+
+/* Prevenir zoom en inputs en iOS Safari */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+input[type="time"],
+textarea,
+select {
+  font-size: 16px !important; /* Previene zoom en iOS */
+  min-height: var(--touch-target);
+}
+
+/* ==============================================
+   NAVEGACIÓN MÓVIL MEJORADA
+============================================== */
+
+/* Navegación principal */
+nav.bg-navy {
+  padding: var(--spacing-sm) 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/* Container de navegación */
+nav .container {
+  padding-left: var(--spacing-lg);
+  padding-right: var(--spacing-lg);
+}
+
+/* Logo y título en móviles */
+nav .flex.items-center {
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+/* Menú de navegación en móviles */
+@media (max-width: 640px) {
+  nav .container {
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  /* Logo section */
+  nav .flex.items-center.mb-4 {
+    margin-bottom: var(--spacing-sm) !important;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  /* Texto "INNOVACIÓN..." */
+  nav .ml-3.text-xs {
+    display: none; /* Ocultar en móviles muy pequeños */
+  }
+  
+  /* Navegación links container */
+  nav .flex.flex-wrap {
+    width: 100%;
+    justify-content: center;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  /* Links de navegación */
+  nav .flex.space-x-4 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+    width: 100%;
+    margin: 0;
+  }
+  
+  nav .flex.space-x-4 a {
+    margin: 0;
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-align: center;
+    min-height: var(--touch-target-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-sm);
+  }
+  
+  /* Controles (dark mode + logout) */
+  nav .flex.items-center.space-x-3 {
+    width: 100%;
+    justify-content: center;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+  }
+  
+  /* Divider hide en móviles */
+  nav .h-6.w-px {
+    display: none;
+  }
+}
+
+/* ==============================================
+   CONTENIDO PRINCIPAL RESPONSIVO
+============================================== */
+
+/* Container principal */
+main.container {
+  padding-left: var(--spacing-lg);
+  padding-right: var(--spacing-lg);
+  padding-top: var(--spacing-xl);
+  padding-bottom: var(--spacing-xl);
+}
+
+@media (max-width: 640px) {
+  main.container {
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+    padding-top: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+  }
+}
+
+/* ==============================================
+   PÁGINAS ESPECÍFICAS - MOBILE OPTIMIZATION
+============================================== */
+
+/* APPOINTMENTS VIEW */
+.appointments-view h1 {
+  font-size: var(--text-xl);
+  margin-bottom: var(--spacing-lg);
+}
+
+@media (max-width: 640px) {
+  .appointments-view h1 {
+    font-size: var(--text-lg);
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+  }
+}
+
+/* Controles de fecha y botones */
+.appointments-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+@media (min-width: 640px) {
+  .appointments-controls {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+/* Input de fecha móvil */
+.date-input-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.date-input-container input[type="date"] {
+  flex: 1;
+  min-height: var(--touch-target);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid #D1D5DB;
+  font-size: var(--text-base);
+}
+
+@media (min-width: 640px) {
+  .date-input-container {
+    width: auto;
+    min-width: 200px;
+  }
+}
+
+/* Botones de acción principales */
+.action-buttons {
+  display: flex;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.action-buttons button {
+  flex: 1;
+  min-height: var(--touch-target);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  transition: all 0.2s ease;
+}
+
+@media (min-width: 640px) {
+  .action-buttons {
+    width: auto;
+  }
+  
+  .action-buttons button {
+    flex: none;
+    min-width: 140px;
+  }
+}
+
+/* ==============================================
+   FILTROS RESPONSIVOS
+============================================== */
+
+.filters-section {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-mobile);
+  margin-bottom: var(--spacing-xl);
+  overflow: hidden;
+}
+
+.filters-header {
+  padding: var(--spacing-lg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 500;
+  color: #1A2A47;
+}
+
+.filters-content {
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
+}
+
+@media (max-width: 640px) {
+  .filters-header,
+  .filters-content {
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+  }
+}
+
+/* Grid de filtros */
+.filters-grid {
+  display: grid;
+  gap: var(--spacing-lg);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .filters-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .filters-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Inputs de filtro */
+.filter-input {
+  width: 100%;
+  min-height: var(--touch-target);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid #D1D5DB;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  transition: border-color 0.2s ease;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: #00C7A0;
+  box-shadow: 0 0 0 3px rgba(0, 199, 160, 0.1);
+}
+
+/* ==============================================
+   TARJETAS DE CITAS RESPONSIVAS
+============================================== */
+
+.appointment-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-mobile);
+  margin-bottom: var(--spacing-lg);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.appointment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-mobile-elevated);
+}
+
+.appointment-card-content {
+  padding: var(--spacing-lg);
+}
+
+@media (max-width: 640px) {
+  .appointment-card-content {
+    padding: var(--spacing-md);
+  }
+}
+
+/* Header de la tarjeta */
+.appointment-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-md);
+  gap: var(--spacing-md);
+}
+
+@media (max-width: 640px) {
+  .appointment-card-header {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+}
+
+/* Información principal */
+.appointment-info {
+  flex: 1;
+  min-width: 0; /* Para permitir text truncation */
+}
+
+.appointment-patient-name {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: #1A2A47;
+  margin-bottom: var(--spacing-xs);
+  line-height: 1.3;
+}
+
+@media (max-width: 640px) {
+  .appointment-patient-name {
+    font-size: var(--text-base);
+  }
+}
+
+/* Status badge responsive */
+.status-badge {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  white-space: nowrap;
+  text-align: center;
+  min-width: 80px;
+}
+
+@media (max-width: 640px) {
+  .status-badge {
+    align-self: flex-start;
+    min-width: auto;
+  }
+}
+
+/* ==============================================
+   MODALES RESPONSIVOS
+============================================== */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  z-index: 50;
+}
+
+.modal-content {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-mobile-elevated);
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: var(--spacing-md);
+    align-items: flex-end;
+  }
+  
+  .modal-content {
+    max-height: 85vh;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}
+
+.modal-header {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid #E5E7EB;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-body {
+  padding: var(--spacing-lg);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-footer {
+  padding: var(--spacing-lg);
+  border-top: 1px solid #E5E7EB;
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: var(--spacing-md);
+  }
+  
+  .modal-footer {
+    flex-direction: column-reverse;
+  }
+  
+  .modal-footer button {
+    width: 100%;
+    min-height: var(--touch-target);
+  }
+}
+
+/* ==============================================
+   FORMULARIOS RESPONSIVOS
+============================================== */
+
+.form-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: var(--spacing-xs);
+}
+
+.form-input {
+  width: 100%;
+  min-height: var(--touch-target);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid #D1D5DB;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #00C7A0;
+  box-shadow: 0 0 0 3px rgba(0, 199, 160, 0.1);
+}
+
+/* Grid de formularios */
+.form-grid {
+  display: grid;
+  gap: var(--spacing-lg);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .form-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ==============================================
+   BOTONES RESPONSIVOS
+============================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  min-height: var(--touch-target);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  -webkit-user-select: none; /* Safari */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Variantes de botones */
+.btn-primary {
+  background: #1A3064;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #2A4075;
+}
+
+.btn-secondary {
+  background: #00C7A0;
+  color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #00A286;
+}
+
+.btn-outline {
+  background: transparent;
+  color: #374151;
+  border: 1px solid #D1D5DB;
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: #F9FAFB;
+}
+
+/* Tamaños de botones */
+.btn-sm {
+  min-height: var(--touch-target-sm);
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--text-xs);
+}
+
+.btn-lg {
+  min-height: 52px;
+  padding: var(--spacing-md) var(--spacing-xl);
+  font-size: var(--text-base);
+}
+
+/* Botones full-width en móviles */
+@media (max-width: 640px) {
+  .btn-mobile-full {
+    width: 100%;
+  }
+}
+
+/* ==============================================
+   UTILIDADES RESPONSIVAS
+============================================== */
+
+/* Ocultar elementos en móviles */
+@media (max-width: 640px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+/* Mostrar solo en móviles */
+.show-mobile {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  .show-mobile {
+    display: block !important;
+  }
+  
+  .show-mobile-flex {
+    display: flex !important;
+  }
+  
+  .show-mobile-grid {
+    display: grid !important;
+  }
+}
+
+/* Texto responsivo */
+.text-responsive {
+  font-size: var(--text-sm);
+}
+
+@media (min-width: 640px) {
+  .text-responsive {
+    font-size: var(--text-base);
+  }
+}
+
+/* Espaciado responsivo */
+.spacing-responsive {
+  padding: var(--spacing-md);
+}
+
+@media (min-width: 640px) {
+  .spacing-responsive {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .spacing-responsive {
+    padding: var(--spacing-xl);
+  }
+}
+
+/* ==============================================
+   DARK MODE RESPONSIVE
+============================================== */
+
+@media (prefers-color-scheme: dark) {
+  .auto-dark {
+    background: #1A1A2E;
+    color: #FFFFFF;
+  }
+}
+
+.dark .modal-content,
+.dark .appointment-card,
+.dark .filters-section {
+  background: #2E2E48;
+  border: 1px solid #3D3D5C;
+}
+
+.dark .form-input,
+.dark .filter-input {
+  background: #232335;
+  border-color: #3D3D5C;
+  color: #FFFFFF;
+}
+
+.dark .form-input:focus,
+.dark .filter-input:focus {
+  border-color: #00C7A0;
+  box-shadow: 0 0 0 3px rgba(0, 199, 160, 0.2);
+}
+
+/* ==============================================
+   MEJORAS DE ACCESIBILIDAD MÓVIL
+============================================== */
+
+/* Mejorar contraste para elementos interactivos */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #00C7A0;
+  outline-offset: 2px;
+}
+
+/* Hover states solo en dispositivos que soportan hover */
+@media (hover: hover) and (pointer: fine) {
+  .hover-only:hover {
+    transform: translateY(-1px);
+  }
+}
+
+/* Mejorar la legibilidad en pantallas pequeñas */
+@media (max-width: 480px) {
+  body {
+    font-size: 15px; /* Ligeramente más pequeño para pantallas muy pequeñas */
+  }
+  
+  .appointment-card-content {
+    padding: var(--spacing-sm);
+  }
+  
+  .modal-content {
+    margin: var(--spacing-xs);
+  }
+}
+
+/* ==============================================
+   ANIMACIONES OPTIMIZADAS PARA MÓVILES
+============================================== */
+
+/* Reducir animaciones en dispositivos con batería baja o preferencias de usuario */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Animaciones sutiles para interacciones móviles */
+.mobile-tap {
+  transition: transform 0.1s ease;
+}
+
+.mobile-tap:active {
+  transform: scale(0.98);
+}
+
+/* ==============================================
+   FOOTER RESPONSIVO
+============================================== */
+
+footer {
+  padding: var(--spacing-lg) var(--spacing-md);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  footer {
+    padding: var(--spacing-md);
+  }
+  
+  footer .flex {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  footer .text-sm {
+    font-size: var(--text-xs);
+  }
+} 

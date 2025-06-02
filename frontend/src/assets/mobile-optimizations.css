@@ -1,0 +1,366 @@
+/* 
+ * Mobile Optimizations - Específico para iPhone y otros dispositivos móviles
+ */
+
+/* ==============================================
+   OPTIMIZACIONES ESPECÍFICAS PARA IPHONE
+============================================== */
+
+/* iPhone SE y pantallas pequeñas (375px y menos) */
+@media screen and (max-width: 375px) {
+  /* Reducir padding general */
+  .spacing-responsive {
+    padding: 0.5rem !important;
+  }
+  
+  /* Botones más compactos */
+  .btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  
+  /* Navegación más compacta */
+  nav .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  /* Texto más pequeño en pantallas muy pequeñas */
+  .appointment-patient-name {
+    font-size: 0.875rem !important;
+  }
+  
+  /* Grid de una sola columna en filtros */
+  .filters-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* iPhone 6/7/8 y similares (375px - 414px) */
+@media screen and (min-width: 376px) and (max-width: 414px) {
+  /* Optimizaciones para este rango de pantallas */
+  .action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  
+  /* Navegación en grid 2x2 */
+  nav .flex.flex-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+}
+
+/* ==============================================
+   SAFE AREAS PARA DISPOSITIVOS CON NOTCH
+============================================== */
+
+/* Soporte para iPhone X y posteriores con notch */
+@supports (padding-top: env(safe-area-inset-top)) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Ajustar navegación para notch */
+  nav {
+    padding-top: calc(env(safe-area-inset-top) + 0.5rem);
+  }
+  
+  /* Ajustar footer para indicador de inicio */
+  footer {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
+  }
+}
+
+/* ==============================================
+   OPTIMIZACIONES DE PERFORMANCE MÓVIL
+============================================== */
+
+/* Optimizar animaciones para móviles */
+@media (max-width: 640px) {
+  /* Reducir animaciones complejas */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.2s !important;
+    transition-duration: 0.2s !important;
+  }
+  
+  /* Optimizar transformaciones */
+  .mobile-tap {
+    transform: translateZ(0); /* Activar aceleración por hardware */
+    will-change: transform;
+  }
+  
+  /* Mejorar scroll en iOS */
+  .modal-body,
+  .filters-content {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ==============================================
+   MEJORAS DE LEGIBILIDAD MÓVIL
+============================================== */
+
+/* Mejorar contraste en pantallas móviles */
+@media (max-width: 640px) {
+  /* Texto más oscuro para mejor legibilidad */
+  .text-gray-600 {
+    color: #4B5563 !important;
+  }
+  
+  /* Fondo más contrastante para elementos interactivos */
+  .appointment-card:hover {
+    background-color: #F9FAFB;
+  }
+  
+  /* Botones más visibles */
+  .btn-outline {
+    border-width: 2px;
+  }
+  
+  /* Enlaces más visibles */
+  .nav-active {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+  }
+}
+
+/* ==============================================
+   OPTIMIZACIONES PARA MODO OSCURO MÓVIL
+============================================== */
+
+@media (max-width: 640px) {
+  .dark .appointment-card {
+    border-color: #4A5568;
+  }
+  
+  .dark .appointment-card:hover {
+    background-color: #2D3748;
+  }
+  
+  .dark .btn-outline {
+    border-color: #4A5568;
+    color: #F7FAFC;
+  }
+  
+  .dark .btn-outline:hover {
+    background-color: #4A5568;
+  }
+}
+
+/* ==============================================
+   OPTIMIZACIONES DE GESTOS TÁCTILES
+============================================== */
+
+/* Mejorar área de toque */
+@media (max-width: 640px) {
+  /* Asegurar área mínima de toque de 44x44px */
+  button,
+  .btn,
+  a[role="button"],
+  input[type="submit"],
+  input[type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Espaciado entre elementos táctiles */
+  .action-buttons .btn {
+    margin: 2px;
+  }
+  
+  /* Mejorar feedback táctil */
+  .mobile-tap:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* ==============================================
+   OPTIMIZACIONES ESPECÍFICAS DEL CONTENIDO
+============================================== */
+
+/* Appointments View - Mobile */
+@media (max-width: 640px) {
+  /* Título centrado y más pequeño */
+  .appointments-view h1 {
+    text-align: center;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Controles de fecha stack vertical */
+  .appointments-controls {
+    gap: 1rem;
+  }
+  
+  .date-input-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .date-input-container label {
+    text-align: center;
+    font-weight: 600;
+  }
+  
+  /* Botones de acción full width */
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .action-buttons button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Appointment Cards - Mobile */
+@media (max-width: 640px) {
+  /* Simplificar layout de tarjetas */
+  .appointment-card-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .appointment-info {
+    text-align: center;
+  }
+  
+  .status-badge {
+    align-self: center;
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+  }
+  
+  /* Información en una sola columna */
+  .appointment-card-content .grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  /* Botones de acción en grid */
+  .appointment-card .flex.flex-wrap {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.5rem;
+  }
+  
+  .appointment-card .btn {
+    font-size: 0.75rem;
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* ==============================================
+   OPTIMIZACIONES PARA LANDSCAPE EN MÓVILES
+============================================== */
+
+@media screen and (max-height: 480px) and (orientation: landscape) {
+  /* Reducir altura de navegación */
+  nav {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+  
+  /* Compactar controles */
+  .appointments-controls {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  /* Reducir espaciado vertical */
+  .spacing-responsive {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+}
+
+/* ==============================================
+   UTILIDADES DE DEBUG PARA DESARROLLO
+============================================== */
+
+/* Mostrar breakpoint actual (solo en desarrollo) */
+.debug-breakpoint::before {
+  position: fixed;
+  top: 0;
+  right: 0;
+  background: red;
+  color: white;
+  padding: 4px 8px;
+  font-size: 12px;
+  z-index: 9999;
+  content: 'XS';
+}
+
+@media (min-width: 475px) {
+  .debug-breakpoint::before {
+    content: 'XS+';
+  }
+}
+
+@media (min-width: 640px) {
+  .debug-breakpoint::before {
+    content: 'SM';
+  }
+}
+
+@media (min-width: 768px) {
+  .debug-breakpoint::before {
+    content: 'MD';
+  }
+}
+
+@media (min-width: 1024px) {
+  .debug-breakpoint::before {
+    content: 'LG';
+  }
+}
+
+@media (min-width: 1280px) {
+  .debug-breakpoint::before {
+    content: 'XL';
+  }
+}
+
+/* ==============================================
+   MEJORAS DE ACCESIBILIDAD MÓVIL
+============================================== */
+
+/* Focus visible mejorado para móviles */
+@media (max-width: 640px) {
+  *:focus-visible {
+    outline: 3px solid #00C7A0;
+    outline-offset: 2px;
+  }
+  
+  /* Mejorar visibilidad de elementos activos */
+  .btn:active,
+  button:active {
+    background-color: rgba(0, 199, 160, 0.1);
+  }
+  
+  /* Texto más grande para mejor legibilidad */
+  .form-label {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  
+  /* Mejorar contraste de placeholders */
+  input::placeholder,
+  textarea::placeholder {
+    color: #6B7280;
+    opacity: 1;
+  }
+} 
