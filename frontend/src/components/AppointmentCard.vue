@@ -25,63 +25,22 @@
         </span>
       </div>
       
-      <!-- Etiqueta de proceso médico (sticky note) mejorada -->
-      <div v-if="appointment.medical_process_tag && appointment.status !== 'Completada'" class="relative mt-1 mb-1.5">
-        <div class="flex items-center">
-          <div class="ml-3 px-2 py-1 text-xs font-semibold rounded-md shadow-sm dark:shadow-md flex items-center space-x-1 tag-container" 
-               style="max-width: 90%;">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            <span class="text-amber-800 dark:text-amber-300 font-medium">{{ appointment.medical_process_tag }}</span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Selector de etiqueta de proceso médico (botón +) -->
-      <div v-if="['En Espera', 'En Consulta'].includes(appointment.status)" class="px-3 pt-1 pb-0 relative">
-        <div v-if="!showTagSelector" class="flex justify-start">
-          <button 
-            @click="toggleTagSelector"
-            class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-800/30 dark:hover:bg-amber-700/40 dark:text-amber-300 p-1 rounded-full border border-amber-200 dark:border-amber-700 flex items-center justify-center w-5 h-5 transition-colors"
-            title="Añadir etiqueta de proceso médico">
+      <!-- Selector y visualización de etiqueta de proceso médico -->
+      <div v-if="['En Espera', 'En Consulta'].includes(appointment.status)" class="px-3 pt-2 pb-1">
+        <!-- Botón para añadir o cambiar etiqueta -->
+        <button v-if="!appointment.medical_process_tag" @click="showTagModal = true" class="flex items-center space-x-1 text-xs text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-800/30 px-2 py-1 rounded-md border border-dashed border-amber-400 dark:border-amber-600 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
-          </button>
-        </div>
+            <span>Añadir Proceso</span>
+        </button>
         
-        <!-- Panel emergente para seleccionar etiqueta -->
-        <div v-if="showTagSelector" class="absolute z-50 left-3 mt-1 bg-white dark:bg-slate-800 rounded-md shadow-md border border-gray-200 dark:border-slate-700 p-2 min-w-[180px] max-h-[200px] overflow-y-auto tag-selector">
-          <div class="flex justify-between items-center mb-2 pb-1 border-b dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800 z-10">
-            <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Proceso médico</span>
-            <button @click="toggleTagSelector" class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          <div class="space-y-1">
-            <button 
-              @click="selectTag('')"
-              class="w-full text-left text-xs p-1.5 rounded hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center"
-              :class="{'bg-gray-100 dark:bg-slate-700': selectedMedicalProcessTag === ''}">
-              <span class="text-gray-700 dark:text-gray-300">Sin etiqueta</span>
-            </button>
-            <button 
-              v-for="tag in medicalProcessTags" 
-              :key="tag"
-              @click="selectTag(tag)"
-              class="w-full text-left text-xs p-1.5 rounded hover:bg-amber-50 dark:hover:bg-amber-800/30 flex items-center"
-              :class="{'bg-amber-50 dark:bg-amber-800/40': selectedMedicalProcessTag === tag}">
-              <svg v-if="selectedMedicalProcessTag === tag" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-amber-600 dark:text-amber-400 mr-1.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-              <span v-else class="w-3 h-3 mr-1.5 flex-shrink-0"></span>
-              <span class="text-amber-800 dark:text-amber-300">{{ tag }}</span>
-            </button>
-          </div>
-        </div>
+        <button v-else @click="showTagModal = true" class="flex items-center space-x-1.5 text-xs bg-amber-100 dark:bg-amber-800/40 text-amber-800 dark:text-amber-200 px-2 py-1 rounded-md border border-amber-200 dark:border-amber-700 hover:bg-amber-200 dark:hover:bg-amber-700/60 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            <span class="font-medium">{{ appointment.medical_process_tag }}</span>
+        </button>
       </div>
       
       <!-- Cuerpo de la tarjeta con información del paciente y doctor -->
@@ -129,14 +88,36 @@
           <!-- Tiempos y métricas -->
           <div class="space-y-1.5 border-t pt-2 md:pt-0 md:border-t-0 md:border-l md:pl-3 mt-1.5 md:mt-0">
             <div v-if="appointment.status === 'En Espera'" 
-                class="bg-gray-50 rounded-md p-1.5 flex items-center justify-between">
-              <span class="text-xs font-medium text-gray-500">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Timer:
-              </span>
-              <TimerDisplay :status="'En Espera'" :start-time="appointment.arrival_time" class="text-xs font-semibold text-navy font-sans" />
+                class="bg-gray-50 rounded-md p-1.5 flex items-center justify-between w-full">
+              <div class="flex items-center">
+                <span class="text-xs font-medium text-gray-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Timer:
+                </span>
+                <TimerDisplay :status="'En Espera'" :start-time="appointment.arrival_time" class="text-xs font-semibold text-navy font-sans ml-2" />
+              </div>
+              <div class="flex gap-1.5">
+                <button
+                  @click="$emit('change-status', 'En Consulta')"
+                  class="text-xs bg-wave-teal bg-opacity-10 text-wave-teal px-2.5 py-1 rounded-md hover:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-wave-teal focus:ring-offset-1 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span class="hidden sm:inline">Iniciar</span> Consulta
+                </button>
+                <button
+                  @click="$emit('change-status', 'Cancelada')"
+                  class="text-xs bg-red-100 text-red-700 px-2.5 py-1 rounded-md hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Cancelar
+                </button>
+              </div>
             </div>
             
             <div v-if="appointment.status === 'En Consulta'" class="space-y-1.5">
@@ -177,11 +158,62 @@
               </div>
             </div>
 
-            <div v-if="appointment.status === 'Programada'" class="bg-gray-50 rounded-md p-1.5 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-gray-400 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span class="text-xs font-medium text-gray-500">Esperando llegada de cita</span>
+            <div v-if="appointment.status === 'Programada'" class="bg-gray-50 rounded-md p-1.5 flex items-center justify-between w-full">
+              <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-gray-400 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="text-xs font-medium text-gray-500">Esperando llegada de cita</span>
+              </div>
+              <div class="flex gap-1.5">
+                <button
+                  @click="$emit('change-status', 'En Espera')"
+                  class="text-xs bg-wave-blue bg-opacity-10 text-wave-blue px-2.5 py-1 rounded-md hover:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-wave-blue focus:ring-offset-1 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <span class="hidden sm:inline">Marcar</span> Llegada
+                </button>
+                <button
+                  @click="$emit('change-status', 'No Asistió')"
+                  class="text-xs bg-purple-100 text-purple-700 px-2.5 py-1 rounded-md hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  No Asistió
+                </button>
+              </div>
+              <div class="flex gap-1.5">
+                <button
+                  @click="$emit('edit-appointment')"
+                  class="text-xs bg-primary bg-opacity-10 text-primary px-2.5 py-1 rounded-md hover:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Editar
+                </button>
+                <button
+                  @click="confirmDelete"
+                  class="text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-1 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Eliminar
+                </button>
+                <button
+                  @click="$emit('change-status', 'Cancelada')"
+                  class="text-xs bg-red-100 text-red-700 px-2.5 py-1 rounded-md hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Cancelar
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -192,7 +224,7 @@
         <!-- Botones de estado -->
         <button
           @click="$emit('change-status', 'En Espera')"
-          v-if="appointment.status === 'Programada'"
+          v-if="appointment.status === 'Programada' && false"
           class="text-xs bg-wave-blue bg-opacity-10 text-wave-blue px-2.5 py-1 rounded-md hover:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-wave-blue focus:ring-offset-1 transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -202,7 +234,7 @@
         </button>
         <button
           @click="$emit('change-status', 'No Asistió')"
-          v-if="appointment.status === 'Programada'"
+          v-if="appointment.status === 'Programada' && false"
           class="text-xs bg-purple-100 text-purple-700 px-2.5 py-1 rounded-md hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1 transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -212,7 +244,7 @@
         </button>
         <button
           @click="$emit('change-status', 'En Consulta')"
-          v-if="appointment.status === 'En Espera'"
+          v-if="appointment.status === 'En Espera' && false"
           class="text-xs bg-wave-teal bg-opacity-10 text-wave-teal px-2.5 py-1 rounded-md hover:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-wave-teal focus:ring-offset-1 transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -232,7 +264,7 @@
         </button>
         <button
           @click="$emit('change-status', 'Cancelada')"
-          v-if="['Programada', 'En Espera', 'En Consulta'].includes(appointment.status)"
+          v-if="['En Espera', 'En Consulta'].includes(appointment.status) && false"
           class="text-xs bg-red-100 text-red-700 px-2.5 py-1 rounded-md hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -244,7 +276,7 @@
         <!-- Botones de edición y eliminación -->
         <button
           @click="$emit('edit-appointment')"
-          v-if="['Programada'].includes(appointment.status)"
+          v-if="appointment.status === 'Programada' && false"
           class="text-xs bg-primary bg-opacity-10 text-primary px-2.5 py-1 rounded-md hover:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -254,7 +286,7 @@
         </button>
         <button
           @click="confirmDelete"
-          v-if="['Programada', 'Cancelada', 'No Asistió'].includes(appointment.status)"
+          v-if="['Cancelada', 'No Asistió'].includes(appointment.status) || (appointment.status === 'Programada' && false)"
           class="text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-1 transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -262,9 +294,56 @@
           </svg>
           Eliminar
         </button>
+        <button
+          @click="$emit('change-status', 'Cancelada')"
+          v-if="appointment.status === 'Programada' && false"
+          class="text-xs bg-red-100 text-red-700 px-2.5 py-1 rounded-md hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          Cancelar
+        </button>
       </div>
     </div>
     
+    <!-- Modal para seleccionar proceso médico -->
+    <BaseModal :show="showTagModal" @close="showTagModal = false">
+        <template #title>Seleccionar Proceso Médico</template>
+        <div class="space-y-2">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Seleccione el proceso que se está realizando para la cita de <strong class="text-navy dark:text-white">{{ appointment.patient?.name || 'este paciente' }}</strong>.
+            </p>
+            <button
+              @click="selectTag('')"
+              class="w-full text-left text-sm p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface flex items-center transition-colors"
+              :class="{'bg-gray-100 dark:bg-dark-surface font-semibold': selectedMedicalProcessTag === ''}">
+              <span class="text-gray-700 dark:text-gray-300">Sin etiqueta</span>
+            </button>
+            <button
+              v-for="tag in medicalProcessTags"
+              :key="tag"
+              @click="selectTag(tag)"
+              class="w-full text-left text-sm p-2.5 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/40 flex items-center transition-colors"
+              :class="{'bg-amber-100 dark:bg-amber-900/60 font-semibold': selectedMedicalProcessTag === tag}">
+              <svg v-if="selectedMedicalProcessTag === tag" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600 dark:text-amber-400 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span v-else class="w-4 h-4 mr-2 flex-shrink-0"></span>
+              <span class="text-amber-800 dark:text-amber-300">{{ tag }}</span>
+            </button>
+        </div>
+        <template #footer>
+            <button
+              type="button"
+              @click="showTagModal = false"
+              class="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-dark-button px-3 py-2 text-sm font-semibold text-navy dark:text-white shadow-sm dark:shadow-dark-sm ring-1 ring-inset ring-gray-300 dark:ring-dark-border hover:bg-gray-50 dark:hover:bg-dark-accent/30 sm:mt-0 sm:w-auto transition-colors focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-secondary-dark"
+            >
+              Cancelar
+            </button>
+        </template>
+    </BaseModal>
+
     <!-- Diálogo de confirmación para eliminar cita -->
     <ConfirmDialog
       :show="showDeleteConfirm"
@@ -282,6 +361,7 @@
   import { computed, ref } from 'vue';
   import TimerDisplay from './TimerDisplay.vue';
   import ConfirmDialog from './ConfirmDialog.vue';
+  import BaseModal from './BaseModal.vue';
   import { toastService } from '../services/toastService';
   
   // Props
@@ -298,8 +378,8 @@
   // Estado para la etiqueta seleccionada
   const selectedMedicalProcessTag = ref(props.appointment.medical_process_tag || '');
   
-  // Estado para controlar la visibilidad del selector
-  const showTagSelector = ref(false);
+  // Estado para controlar la visibilidad del modal
+  const showTagModal = ref(false);
   
   // Estado para controlar el diálogo de confirmación
   const showDeleteConfirm = ref(false);
@@ -314,16 +394,11 @@
     'Campimetría'
   ];
   
-  // Función para alternar la visibilidad del selector
-  const toggleTagSelector = () => {
-    showTagSelector.value = !showTagSelector.value;
-  };
-  
   // Función para seleccionar una etiqueta
   const selectTag = (tag) => {
     selectedMedicalProcessTag.value = tag;
     emit('update-tag', tag);
-    showTagSelector.value = false;
+    showTagModal.value = false;
   };
   
   // Función para actualizar la etiqueta de proceso médico
@@ -515,13 +590,5 @@
   .tag-selector {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
-
-  /* Estilos específicos para modo claro/oscuro */
-  .tag-container {
-    @apply bg-gradient-to-r from-amber-50 to-yellow-100 border-l-4 border-l-amber-400;
-  }
-
-  :global(.dark) .tag-container {
-    @apply bg-gradient-to-r from-amber-900/40 to-amber-800/40 border-l-amber-600;
-  }
+   
   </style>
