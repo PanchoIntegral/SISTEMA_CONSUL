@@ -13,11 +13,9 @@
                    'bg-wave-blue bg-opacity-5': appointment.status === 'En Espera',
                    'bg-wave-teal bg-opacity-5': appointment.status === 'En Consulta',
                    'bg-gray-50': appointment.status === 'Programada' || appointment.status === 'No Asistió'}">
-        <div class="flex items-center gap-1.5">
-          <div class="flex flex-col">
+        <div class="flex items-baseline gap-2">
             <span class="font-bold text-md text-primary">{{ formattedTime }}</span>
             <span class="text-xs text-gray-500">{{ formattedDate }}</span>
-          </div>
         </div>
         <span
           :class="statusClass"
@@ -92,31 +90,28 @@
           <!-- Información de paciente y doctor -->
           <div class="space-y-1.5">
             <div class="flex items-center">
-              <div class="w-7 h-7 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mr-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <div>
-                <div class="flex items-center">
-                  <p class="text-sm font-semibold text-navy">{{ appointment.patient?.name || 'N/A' }}</p>
-                  <span v-if="appointment.is_recurring_patient" class="ml-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-secondary bg-opacity-10 text-secondary" title="Paciente recurrente">
-                    <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clip-rule="evenodd"></path>
-                    </svg>
-                    <span class="hidden sm:inline">Recurrente</span>
-                  </span>
+              <div class="flex items-center">
+                <div class="w-7 h-7 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mr-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </div>
+                <p class="text-sm font-semibold text-navy">{{ appointment.patient?.name || 'N/A' }}</p>
+                <span v-if="appointment.is_recurring_patient" class="ml-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-secondary bg-opacity-10 text-secondary" title="Paciente recurrente">
+                  <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clip-rule="evenodd"></path>
+                  </svg>
+                  <span class="hidden sm:inline">Recurrente</span>
+                </span>
               </div>
-            </div>
-            
-            <div class="flex items-center">
-              <div class="w-7 h-7 bg-wave-teal bg-opacity-10 rounded-full flex items-center justify-center mr-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-wave-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+              <div class="flex items-center ml-[70px]">
+                <div class="w-7 h-7 bg-wave-teal bg-opacity-10 rounded-full flex items-center justify-center mr-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-wave-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <p class="text-sm text-gray-600">{{ formattedDoctorName }}</p>
               </div>
-              <p class="text-sm text-gray-600">{{ formattedDoctorName }}</p>
             </div>
             
             <div v-if="appointment.notes" class="flex mt-1.5">
