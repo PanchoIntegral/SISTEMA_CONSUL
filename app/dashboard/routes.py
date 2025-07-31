@@ -361,9 +361,9 @@ def get_appointments_by_day(current_user):
             .execute()
 
         if not hasattr(appointments_query, 'data'):
-             error_details = getattr(appointments_query, 'error', 'Unknown Supabase error')
-             current_app.logger.error(f"Error en Supabase al consultar citas por día: {error_details}")
-             return jsonify({"message": "Error al consultar datos de citas"}), 500
+            error_details = getattr(appointments_query, 'error', 'Unknown Supabase error')
+            current_app.logger.error(f"Error en Supabase al consultar citas por día: {error_details}")
+            return jsonify({"message": "Error al consultar datos de citas"}), 500
 
         appointments = appointments_query.data
         daily_counts = Counter()
@@ -373,8 +373,8 @@ def get_appointments_by_day(current_user):
                 day = app_time.day
                 daily_counts[day] += 1
             except (ValueError, TypeError, KeyError):
-                 current_app.logger.warning(f"No se pudo procesar fecha: {app.get('appointment_time')}")
-                 continue 
+                current_app.logger.warning(f"No se pudo procesar fecha: {app.get('appointment_time')}")
+                continue 
 
         
         result = []
