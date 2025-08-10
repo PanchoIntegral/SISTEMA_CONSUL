@@ -57,6 +57,59 @@ def get_current_date_tijuana():
     """Retorna la fecha actual en la zona horaria de Tijuana."""
     return get_current_time_tijuana().date()
 
+def get_shift_from_time(appointment_time_str: str) -> str:
+    """
+    Determina el turno (mañana o tarde) basado en la hora de la cita.
+    Turno Mañana: 9:00 AM - 3:00 PM (15:00)
+    Turno Tarde: 4:00 PM - 9:00 PM (21:00)
+    """
+    try:
+        # Parsear la hora de la cita
+        appointment_dt = datetime.fromisoformat(appointment_time_str.replace('Z', '+00:00'))
+        
+        # Convertir a zona horaria de Tijuana para obtener la hora local
+        tijuana_tz = get_tijuana_timezone()
+        local_time = appointment_dt.astimezone(tijuana_tz)
+        
+        # Extraer la hora (0-23)
+        hour = local_time.hour
+        
+        # Determinar turno
+        if 9 <= hour < 15:  # 9:00 AM - 2:59 PM
+            return "mañana"
+        elif 16 <= hour < 21:  # 4:00 PM - 8:59 PM  
+            return "tarde"
+        else:
+            return "fuera_horario"  # Para citas fuera del horario normal
+            
+    except Exception as e:
+        current_app.logger.error(f"Error determinando turno para hora {appointment_time_str}: {e}")
+        return "indeterminado"
+
+def filter_appointments_by_shift(appointments: list, shift: str) -> list:
+    """
+    Filtra las citas por turno (mañana/tarde).
+    
+    Args:
+        appointments: Lista de citas
+        shift: 'mañana', 'tarde', o 'todos'
+    
+    Returns:
+        Lista filtrada de citas
+    """
+    if not appointments or shift == "todos" or not shift:
+        return appointments
+    
+    filtered_appointments = []
+    for appointment in appointments:
+        appointment_time = appointment.get('appointment_time')
+        if appointment_time:
+            appointment_shift = get_shift_from_time(appointment_time)
+            if appointment_shift == shift:
+                filtered_appointments.append(appointment)
+    
+    return filtered_appointments
+
 def calculate_durations(appointment_data: dict) -> dict:
     """Calcula tiempos de espera y consulta si los timestamps existen."""
     wait_seconds = None

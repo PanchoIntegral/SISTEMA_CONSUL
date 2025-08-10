@@ -5,7 +5,7 @@ from datetime import datetime, timezone, timedelta # Asegúrate de importar time
 from . import appointments_bp
 from app.extensions import get_supabase
 from app.utils.decorators import token_required
-from app.utils.helpers import calculate_durations, get_current_date_tijuana, get_current_time_tijuana, get_tijuana_timezone
+from app.utils.helpers import calculate_durations, get_current_date_tijuana, get_current_time_tijuana, get_tijuana_timezone, filter_appointments_by_shift
 
 supabase = get_supabase()
 
@@ -155,6 +155,7 @@ def get_appointments(current_user):
         filter_status = request.args.get('status')
         filter_doctor_id = request.args.get('doctor_id')
         filter_patient_name = request.args.get('patient_name')
+        filter_shift = request.args.get('shift')  # Nuevo filtro por turno
         filter_exclude_statuses = request.args.getlist('exclude_statuses[]')  # Obtener lista de estados a excluir
         filter_include_statuses = request.args.getlist('include_statuses[]')  # Obtener lista de estados a incluir
 
@@ -281,6 +282,11 @@ def get_appointments(current_user):
                 except Exception as sort_error:
                     current_app.logger.error(f"Error al ordenar por nombre de paciente: {sort_error}")
                     # Continuamos sin ordenar si hay un error
+
+            # Aplicar filtro por turno después del procesamiento
+            if filter_shift:
+                current_app.logger.info(f"Filtrando citas por turno: {filter_shift}")
+                appointments_with_times = filter_appointments_by_shift(appointments_with_times, filter_shift)
 
         return jsonify(appointments_with_times), 200
 

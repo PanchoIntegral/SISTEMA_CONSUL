@@ -27,6 +27,43 @@
       </div>
     </div>
 
+    <!-- Filtros rápidos por turno -->
+    <div class="bg-white p-3 sm:p-4 rounded-lg shadow mb-4">
+      <h3 class="text-sm font-medium text-navy mb-3">Filtro rápido por turno:</h3>
+      <div class="flex flex-wrap gap-2">
+        <button 
+          @click="setQuickShiftFilter('')"
+          :class="quickShiftButtonClasses('')"
+          class="px-4 py-2 text-sm font-medium rounded-md border transition-colors duration-200 flex items-center gap-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          Todos los turnos
+        </button>
+        <button 
+          @click="setQuickShiftFilter('mañana')"
+          :class="quickShiftButtonClasses('mañana')"
+          class="px-4 py-2 text-sm font-medium rounded-md border transition-colors duration-200 flex items-center gap-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          Mañana
+        </button>
+        <button 
+          @click="setQuickShiftFilter('tarde')"
+          :class="quickShiftButtonClasses('tarde')"
+          class="px-4 py-2 text-sm font-medium rounded-md border transition-colors duration-200 flex items-center gap-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+          Tarde
+        </button>
+      </div>
+    </div>
+
     <!-- Nuevos controles de filtro -->
     <div class="bg-white p-3 sm:p-4 rounded-lg shadow mb-6">
       <details class="w-full">
@@ -85,6 +122,21 @@
                 <span class="text-gray-400 hover:text-gray-500">&times;</span>
               </div>
             </div>
+          </div>
+
+          <!-- Nuevo: Filtro por turno -->
+          <div>
+            <label for="shift-filter" class="block text-sm font-medium text-navy">Por turno:</label>
+            <select
+              id="shift-filter"
+              v-model="localSelectedShift"
+              @change="updateShift"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary sm:text-sm p-2"
+            >
+              <option value="">Todos los turnos</option>
+              <option value="mañana">☀️ Turno Mañana</option>
+              <option value="tarde">🌙 Turno Tarde</option>
+            </select>
           </div>
         </div>
         
@@ -150,6 +202,11 @@
             Paciente: {{ localSearchPatientName }}
             <button type="button" @click="clearPatientSearch" class="ml-1">&times;</button>
           </span>
+          
+          <span v-if="localSelectedShift" class="inline-flex items-center rounded-md bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800 ring-1 ring-inset ring-purple-600/30">
+            Turno: {{ getShiftDisplayName(localSelectedShift) }}
+            <button type="button" @click="clearShiftFilter" class="ml-1">&times;</button>
+          </span>
         </div>
       </details>
     </div>
@@ -193,7 +250,7 @@
         <div class="flex flex-col sm:flex-row-reverse w-full gap-2 sm:gap-0">
           <button
             type="button"
-            @click="submitAppointmentForm"
+            @clicenk="submitAppointmentForm"
             :disabled="appointmentFormRef?.isLoading"
             class="inline-flex justify-center rounded-md bg-secondary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-secondary-light sm:ml-3 disabled:opacity-50 transition-colors"
           >
@@ -275,6 +332,7 @@ const localSelectedDate = ref(appointmentsStore.date);
 const localSelectedStatus = ref(appointmentsStore.status);
 const localSelectedDoctorId = ref(appointmentsStore.doctorId);
 const localSearchPatientName = ref(appointmentsStore.patientName);
+const localSelectedShift = ref(appointmentsStore.shift);
 const localSortBy = ref(appointmentsStore.currentSortBy);
 const localSortDir = ref(appointmentsStore.currentSortDirection);
 
@@ -288,7 +346,7 @@ const selectedAppointment = ref(null); // Cita seleccionada para editar
 
 // Verificar si hay filtros activos
 const hasActiveFilters = computed(() => {
-  return localSelectedStatus.value || localSelectedDoctorId.value || localSearchPatientName.value;
+  return localSelectedStatus.value || localSelectedDoctorId.value || localSearchPatientName.value || localSelectedShift.value;
 });
 
 // Texto adicional para el título cuando hay filtros
@@ -302,6 +360,9 @@ const filterSuffix = computed(() => {
   }
   if (localSearchPatientName.value) {
     parts.push(`que coinciden con "${localSearchPatientName.value}"`);
+  }
+  if (localSelectedShift.value) {
+    parts.push(`del turno de ${localSelectedShift.value}`);
   }
   
   return parts.length > 0 ? `(${parts.join(' ')})` : '';
@@ -371,6 +432,10 @@ const updatePatientName = () => {
   }, 300);
 };
 
+const updateShift = () => {
+  appointmentsStore.setSelectedShift(localSelectedShift.value);
+};
+
 const clearStatusFilter = () => {
   localSelectedStatus.value = '';
   appointmentsStore.setSelectedStatus('');
@@ -386,10 +451,51 @@ const clearPatientSearch = () => {
   appointmentsStore.setSearchPatientName('');
 };
 
+const clearShiftFilter = () => {
+  localSelectedShift.value = '';
+  appointmentsStore.setSelectedShift('');
+};
+
 const clearAllFilters = () => {
   clearStatusFilter();
   clearDoctorFilter();
   clearPatientSearch();
+  clearShiftFilter();
+};
+
+// Funciones para los filtros rápidos de turno
+const setQuickShiftFilter = (shiftValue) => {
+  localSelectedShift.value = shiftValue;
+  appointmentsStore.setSelectedShift(shiftValue);
+};
+
+// Función para determinar las clases de los botones de filtro rápido de turno
+const quickShiftButtonClasses = (shift) => {
+  const isSelected = localSelectedShift.value === shift;
+  
+  switch (shift) {
+    case 'mañana':
+      return isSelected 
+        ? 'bg-orange-100 text-orange-800 border-orange-300 shadow-sm' 
+        : 'bg-white text-gray-700 border-gray-300 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-200';
+    case 'tarde':
+      return isSelected 
+        ? 'bg-indigo-100 text-indigo-800 border-indigo-300 shadow-sm' 
+        : 'bg-white text-gray-700 border-gray-300 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200';
+    default: // 'todos' o empty
+      return isSelected 
+        ? 'bg-secondary text-white border-secondary shadow-sm' 
+        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400';
+  }
+};
+
+// Función para obtener el nombre de visualización del turno
+const getShiftDisplayName = (shift) => {
+  const shiftNames = {
+    'mañana': 'Mañana',
+    'tarde': 'Tarde'
+  };
+  return shiftNames[shift] || shift;
 };
 
 const updateMedicalProcessTag = async (appointmentId, tag) => {
@@ -498,3 +604,33 @@ onUnmounted(() => {
   // appointmentsStore.unsubscribeFromRealtimeUpdates();
 });
 </script>
+
+<style scoped>
+/* Estilos para los iconos de turno */
+.shift-icon {
+  transition: transform 0.2s ease;
+}
+
+.shift-icon:hover {
+  transform: scale(1.1);
+}
+
+/* Mejoras para botones de filtro rápido */
+button:hover .shift-icon {
+  transform: translateY(-1px);
+}
+
+/* Animación suave para iconos SVG */
+svg {
+  transition: all 0.2s ease;
+}
+
+/* Hover effects para botones */
+button:hover svg {
+  transform: scale(1.05);
+}
+
+button:active svg {
+  transform: scale(0.95);
+}
+</style>
