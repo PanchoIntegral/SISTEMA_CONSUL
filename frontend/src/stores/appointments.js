@@ -19,6 +19,7 @@ export const useAppointmentsStore = defineStore('appointments', () => {
   const selectedStatus = ref(''); // Filtro por estado
   const selectedDoctorId = ref(''); // Filtro por doctor ID
   const searchPatientName = ref(''); // Filtro por nombre de paciente
+  const selectedShift = ref(''); // Nuevo: filtro por turno
   const sortBy = ref('appointment_time'); // Nuevo: campo de ordenamiento
   const sortDirection = ref('asc'); // Nuevo: dirección de ordenamiento
   const isLoading = ref(false);
@@ -30,6 +31,7 @@ export const useAppointmentsStore = defineStore('appointments', () => {
   const status = computed(() => selectedStatus.value);
   const doctorId = computed(() => selectedDoctorId.value);
   const patientName = computed(() => searchPatientName.value);
+  const shift = computed(() => selectedShift.value); // Nuevo: getter para turno
   const currentSortBy = computed(() => sortBy.value); // Nuevo: getter para campo de orden
   const currentSortDirection = computed(() => sortDirection.value); // Nuevo: getter para dirección de orden
   const loading = computed(() => isLoading.value);
@@ -54,6 +56,7 @@ export const useAppointmentsStore = defineStore('appointments', () => {
     
     if (selectedDoctorId.value) filters.doctor_id = selectedDoctorId.value;
     if (searchPatientName.value) filters.patient_name = searchPatientName.value;
+    if (selectedShift.value) filters.shift = selectedShift.value; // Nuevo: filtro por turno
     // Añadir parámetros de ordenamiento
     filters.sort_by = sortBy.value;
     filters.sort_dir = sortDirection.value;
@@ -88,6 +91,12 @@ export const useAppointmentsStore = defineStore('appointments', () => {
     fetchAppointments();
   }
   
+  // Nueva: función para establecer el filtro por turno
+  function setSelectedShift(shiftValue) {
+    selectedShift.value = shiftValue;
+    fetchAppointments();
+  }
+  
   // Nueva: función para establecer el ordenamiento
   function setSorting(field, direction) {
     sortBy.value = field;
@@ -106,6 +115,7 @@ export const useAppointmentsStore = defineStore('appointments', () => {
     selectedStatus.value = '';
     selectedDoctorId.value = '';
     searchPatientName.value = '';
+    selectedShift.value = ''; // Limpiar filtro de turno
     // No limpiamos la fecha ni el ordenamiento, solo los filtros
     fetchAppointments();
   }
@@ -312,17 +322,17 @@ export const useAppointmentsStore = defineStore('appointments', () => {
   return {
     // State
     appointmentsList, selectedDate, isLoading, error, 
-    selectedStatus, selectedDoctorId, searchPatientName,
+    selectedStatus, selectedDoctorId, searchPatientName, selectedShift,
     sortBy, sortDirection, // Nuevos estados
     // Getters
     appointments, date, loading, currentError, 
-    status, doctorId, patientName, currentFilters,
+    status, doctorId, patientName, shift, currentFilters,
     currentSortBy, currentSortDirection, // Nuevos getters
     // Actions
     setSelectedDate, fetchAppointments, updateAppointmentStatus,
     createAppointment, deleteAppointment, updateAppointmentData,
     subscribeToRealtimeUpdates, unsubscribeFromRealtimeUpdates,
-    setSelectedStatus, setSelectedDoctorId, setSearchPatientName, clearFilters,
+    setSelectedStatus, setSelectedDoctorId, setSearchPatientName, setSelectedShift, clearFilters,
     setSorting, toggleSortDirection // Nuevas acciones
   };
 });

@@ -16,6 +16,17 @@
         <div class="flex items-baseline gap-2">
             <span class="font-bold text-md text-primary">{{ formattedTime }}</span>
             <span class="text-xs text-gray-500">{{ formattedDate }}</span>
+            <span 
+              v-if="shiftInfo.shift !== 'indeterminado'" 
+              :class="shiftBadgeClass"
+              class="text-xs font-medium px-2 py-0.5 rounded-full border flex items-center gap-1 transition-all duration-200 cursor-help"
+              :title="`Turno de ${shiftInfo.displayName} (${getShiftTimeRange(shiftInfo.shift)})`"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="shiftInfo.iconProps.path" />
+              </svg>
+              {{ shiftInfo.displayName }}
+            </span>
         </div>
         <span
           :class="statusClass"
@@ -359,6 +370,7 @@
   
   <script setup>
   import { computed, ref } from 'vue';
+  import { getShiftInfo, getShiftTimeRange } from '@/utils/shiftUtils';
   import TimerDisplay from './TimerDisplay.vue';
   import ConfirmDialog from './ConfirmDialog.vue';
   import BaseModal from './BaseModal.vue';
@@ -548,6 +560,21 @@
     const hasTitle = /^(Dr\.?|Dra\.?|Doctor|Doctora)/i.test(doctorName);
     
     return hasTitle ? doctorName : `Dr. ${doctorName}`;
+  });
+
+  // Computed para información del turno
+  const shiftInfo = computed(() => {
+    return getShiftInfo(props.appointment.appointment_time);
+  });
+
+  // Computed para clases del badge de turno
+  const shiftBadgeClass = computed(() => {
+    switch (shiftInfo.value.shift) {
+      case 'mañana': return 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100';
+      case 'tarde': return 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100';
+      case 'fuera_horario': return 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100';
+      default: return 'bg-gray-50 text-gray-500 border-gray-200';
+    }
   });
 
   // Computed para clases de estado
