@@ -107,21 +107,44 @@ def create_patient(current_user):
 @patients_bp.route("", methods=["GET"])
 @token_required
 def get_patients(current_user):
-    """Endpoint para obtener la lista de pacientes."""
+    """Endpoint para obtener la lista de pacientes con paginación."""
     current_app.logger.info(f"Solicitud GET /patients por user ID: {current_user.id}")
     try:
+        # Obtener parámetros de consulta para paginación
+        page = request.args.get('page', default=1, type=int)
+        page_size = request.args.get('page_size', default=10, type=int)
         search_term = request.args.get('search')
-        query = supabase.table('patients').select('*').order('name')
+
+        # Calcular el índice de inicio y fin para la paginación
+        start_index = (page - 1) * page_size
+        end_index = start_index + page_size
+
+        # Construir la consulta base
+        query = supabase.table('patients').select('*').order('name').range(start_index, end_index - 1)
 
         if search_term:
             query = query.ilike('name', f'%{search_term}%')
 
         response = query.execute()
-        current_app.logger.debug(f"Respuesta de Supabase (get patients): {response}")
-        return jsonify(response.data or []), 200
+        current_app.logger.debug(f"Respuesta de Supabase (get patients paginated): {response}")
+
+        # Obtener el total de pacientes para calcular el número total de páginas
+        total_response = supabase.table('patients').select('id', count='exact').execute()
+        total_count = total_response.count
+        total_pages = (total_count + page_size - 1) // page_size
+
+        return jsonify({
+            "data": response.data or [],
+            "pagination": {
+                "page": page,
+                "page_size": page_size,
+                "total_pages": total_pages,
+                "total_count": total_count
+            }
+        }), 200
 
     except Exception as e:
-        current_app.logger.exception("Error obteniendo la lista de pacientes")
+        current_app.logger.exception("Error obteniendo la lista de pacientes con paginación")
         return jsonify({"message": "Error obteniendo la lista de pacientes"}), 500
 
 

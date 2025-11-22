@@ -2,9 +2,13 @@ import apiClient from './apiClient';
 
 export const getPatients = async (searchTerm = '') => {
   try {
-    const params = searchTerm ? { search: searchTerm } : {};
+    const params = {
+      page: 1,
+      page_size: 100,
+      ...(searchTerm && { search: searchTerm })
+    };
     const response = await apiClient.get('/patients', { params });
-    return response.data;
+    return response.data; // El backend devuelve {data: [], pagination: {}}
   } catch (error) {
     console.error("Error en servicio getPatients:", error.response || error.message);
     throw error.response?.data || { message: 'Error al obtener los pacientes.' };
@@ -52,10 +56,46 @@ export const deletePatient = async (id) => {
     }
 };
 
+export const getPaginatedPatients = async (page = 1, pageSize = 10, searchTerm = '') => {
+  try {
+    const params = {
+      page,
+      page_size: pageSize,
+      ...(searchTerm && { search: searchTerm })
+    };
+    const response = await apiClient.get('/patients', { params });
+    return response.data;
+  } catch (error) {
+    console.error("Error en servicio getPaginatedPatients:", error.response || error.message);
+    throw error.response?.data || { message: 'Error al obtener los pacientes paginados.' };
+  }
+};
+
+/**
+ * Obtiene todos los pacientes sin paginación.
+ * @param {string} searchTerm - Término de búsqueda opcional.
+ * @returns {Promise<object>} - Promesa que resuelve con todos los pacientes.
+ */
+export const getAllPatients = async (searchTerm = '') => {
+  try {
+    const params = {
+      page: 1,
+      page_size: 9999, // Número muy grande para obtener todos
+      ...(searchTerm && { search: searchTerm })
+    };
+    const response = await apiClient.get('/patients', { params });
+    return response.data; // El backend devuelve {data: [], pagination: {}}
+  } catch (error) {
+    console.error("Error en servicio getAllPatients:", error.response || error.message);
+    throw error.response?.data || { message: 'Error al obtener todos los pacientes.' };
+  }
+};
 
 export default {
     getPatients,
+    getPaginatedPatients,
+    getAllPatients,
     createPatient,
-    updatePatient, // Añadido
-    deletePatient, // Añadido
+    updatePatient,
+    deletePatient,
 };
