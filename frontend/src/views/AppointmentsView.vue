@@ -250,7 +250,7 @@
         <div class="flex flex-col sm:flex-row-reverse w-full gap-2 sm:gap-0">
           <button
             type="button"
-            @clicenk="submitAppointmentForm"
+            @click="submitAppointmentForm"
             :disabled="appointmentFormRef?.isLoading"
             class="inline-flex justify-center rounded-md bg-secondary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-secondary-light sm:ml-3 disabled:opacity-50 transition-colors"
           >
