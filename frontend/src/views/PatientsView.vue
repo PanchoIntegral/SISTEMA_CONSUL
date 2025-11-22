@@ -34,7 +34,7 @@
   
       <div v-else class="overflow-x-auto shadow dark:shadow-dark-sm ring-1 ring-black ring-opacity-5 dark:ring-dark-border sm:rounded-lg">
         <!-- Tabla para pantallas medianas y grandes -->
-        <table v-if="patientsStore.patients.length > 0" class="min-w-full divide-y divide-gray-300 dark:divide-dark-border hidden sm:table">
+        <table v-if="patientsStore.patients && patientsStore.patients.length > 0" class="min-w-full divide-y divide-gray-300 dark:divide-dark-border hidden sm:table">
           <thead class="bg-gray-50 dark:bg-dark-surface">
             <tr>
               <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-navy dark:text-dark-primary sm:pl-6">Nombre</th>
@@ -64,7 +64,7 @@
 
         <!-- Vista de tarjetas para móviles -->
         <div class="sm:hidden">
-          <div v-if="patientsStore.patients.length > 0" class="divide-y divide-gray-200 dark:divide-dark-border">
+          <div v-if="patientsStore.patients && patientsStore.patients.length > 0" class="divide-y divide-gray-200 dark:divide-dark-border">
             <div v-for="patient in patientsStore.patients" :key="patient.id" class="bg-white dark:bg-dark-card p-4 transition-colors">
               <div class="flex justify-between items-start">
                 <div>
@@ -93,7 +93,7 @@
           </div>
         </div>
 
-        <div v-if="patientsStore.patients.length === 0" class="text-center py-10 bg-white dark:bg-dark-card sm:rounded-lg">
+        <div v-if="!patientsStore.patients || patientsStore.patients.length === 0" class="text-center py-10 bg-white dark:bg-dark-card sm:rounded-lg">
           <p class="text-gray-500 dark:text-dark-muted">No hay pacientes registrados.</p>
         </div>
       </div>
@@ -141,6 +141,32 @@
         @confirm="handleDeleteConfirmed"
         @cancel="handleDeleteCancelled"
       />
+
+      <!-- Paginación -->
+      <div v-if="patientsStore.totalPatients > 0" class="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
+        <div class="text-sm text-gray-700 dark:text-dark-secondary">
+          Mostrando {{ (currentPage - 1) * pageSize + 1 }}-{{ Math.min(currentPage * pageSize, patientsStore.totalPatients) }} de {{ patientsStore.totalPatients }} pacientes
+        </div>
+        <div class="flex gap-2">
+          <button
+            @click="handlePageChange(currentPage - 1)"
+            :disabled="currentPage === 1"
+            class="inline-flex items-center justify-center rounded-md bg-primary dark:bg-secondary-dark px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-light dark:hover:bg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Anterior
+          </button>
+          <span class="text-sm text-gray-700 dark:text-dark-secondary flex items-center px-2">
+            Página {{ currentPage }} de {{ patientsStore.pagination.total_pages }}
+          </span>
+          <button
+            @click="handlePageChange(currentPage + 1)"
+            :disabled="currentPage >= patientsStore.pagination.total_pages"
+            class="inline-flex items-center justify-center rounded-md bg-primary dark:bg-secondary-dark px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-light dark:hover:bg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
   
     </div>
   </template>
@@ -159,6 +185,8 @@
   const isEditing = ref(false);
   const editingPatient = ref(null);
   const searchQuery = ref('');
+  const currentPage = ref(1);
+  const pageSize = ref(10);
   const showDeleteConfirm = ref(false);
   const patientToDelete = ref(null);
   
@@ -166,15 +194,30 @@
   let searchTimeout = null;
   
   onMounted(() => {
-    patientsStore.fetchPatients();
+    fetchPaginatedPatients();
   });
+  
+  const fetchPaginatedPatients = async () => {
+    try {
+      await patientsStore.fetchPaginatedPatients(currentPage.value, pageSize.value, searchQuery.value);
+    } catch (error) {
+      console.error('Error al cargar pacientes paginados:', error);
+    }
+  };
   
   // Función para manejar la búsqueda con debounce
   const handleSearch = () => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
-      patientsStore.fetchPatients(true, searchQuery.value);
+      currentPage.value = 1; // Reiniciar a la primera página
+      fetchPaginatedPatients();
     }, 300); // Esperar 300ms después de que el usuario deje de escribir
+  };
+  
+  // Cambiar de página
+  const handlePageChange = (newPage) => {
+    currentPage.value = newPage;
+    fetchPaginatedPatients();
   };
   
   // Limpiar el timeout cuando el componente se desmonta

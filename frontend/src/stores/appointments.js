@@ -14,6 +14,7 @@ const getTodayDateString = () => {
 
 export const useAppointmentsStore = defineStore('appointments', () => {
   // State
+  const appointmentsListAll = ref([]); // Lista completa sin filtros
   const appointmentsList = ref([]);
   const selectedDate = ref(getTodayDateString());
   const selectedStatus = ref(''); // Filtro por estado
@@ -24,6 +25,66 @@ export const useAppointmentsStore = defineStore('appointments', () => {
   const sortDirection = ref('asc'); // Nuevo: dirección de ordenamiento
   const isLoading = ref(false);
   const error = ref(null);
+
+  // Función auxiliar para aplicar filtros localmente
+  const applyLocalFilters = () => {
+    let filtered = [...appointmentsListAll.value];
+    
+    // Filtrar por estado
+    if (selectedStatus.value === 'Citas Activas') {
+      filtered = filtered.filter(apt => 
+        !['Completada', 'Cancelada', 'No Asistió'].includes(apt.status)
+      );
+    } else if (selectedStatus.value === 'Citas Inactivas') {
+      filtered = filtered.filter(apt => 
+        !['Programada', 'En Espera', 'En Consulta'].includes(apt.status)
+      );
+    } else if (selectedStatus.value) {
+      filtered = filtered.filter(apt => apt.status === selectedStatus.value);
+    }
+    
+    // Filtrar por doctor
+    if (selectedDoctorId.value) {
+      filtered = filtered.filter(apt => {
+        // Comparar tanto doctor_id directo como doctor.id anidado
+        const aptDoctorId = apt.doctor_id || apt.doctor?.id;
+        const match = aptDoctorId && aptDoctorId.toString() === selectedDoctorId.value.toString();
+        return match;
+      });
+    }
+    
+    // Filtrar por nombre de paciente
+    if (searchPatientName.value) {
+      const searchLower = searchPatientName.value.toLowerCase();
+      filtered = filtered.filter(apt => 
+        apt.patient?.name?.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    // Filtrar por turno
+    if (selectedShift.value) {
+      filtered = filtered.filter(apt => {
+        const hour = new Date(apt.appointment_time).getHours();
+        if (selectedShift.value === 'mañana') {
+          return hour >= 6 && hour < 14;
+        } else if (selectedShift.value === 'tarde') {
+          return hour >= 14 && hour < 22;
+        }
+        return true;
+      });
+    }
+    
+    // Ordenar
+    if (sortBy.value === 'appointment_time') {
+      filtered.sort((a, b) => {
+        const timeA = new Date(a.appointment_time).getTime();
+        const timeB = new Date(b.appointment_time).getTime();
+        return sortDirection.value === 'asc' ? timeA - timeB : timeB - timeA;
+      });
+    }
+    
+    appointmentsList.value = filtered;
+  };
 
   // Getters
   const appointments = computed(() => appointmentsList.value);
@@ -67,7 +128,7 @@ export const useAppointmentsStore = defineStore('appointments', () => {
   function setSelectedDate(newDate) {
     if (newDate && typeof newDate === 'string') {
         selectedDate.value = newDate;
-        fetchAppointments();
+        // No recargar inmediatamente, se hará desde la vista
     } else {
         console.error("Formato de fecha inválido:", newDate);
     }
@@ -76,38 +137,38 @@ export const useAppointmentsStore = defineStore('appointments', () => {
   // Función para establecer el filtro de estado
   function setSelectedStatus(status) {
     selectedStatus.value = status;
-    fetchAppointments();
+    applyLocalFilters(); // Filtrado instantáneo
   }
   
   // Función para establecer el filtro de doctor
   function setSelectedDoctorId(doctorId) {
     selectedDoctorId.value = doctorId;
-    fetchAppointments();
+    applyLocalFilters(); // Filtrado instantáneo
   }
   
   // Función para establecer el filtro por nombre de paciente
   function setSearchPatientName(name) {
     searchPatientName.value = name;
-    fetchAppointments();
+    applyLocalFilters(); // Filtrado instantáneo
   }
   
   // Nueva: función para establecer el filtro por turno
   function setSelectedShift(shiftValue) {
     selectedShift.value = shiftValue;
-    fetchAppointments();
+    applyLocalFilters(); // Filtrado instantáneo
   }
   
   // Nueva: función para establecer el ordenamiento
   function setSorting(field, direction) {
     sortBy.value = field;
     sortDirection.value = direction;
-    fetchAppointments();
+    applyLocalFilters(); // Ordenar instantáneamente
   }
   
   // Nueva: función para cambiar la dirección de ordenamiento del campo actual
   function toggleSortDirection() {
     sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
-    fetchAppointments();
+    applyLocalFilters(); // Ordenar instantáneamente
   }
   
   // Función para limpiar todos los filtros
@@ -115,21 +176,25 @@ export const useAppointmentsStore = defineStore('appointments', () => {
     selectedStatus.value = '';
     selectedDoctorId.value = '';
     searchPatientName.value = '';
-    selectedShift.value = ''; // Limpiar filtro de turno
-    // No limpiamos la fecha ni el ordenamiento, solo los filtros
-    fetchAppointments();
+    selectedShift.value = '';
+    applyLocalFilters(); // Aplicar filtros instantáneamente
   }
 
   async function fetchAppointments() {
     isLoading.value = true;
     error.value = null;
-    appointmentsList.value = [];
     try {
-      const data = await apiAppointmentsService.getAppointments(currentFilters.value);
-      appointmentsList.value = data || [];
+      // Solo enviar fecha al servidor, los demás filtros se aplican localmente
+      const serverFilters = {};
+      if (selectedDate.value) serverFilters.date = selectedDate.value;
+      
+      const data = await apiAppointmentsService.getAppointments(serverFilters);
+      appointmentsListAll.value = data || []; // Guardar lista completa
+      applyLocalFilters(); // Aplicar filtros locales
     } catch (err) {
       console.error("Error fetching appointments:", err);
       error.value = err.message || 'Error al cargar citas.';
+      appointmentsListAll.value = [];
       appointmentsList.value = [];
     } finally {
       isLoading.value = false;
@@ -143,19 +208,32 @@ export const useAppointmentsStore = defineStore('appointments', () => {
    * @returns {Promise<boolean>} - True si se actualizó exitosamente, false si hubo error.
    */
   async function updateAppointmentStatus(id, newStatus) {
-    isLoading.value = true;
     error.value = null;
+    
+    // Encontrar la cita antes de actualizar
+    const index = appointmentsList.value.findIndex(appt => appt.id === id);
+    if (index === -1) {
+      console.error('Cita no encontrada en la lista local');
+      return false;
+    }
+    
+    const patientName = appointmentsList.value[index]?.patient?.name || 'el paciente';
+    const previousState = { ...appointmentsList.value[index] };
+    
+    // Actualización optimista: actualizar UI inmediatamente
+    appointmentsList.value[index] = { 
+      ...appointmentsList.value[index], 
+      status: newStatus 
+    };
+    
     try {
+      // Llamar al backend en segundo plano
       const updatedAppointment = await apiAppointmentsService.updateAppointment(id, { status: newStatus });
       
-      // Actualizar la cita en la lista local
-      const index = appointmentsList.value.findIndex(appt => appt.id === id);
-      if (index !== -1) {
-        appointmentsList.value[index] = { ...appointmentsList.value[index], ...updatedAppointment };
-      }
+      // Actualizar con los datos completos del servidor
+      appointmentsList.value[index] = { ...appointmentsList.value[index], ...updatedAppointment };
       
       // Mostrar notificación según el estado
-      const patientName = appointmentsList.value[index]?.patient?.name || 'el paciente';
       if (newStatus === 'En Espera') {
         toastService.info('Paciente en espera', `Se ha registrado la llegada de ${patientName}.`);
       } else if (newStatus === 'En Consulta') {
@@ -172,10 +250,12 @@ export const useAppointmentsStore = defineStore('appointments', () => {
     } catch (err) {
       console.error(`Error updating appointment status ${id}:`, err);
       error.value = err.message || 'Error al actualizar el estado de la cita.';
+      
+      // Revertir al estado anterior en caso de error
+      appointmentsList.value[index] = previousState;
+      
       toastService.error('Error', `No se pudo actualizar el estado de la cita: ${err.message || 'Error desconocido'}`);
       return false; // Indicar fallo
-    } finally {
-      isLoading.value = false;
     }
   }
 
@@ -186,19 +266,32 @@ export const useAppointmentsStore = defineStore('appointments', () => {
    * @returns {Promise<boolean>} - True si se actualizó exitosamente, false si hubo error.
    */
   async function updateAppointmentData(id, appointmentData) {
-    isLoading.value = true;
     error.value = null;
+    
+    // Encontrar la cita antes de actualizar
+    const index = appointmentsList.value.findIndex(appt => appt.id === id);
+    if (index === -1) {
+      console.error('Cita no encontrada en la lista local');
+      return false;
+    }
+    
+    const previousState = { ...appointmentsList.value[index] };
+    
+    // Actualización optimista: actualizar UI inmediatamente
+    appointmentsList.value[index] = { 
+      ...appointmentsList.value[index], 
+      ...appointmentData 
+    };
+    
     try {
+      // Llamar al backend en segundo plano
       const updatedAppointment = await apiAppointmentsService.updateAppointment(id, appointmentData);
       
-      // Actualizar la cita en la lista local
-      const index = appointmentsList.value.findIndex(appt => appt.id === id);
-      if (index !== -1) {
-        appointmentsList.value[index] = { ...appointmentsList.value[index], ...updatedAppointment };
-      }
+      // Actualizar con los datos completos del servidor
+      appointmentsList.value[index] = { ...appointmentsList.value[index], ...updatedAppointment };
 
       // Mostrar notificación para actualización de datos
-      if (appointmentData.date || appointmentData.time) {
+      if (appointmentData.date || appointmentData.time || appointmentData.appointment_time) {
         toastService.info('Cita actualizada', 'Se actualizó la fecha u hora de la cita.');
       } else if (appointmentData.medical_process_tag) {
         toastService.info('Proceso médico actualizado', `Se asignó la etiqueta "${appointmentData.medical_process_tag}".`);
@@ -210,10 +303,12 @@ export const useAppointmentsStore = defineStore('appointments', () => {
     } catch (err) {
       console.error(`Error updating appointment data ${id}:`, err);
       error.value = err.message || 'Error al actualizar los datos de la cita.';
+      
+      // Revertir al estado anterior en caso de error
+      appointmentsList.value[index] = previousState;
+      
       toastService.error('Error', `No se pudieron actualizar los datos de la cita: ${err.message || 'Error desconocido'}`);
       return false; // Indicar fallo
-    } finally {
-      isLoading.value = false;
     }
   }
 
@@ -223,12 +318,16 @@ export const useAppointmentsStore = defineStore('appointments', () => {
    * @returns {Promise<boolean>} - True si se creó exitosamente, false si hubo error.
    */
   async function createAppointment(appointmentData) {
-    isLoading.value = true; // Podría ser un loading específico para creación
+    isLoading.value = true; // Mostrar loading durante la creación
     error.value = null;
     try {
         const newAppointment = await apiAppointmentsService.createAppointment(appointmentData);
-        // Refrescar la lista con los filtros actuales
+        console.log('Cita creada exitosamente:', newAppointment);
+        
+        // Recargar las citas para asegurar que aparezca la nueva
+        console.log('Recargando citas con filtros:', currentFilters.value);
         await fetchAppointments();
+        console.log('Citas después de recargar:', appointmentsList.value.length);
         
         // Mostrar notificación de éxito
         const patientName = newAppointment.patient?.name || 'el paciente';
@@ -242,7 +341,6 @@ export const useAppointmentsStore = defineStore('appointments', () => {
             appointmentDateFormatted = `${day}/${month}/${year}`;
           } catch (error) {
             console.error('Error convirtiendo fecha para notificación:', error);
-            // Fallback: usar Date directamente (puede tener problemas de zona horaria pero es mejor que nada)
             appointmentDateFormatted = new Date(newAppointment.appointment_time).toLocaleDateString('es-MX');
           }
         }
@@ -285,16 +383,24 @@ export const useAppointmentsStore = defineStore('appointments', () => {
    * @returns {Promise<boolean>} - True si se eliminó exitosamente, false si hubo error.
    */
   async function deleteAppointment(id) {
-    isLoading.value = true;
     error.value = null;
+    
+    // Guardar información de la cita antes de eliminarla
+    const appointmentToDelete = appointmentsList.value.find(appt => appt.id === id);
+    if (!appointmentToDelete) {
+      console.error('Cita no encontrada en la lista local');
+      return false;
+    }
+    
+    const deletedAppointmentIndex = appointmentsList.value.findIndex(appt => appt.id === id);
+    const previousList = [...appointmentsList.value];
+    
+    // Eliminación optimista: remover de la UI inmediatamente
+    appointmentsList.value = appointmentsList.value.filter(appt => appt.id !== id);
+    
     try {
-      // Guardar información de la cita antes de eliminarla para la notificación
-      const appointmentToDelete = appointmentsList.value.find(appt => appt.id === id);
-      const patientName = appointmentToDelete?.patient?.name || 'el paciente';
-      
+      // Llamar al backend en segundo plano
       await apiAppointmentsService.deleteAppointment(id);
-      // Eliminar la cita de la lista local
-      appointmentsList.value = appointmentsList.value.filter(appt => appt.id !== id);
       
       // No mostramos notificación aquí porque ya se maneja en el componente
       
@@ -303,14 +409,15 @@ export const useAppointmentsStore = defineStore('appointments', () => {
       console.error(`Error deleting appointment ${id}:`, err);
       error.value = err.message || 'Error al eliminar la cita.';
       
+      // Revertir la eliminación en caso de error
+      appointmentsList.value = previousList;
+      
       toastService.error(
         'Error', 
         `No se pudo eliminar la cita: ${err.message || 'Error desconocido'}`
       );
       
       return false; // Indicar fallo
-    } finally {
-      isLoading.value = false;
     }
   }
 

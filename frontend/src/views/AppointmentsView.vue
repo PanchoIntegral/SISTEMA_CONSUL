@@ -414,26 +414,27 @@ const setSort = (field) => {
 
 const updateDate = () => {
   appointmentsStore.setSelectedDate(localSelectedDate.value);
+  appointmentsStore.fetchAppointments(); // Solo la fecha recarga del servidor
 };
 
 const updateStatus = () => {
   appointmentsStore.setSelectedStatus(localSelectedStatus.value);
+  // Filtrado instantáneo, no necesita recarga
 };
 
 const updateDoctorId = () => {
   appointmentsStore.setSelectedDoctorId(localSelectedDoctorId.value);
+  // Filtrado instantáneo, no necesita recarga
 };
 
 const updatePatientName = () => {
-  // Aplicar un pequeño debounce para evitar muchas llamadas a la API
-  clearTimeout(window._patientSearchTimeout);
-  window._patientSearchTimeout = setTimeout(() => {
-    appointmentsStore.setSearchPatientName(localSearchPatientName.value);
-  }, 300);
+  appointmentsStore.setSearchPatientName(localSearchPatientName.value);
+  // Filtrado instantáneo, no necesita recarga
 };
 
 const updateShift = () => {
   appointmentsStore.setSelectedShift(localSelectedShift.value);
+  // Filtrado instantáneo, no necesita recarga
 };
 
 const clearStatusFilter = () => {
@@ -500,13 +501,12 @@ const getShiftDisplayName = (shift) => {
 
 const updateMedicalProcessTag = async (appointmentId, tag) => {
     await appointmentsStore.updateAppointmentData(appointmentId, { medical_process_tag: tag });
-    // No es necesario refrescar completo, ya que updateAppointmentData actualiza la lista
+    // No es necesario refrescar, la actualización optimista ya lo hace
 };
 
 const changeAppointmentStatus = async (appointmentId, newStatus) => {
     await appointmentsStore.updateAppointmentStatus(appointmentId, newStatus);
-    // Refrescar los datos después de cambiar el estado
-    refreshDataOnModalClose();
+    // No es necesario refrescar, la actualización optimista ya lo hace
 };
 
 // Llamar al submit del formulario de citas
@@ -526,8 +526,6 @@ const submitEditForm = () => {
 
 // Abrir modal de edición con la cita seleccionada
 const openEditModal = (appointment) => {
-    // Recargar los datos antes de abrir el modal
-    refreshDataOnModalClose();
     // Asignar la cita seleccionada
     selectedAppointment.value = appointment;
     // Abrir el modal
@@ -537,51 +535,43 @@ const openEditModal = (appointment) => {
 // Eliminar una cita
 const deleteAppointment = async (appointmentId) => {
     const success = await appointmentsStore.deleteAppointment(appointmentId);
-    if (success) {
-        // Refrescar los datos después de eliminar la cita
-        refreshDataOnModalClose();
-    }
+    // No es necesario refrescar, la eliminación optimista ya lo hace
 };
 
-// Función para refrescar todos los datos al cerrar un modal
+// Función para refrescar datos solo cuando se abren/cierran modales
 const refreshDataOnModalClose = () => {
-  // Recargar las citas
-  appointmentsStore.fetchAppointments();
-  // Recargar los doctores
-  doctorsStore.fetchDoctors();
-  // Recargar los pacientes
-  patientsStore.fetchPatients();
+  // Solo recargar las citas si es necesario (por ejemplo, después de crear)
+  // No recargar doctores ni pacientes a menos que sea necesario
 };
 
-// Funciones para cerrar modales con refresco de datos
+// Funciones para cerrar modales
 const closeAppointmentModal = () => {
   isAppointmentModalOpen.value = false;
-  refreshDataOnModalClose();
+  // No es necesario refrescar después de crear (la creación optimista ya lo hace)
 };
 
 const closePatientModal = () => {
   isPatientModalOpen.value = false;
-  refreshDataOnModalClose();
-  // Also refresh patients list to clear any potential errors from patient store
+  // Recargar solo la lista de pacientes para el selector
   patientsStore.fetchPatients(); 
 };
 
 const closeEditModal = () => {
   isEditModalOpen.value = false;
-  refreshDataOnModalClose();
+  // No es necesario refrescar después de editar (la actualización optimista ya lo hace)
 };
 
 const handleAppointmentSubmitted = () => {
   isAppointmentModalOpen.value = false;
-  refreshDataOnModalClose();
+  // Las citas ya se recargaron en el store después de crear
 };
 
 const handleEditSubmitted = () => {
   isEditModalOpen.value = false;
-  refreshDataOnModalClose();
+  // La cita ya fue actualizada optimistamente en el store
 };
 
-// Opcional: Recargar lista de pacientes en el form de citas después de crear uno nuevo
+// Opcional: Recargar lista de pacientes después de crear uno nuevo
 const handlePatientSubmitted = (newPatient) => {
   console.log('Nuevo paciente creado:', newPatient);
   closePatientModal();

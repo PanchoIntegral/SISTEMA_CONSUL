@@ -14,7 +14,7 @@
             >
               <option value="" disabled>Seleccionar Paciente</option>
               <option v-if="patientsStore.loading" value="">Cargando...</option>
-              <option v-for="patient in patientsStore.patients" :key="patient.id" :value="patient.id">
+              <option v-for="patient in (patientsStore.patients || [])" :key="patient.id" :value="patient.id">
                 {{ patient.name }}
               </option>
             </select>
@@ -414,7 +414,7 @@ const handleDoctorChange = async () => {
 
 // Cargar pacientes y doctores al montar
 onMounted(() => {
-  patientsStore.fetchPatients();
+  patientsStore.fetchAllPatients(); // Usar fetchAllPatients para obtener todos los pacientes sin paginación
   doctorsStore.fetchDoctors();
 });
 
