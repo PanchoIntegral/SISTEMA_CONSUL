@@ -1,4 +1,28 @@
-<template>
+  <template>
+    <!-- Modal para seleccionar proceso médico desde la vista por doctor -->
+    <BaseModal :show="showTagModal" @close="showTagModal = false">
+      <template #title>Seleccionar Proceso Médico</template>
+      <div class="space-y-2">
+        <p class="text-sm text-gray-600 mb-4">Seleccione el proceso que se está realizando para la cita de <strong class="text-navy">{{ selectedApptForTag?.patient?.name || 'este paciente' }}</strong>.</p>
+        <button
+          @click="selectTag('')"
+          class="w-full text-left text-sm p-2.5 rounded-lg hover:bg-gray-100 flex items-center"
+          :class="{'bg-gray-100 font-semibold': selectedMedicalProcessTag === ''}">
+          <span class="text-gray-700">Sin etiqueta</span>
+        </button>
+        <button
+          v-for="tag in medicalProcessTags"
+          :key="tag"
+          @click="selectTag(tag)"
+          class="w-full text-left text-sm p-2.5 rounded-lg hover:bg-amber-50 flex items-center"
+          :class="{'bg-amber-100 font-semibold': selectedMedicalProcessTag === tag}">
+          <span class="text-amber-800">{{ tag }}</span>
+        </button>
+      </div>
+      <template #footer>
+        <button type="button" @click="showTagModal = false" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-navy shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto transition-colors">Cancelar</button>
+      </template>
+    </BaseModal>
   <div class="bg-white rounded-lg shadow-sm p-6">
     <template v-if="visibleDoctors.length === 0">
       <div class="text-center py-10">
@@ -86,6 +110,13 @@
                       Iniciar
                     </button>
                     <button
+                      v-if="canMarkNoShow(appt.status)"
+                      @click.stop="$emit('change-status', appt.id, 'No Asistió')"
+                      class="flex-1 text-xs px-2 py-1 rounded bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors"
+                    >
+                      No Asistió
+                    </button>
+                    <button
                       v-if="canComplete(appt.status)"
                       @click.stop="$emit('change-status', appt.id, 'Completada')"
                       class="flex-1 text-xs px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
@@ -100,6 +131,20 @@
                       <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
+                    </button>
+                  </div>
+                  <!-- Botón Añadir Proceso (visible en En Espera y En Consulta) -->
+                  <div class="mt-2">
+                    <button
+                      v-if="['En Espera','En Consulta'].includes(appt.status)"
+                      @click.stop="openTagModal(appt)"
+                      class="w-full text-xs flex items-center justify-center gap-2 px-2 py-1 rounded border border-dashed border-amber-300 text-amber-700 hover:bg-amber-50 transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span v-if="!appt.medical_process_tag">+ Añadir Proceso</span>
+                      <span v-else class="bg-amber-100 px-2 py-0.5 rounded font-medium text-amber-800">{{ appt.medical_process_tag }}</span>
                     </button>
                   </div>
                 </div>
@@ -121,7 +166,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import BaseModal from '@/components/BaseModal.vue';
 
 const props = defineProps({
   doctors: Array,
@@ -130,7 +176,33 @@ const props = defineProps({
 });
 
 // Emitir eventos al padre para que los maneje
-defineEmits(['change-status', 'edit-appointment', 'delete-appointment', 'update-tag']);
+const emit = defineEmits(['change-status', 'edit-appointment', 'delete-appointment', 'update-tag']);
+
+// Estado para el modal de selección de proceso médico
+const showTagModal = ref(false);
+const selectedApptForTag = ref(null);
+const selectedMedicalProcessTag = ref('');
+const medicalProcessTags = [
+  'Dilatación',
+  'Inyección',
+  'Láser',
+  'OCT',
+  'OCT/Campimetría',
+  'Campimetría'
+];
+
+function openTagModal(appt) {
+  selectedApptForTag.value = appt;
+  selectedMedicalProcessTag.value = appt.medical_process_tag || '';
+  showTagModal.value = true;
+}
+
+function selectTag(tag) {
+  if (!selectedApptForTag.value) return;
+  // Emitir id y tag para que el padre lo guarde
+  emit('update-tag', selectedApptForTag.value.id, tag);
+  showTagModal.value = false;
+}
 
 const visibleDoctors = computed(() => Array.isArray(props.doctors) ? props.doctors : []);
 
@@ -213,6 +285,10 @@ function canStartConsultation(status) {
 
 function canComplete(status) {
   return status === 'En Consulta';
+}
+
+function canMarkNoShow(status) {
+  return status === 'Programada';
 }
 
 </script>
