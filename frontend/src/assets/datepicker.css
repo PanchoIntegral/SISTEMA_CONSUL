@@ -93,16 +93,38 @@
 }
 
 .numInputWrapper {
-  display: none !important;
+  display: inline-flex !important;
+  gap: 0.25rem;
+  align-items: center;
 }
 
 .numInputWrapper input,
 .numInputWrapper input.cur-year {
-  display: none !important;
+  display: inline-block !important;
+  background: transparent;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.375rem;
+  width: 2.5rem;
+  text-align: center;
+  color: inherit;
+  font-weight: 600;
 }
 
 .numInputWrapper span.arrowUp,
 .numInputWrapper span.arrowDown {
+  display: inline-block !important;
+  width: 1rem;
+  height: 1rem;
+  opacity: 0.8;
+  color: rgba(2,6,23,0.6);
+}
+
+/* Ocultar año solo en el encabezado del calendario (flatpickr-months) */
+.flatpickr-months .numInputWrapper input.cur-year,
+.flatpickr-months .numInputWrapper span.arrowUp,
+.flatpickr-months .numInputWrapper span.arrowDown,
+.flatpickr-months .flatpickr-current-year {
   display: none !important;
 }
 
