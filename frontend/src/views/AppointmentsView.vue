@@ -30,11 +30,11 @@
       <div class="w-full sm:w-auto flex items-center gap-2">
         <label for="appointment-date" class="text-sm font-medium text-gray-700 min-w-fit">Fecha:</label>
         <input
-          type="date"
           id="appointment-date"
-          v-model="localSelectedDate"
-          @change="updateDate"
-          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary sm:text-sm p-2"
+          ref="dateInput"
+          readonly
+          :value="displayDate"
+          class="flatpickr-input block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary sm:text-sm p-2 bg-white cursor-pointer"
         />
       </div>
       <div class="flex flex-wrap gap-2 w-full sm:w-auto">
@@ -354,6 +354,8 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
+import flatpickr from 'flatpickr';
+import { Spanish } from 'flatpickr/dist/l10n/es.js';
 import { useAppointmentsStore } from '@/stores/appointments';
 import { usePatientsStore } from '@/stores/patients'; // Importar store de pacientes
 import { useDoctorsStore } from '@/stores/doctors'; // Importar store de doctores
@@ -369,6 +371,13 @@ const patientsStore = usePatientsStore(); // Usar store de pacientes
 const doctorsStore = useDoctorsStore(); // Usar store de doctores
 
 const localSelectedDate = ref(appointmentsStore.date);
+const dateInput = ref(null);
+const displayDate = computed(() => {
+  if (!localSelectedDate.value) return '';
+  // Mostrar en formato dd/mm/YYYY
+  const [y, m, d] = localSelectedDate.value.split('-');
+  return `${d}/${m}/${y}`;
+});
 const localSelectedStatus = ref(appointmentsStore.status);
 const localSelectedDoctorId = ref(appointmentsStore.doctorId);
 const localSearchPatientName = ref(appointmentsStore.patientName);
@@ -627,6 +636,23 @@ onMounted(() => {
   
   // Cargar citas con los filtros actuales
   appointmentsStore.fetchAppointments();
+
+  // Inicializar flatpickr en el input de fecha
+  if (dateInput.value) {
+    flatpickr(dateInput.value, {
+      locale: Spanish,
+      altInput: true,
+      altFormat: 'd/m/Y',
+      dateFormat: 'Y-m-d',
+      defaultDate: localSelectedDate.value || new Date(),
+      onChange: function(selectedDates, dateStr) {
+        localSelectedDate.value = dateStr;
+        updateDate();
+      },
+      wrap: false,
+      allowInput: false
+    });
+  }
   
   // appointmentsStore.subscribeToRealtimeUpdates();
 });

@@ -8,6 +8,8 @@ import './assets/main.css' // Importar CSS principal con Tailwind
 import './assets/darkmode.css' // Importar CSS para modo oscuro
 import './assets/appointment-cards-fix.css' // Importar fix para tarjetas de citas
 import './assets/modal-dark-fix.css' // Importar fix para modales en modo oscuro
+import 'flatpickr/dist/flatpickr.min.css' // Estilos base de flatpickr
+import './assets/datepicker.css' // Estilos personalizados del datepicker
 
 // Inicializar el modo oscuro si está guardado en localStorage
 const initializeDarkMode = () => {

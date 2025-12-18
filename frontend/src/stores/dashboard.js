@@ -3,20 +3,20 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import apiDashboardService from '@/services/apiDashboardService';
 
-// Datos de prueba para cuando el servidor no está disponible
-const mockData = {
-  totalAppointments: 45,
-  avgWaitTime: 12,
-  avgConsultTime: 20,
-  appointmentsByDoctor: [
-    { doctorName: 'Dr. García', appointmentCount: 15 },
-    { doctorName: 'Dra. Rodríguez', appointmentCount: 12 },
-    { doctorName: 'Dr. Martínez', appointmentCount: 18 }
-  ],
-  completedAppointments: 30,
-  canceledAppointments: 10,
-  noshowAppointments: 5
-};
+// // Datos de prueba para cuando el servidor no está disponible
+// const mockData = {
+//   totalAppointments: 45,
+//   avgWaitTime: 12,
+//   avgConsultTime: 20,
+//   appointmentsByDoctor: [
+//     { doctorName: 'Dr. García', appointmentCount: 15 },
+//     { doctorName: 'Dra. Rodríguez', appointmentCount: 12 },
+//     { doctorName: 'Dr. Martínez', appointmentCount: 18 }
+//   ],
+//   completedAppointments: 30,
+//   canceledAppointments: 10,
+//   noshowAppointments: 5
+// };
 
 export const useDashboardStore = defineStore('dashboard', () => {
   // State

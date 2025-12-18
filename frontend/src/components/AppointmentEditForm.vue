@@ -1,8 +1,8 @@
 <template>
     <form @submit.prevent="handleSubmit" class="space-y-4">
       <div>
-        <label for="patient" class="block text-sm font-medium text-gray-700">Paciente</label>
-        <p class="mt-1 text-sm text-gray-600">{{ appointment.patient?.name || 'N/A' }}</p>
+        <label for="patient" class="block text-sm font-semibold text-navy">Paciente</label>
+        <p class="mt-1 text-sm text-gray-700 font-medium">{{ appointment.patient?.name || 'N/A' }}</p>
       </div>
   
       <div>
@@ -10,7 +10,7 @@
         <select
           id="doctor"
           v-model="formData.doctor_id"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+          class="mt-1 block w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-secondary focus:ring-secondary sm:text-sm"
           :disabled="doctorsStore.loading"
         >
           <option value="">(Opcional) Seleccione un doctor</option>
@@ -22,60 +22,58 @@
       </div>
   
       <div>
-        <label for="appointment-time" class="block text-sm font-medium text-gray-700">Fecha y Hora</label>
+        <label for="appointment-time" class="block text-sm font-semibold text-navy">Fecha y Hora</label>
         <input
-          type="datetime-local"
           id="appointment-time"
-          v-model="formData.appointment_time_local"
-          required
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+          ref="dateTimeInput"
+          readonly
+          :value="formData.appointment_time_local ? formData.appointment_time_local.replace('T', ' ') : ''"
+          class="mt-1 block w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-secondary focus:ring-secondary sm:text-sm flatpickr-input"
         />
       </div>
   
       <div>
-        <label for="notes" class="block text-sm font-medium text-gray-700">Notas (Opcional)</label>
+        <label for="notes" class="block text-sm font-semibold text-navy">Notas (Opcional)</label>
         <textarea
           id="notes"
           v-model="formData.notes"
           rows="3"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+          class="mt-1 block w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-secondary focus:ring-secondary sm:text-sm"
         ></textarea>
       </div>
   
-       <div v-if="errorMessage" class="text-sm text-red-600" role="alert">
+       <div v-if="errorMessage" class="text-sm text-red-600 bg-red-50 border border-red-100 rounded p-2" role="alert">
          {{ errorMessage }}
        </div>
   
       </form>
-      
-      <!-- Alerta de doctor no disponible -->
-      <div v-if="showDoctorUnavailableAlert" 
-           class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-medium text-red-600">Doctor No Disponible</h3>
-            <button @click="showDoctorUnavailableAlert = false" class="text-gray-400 hover:text-gray-500">
-              <span class="sr-only">Cerrar</span>
-              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+
+      <!-- Alerta inline: doctor no disponible (estética del sistema) -->
+      <div v-if="showDoctorUnavailableAlert" class="mt-3">
+        <div class="bg-red-50 border border-red-100 rounded-lg p-4 flex items-start gap-3">
+          <div class="text-red-600">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" />
+            </svg>
           </div>
-          <p class="mb-4">El doctor seleccionado ya tiene una cita programada en este horario. Por favor, elija otro horario o un doctor diferente.</p>
-          <div class="flex justify-end">
-            <button 
-              @click="showDoctorUnavailableAlert = false"
-              class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-            >
-              Entendido
-            </button>
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <h4 class="text-sm font-semibold text-red-600">Doctor no disponible</h4>
+              <button @click="showDoctorUnavailableAlert = false" class="text-gray-400 hover:text-gray-500">
+                <span class="sr-only">Cerrar</span>
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <p class="mt-1 text-sm text-gray-700">El doctor seleccionado ya tiene una cita en ese horario. Elige otro horario o doctor.</p>
           </div>
         </div>
       </div>
   </template>
   
   <script setup>
-  import { ref, reactive, onMounted } from 'vue';
+  import { ref, reactive, onMounted, onUnmounted } from 'vue';
   import { useDoctorsStore } from '@/stores/doctors';
   import { useAppointmentsStore } from '@/stores/appointments';
   
@@ -105,6 +103,9 @@
   const showDoctorUnavailableAlert = ref(false);
   
   // Convertir la fecha ISO a formato local para el input datetime-local
+  const dateTimeInput = ref(null);
+  let fpInstance = null;
+
   onMounted(async () => {
     if (props.appointment.appointment_time) {
       try {
@@ -128,6 +129,30 @@
     
     // Cargar doctores
     doctorsStore.fetchDoctors();
+    // Inicializar flatpickr (calendar + time) para una experiencia consistente
+    try {
+      const flatpickr = (await import('flatpickr')).default;
+      const { Spanish } = await import('flatpickr/dist/l10n/es.js');
+      fpInstance = flatpickr(dateTimeInput.value, {
+        locale: Spanish,
+        enableTime: true,
+        time_24hr: true,
+        altInput: true,
+        altFormat: 'd/m/Y H:i',
+        dateFormat: "Y-m-d\\TH:i",
+        defaultDate: formData.appointment_time_local || null,
+        allowInput: false,
+        onChange(selectedDates, dateStr) {
+          formData.appointment_time_local = dateStr;
+        }
+      });
+    } catch (e) {
+      console.warn('flatpickr init failed:', e);
+    }
+  });
+
+  onUnmounted(() => {
+    if (fpInstance && typeof fpInstance.destroy === 'function') fpInstance.destroy();
   });
   
   // Manejar envío

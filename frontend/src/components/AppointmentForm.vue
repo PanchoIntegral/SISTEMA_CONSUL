@@ -140,37 +140,23 @@
           </div>
         </div>
   
-        <!-- Fecha y Hora de la Cita -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label for="appointment_date" class="block text-sm font-medium text-navy">Fecha *</label>
-            <div class="mt-1">
-              <input
-                type="date"
-                id="appointment_date"
-                v-model="formData.appointment_date"
-                required
-                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary sm:text-sm"
-              />
-              <div v-if="formErrors.appointment_date" class="text-red-500 text-xs mt-1">{{ formErrors.appointment_date }}</div>
-              <!-- Advertencia si la fecha seleccionada está bloqueada -->
-              <div v-if="isSelectedDateBlocked" class="text-red-600 text-xs mt-1 font-medium">
-                ⚠️ Advertencia: Esta fecha está bloqueada para el doctor seleccionado ({{ getBlockedDateReason }})
-              </div>
+        <!-- Fecha y Hora de la Cita (flatpickr combinado) -->
+        <div>
+          <label for="appointment_datetime" class="block text-sm font-medium text-navy">Fecha y Hora *</label>
+          <div class="mt-1">
+            <input
+              id="appointment_datetime"
+              ref="dateTimeInput"
+              readonly
+              placeholder="dd/mm/aaaa hh:mm"
+              required
+              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary sm:text-sm flatpickr-input"
+            />
+            <div v-if="formErrors.appointment_date || formErrors.appointment_time" class="text-red-500 text-xs mt-1">
+              {{ formErrors.appointment_date || formErrors.appointment_time }}
             </div>
-          </div>
-  
-          <div>
-            <label for="appointment_time" class="block text-sm font-medium text-navy">Hora *</label>
-            <div class="mt-1">
-              <input
-                type="time"
-                id="appointment_time"
-                v-model="formData.appointment_time"
-                required
-                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-secondary focus:ring-secondary sm:text-sm"
-              />
-              <div v-if="formErrors.appointment_time" class="text-red-500 text-xs mt-1">{{ formErrors.appointment_time }}</div>
+            <div v-if="isSelectedDateBlocked" class="text-red-600 text-xs mt-1 font-medium">
+              ⚠️ Advertencia: Esta fecha está bloqueada para el doctor seleccionado ({{ getBlockedDateReason }})
             </div>
           </div>
         </div>
@@ -230,7 +216,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed, watch } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue';
 import { usePatientsStore } from '@/stores/patients';
 import { useDoctorsStore } from '@/stores/doctors';
 import { useAppointmentsStore } from '@/stores/appointments';
@@ -397,6 +383,46 @@ const formatBlockedDate = (dateString) => {
   const options = { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' };
   return new Intl.DateTimeFormat('es-ES', options).format(date);
 };
+
+// flatpickr ref y instancia
+const dateTimeInput = ref(null);
+let fpInstance = null;
+
+onMounted(async () => {
+  // Inicializar flatpickr para el input combinado
+  try {
+    const flatpickr = (await import('flatpickr')).default;
+    const { Spanish } = await import('flatpickr/dist/l10n/es.js');
+    fpInstance = flatpickr(dateTimeInput.value, {
+      locale: Spanish,
+      enableTime: true,
+      time_24hr: true,
+      altInput: true,
+      altFormat: 'd/m/Y H:i',
+      dateFormat: 'Y-m-d\\TH:i',
+      defaultDate: (formData.appointment_date && formData.appointment_time) ? `${formData.appointment_date}T${formData.appointment_time}` : null,
+      allowInput: false,
+      onChange(selectedDates, dateStr, instance) {
+        if (selectedDates && selectedDates.length > 0) {
+          const dateObj = selectedDates[0];
+          const y = instance.formatDate(dateObj, 'Y');
+          const m = instance.formatDate(dateObj, 'm');
+          const d = instance.formatDate(dateObj, 'd');
+          const hh = instance.formatDate(dateObj, 'H');
+          const mm = instance.formatDate(dateObj, 'i');
+          formData.appointment_date = `${y}-${m}-${d}`;
+          formData.appointment_time = `${hh}:${mm}`;
+        }
+      }
+    });
+  } catch (e) {
+    console.warn('flatpickr init failed in AppointmentForm:', e);
+  }
+});
+
+onUnmounted(() => {
+  if (fpInstance && typeof fpInstance.destroy === 'function') fpInstance.destroy();
+});
 
 // Manejar cambio de doctor
 const handleDoctorChange = async () => {
